@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>10.3. Upgrading from ltcluster 3.x</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="upgrading-and-pg-upgrade.html" title="10.2. postgresql.confupgrade and ltcluster" /><link rel="next" href="using-ltclusterd.html" title="Part III. Using ltclusterd" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">10.3. Upgrading from ltcluster 3.x</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="upgrading-and-pg-upgrade.html" title="10.2. postgresql.confupgrade and ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="upgrading-ltcluster.html" title="Chapter 10. Upgrading ltcluster">Up</a></td><th width="60%" align="center">Chapter 10. Upgrading ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="using-ltclusterd.html" title="Part III. Using ltclusterd">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="UPGRADING-FROM-LTCLUSTER-3"><div class="titlepage"><div><div><h2 class="title" style="clear: both">10.3. Upgrading from ltcluster 3.x</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="upgrading-from-ltcluster-3.html#CONVERTING-LTCLUSTER-CONF">10.3.1. Converting ltcluster.conf configuration files</a></span></dt><dt><span class="sect2"><a href="upgrading-from-ltcluster-3.html#id-1.4.8.6.8">10.3.2. Upgrading the ltcluster schema (LightDB 12 and earlier)</a></span></dt><dt><span class="sect2"><a href="upgrading-from-ltcluster-3.html#id-1.4.8.6.9">10.3.3. Upgrading the ltcluster schema (LightDB 13 and later)</a></span></dt><dt><span class="sect2"><a href="upgrading-from-ltcluster-3.html#UPGRADE-REREGISTER-NODES">10.3.4. Re-register each node</a></span></dt><dt><span class="sect2"><a href="upgrading-from-ltcluster-3.html#UPGRADE-DROP-LTCLUSTER-CLUSTER-SCHEMA">10.3.5. Drop the legacy ltcluster schema</a></span></dt></dl></div><a id="id-1.4.8.6.2" class="indexterm"></a><p>
+   The upgrade process consists of two steps:
+   </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+       converting the <code class="filename">ltcluster.conf</code> configuration files
+     </li><li class="listitem">
+       upgrading the ltcluster schema using <code class="command">CREATE EXTENSION</code> (LightDB 12 and earlier)
+     </li></ol></div><p>
+  </p><p>
+   A script is provided to assist with converting <code class="filename">ltcluster.conf</code>.
+  </p><p>
+   The schema upgrade (which converts the <span class="productname">ltcluster</span> metadata into
+   a packaged LightDB extension) is normally carried out
+   automatically when the <span class="productname">ltcluster</span> extension is created.
+  </p><p>
+   The shared library has been renamed from <code class="literal">repmgr_funcs</code> to
+   <code class="literal">ltcluster</code> - if it's set in <code class="varname">shared_preload_libraries</code>
+   in <code class="filename">postgresql.conf</code> it will need to be updated to the new name:
+   </p><pre class="programlisting">
+    shared_preload_libraries = 'ltcluster'</pre><p>
+  </p><div class="sect2" id="CONVERTING-LTCLUSTER-CONF"><div class="titlepage"><div><div><h3 class="title">10.3.1. Converting ltcluster.conf configuration files</h3></div></div></div><p>
+    With a completely new ltcluster version, we've taken the opportunity
+    to rename some configuration items for
+    clarity and consistency, both between the configuration file and
+    the column names in <code class="structname">ltcluster.nodes</code>
+    (e.g. <code class="varname">node</code> to <code class="varname">node_id</code>), and
+    also for consistency with LightDB naming conventions
+    (e.g. <code class="varname">loglevel</code> to <code class="varname">log_level</code>).
+   </p><p>
+    Other configuration items have been changed to command line options,
+    and vice-versa, e.g. to avoid hard-coding items such as a a node's
+    upstream ID, which might change over time.
+   </p><p>
+    <span class="productname">ltcluster</span> will issue a warning about deprecated/altered options.
+   </p><div class="sect3" id="id-1.4.8.6.7.5"><div class="titlepage"><div><div><h4 class="title">10.3.1.1. Changed parameters in "ltcluster.conf"</h4></div></div></div><p>
+     Following parameters have been added:
+     </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">data_directory</code>: this is mandatory and must
+         contain the path to the node's data directory</li><li class="listitem" style="list-style-type: disc"><code class="varname">monitoring_history</code>: this replaces the
+          <span class="productname">ltclusterd</span> command line option
+          <code class="literal">--monitoring-history</code></li></ul></div><p>
+    </p><p>
+     Following parameters have been renamed:
+    </p><div class="table" id="LTCLUSTER3-LTCLUSTER4-RENAMED-PARAMETERS"><p class="title"><strong>Table 10.1. Parameters renamed in ltcluster4</strong></p><div class="table-contents"><table class="table" summary="Parameters renamed in ltcluster4" border="1"><colgroup><col /><col /></colgroup><thead><tr><th>ltcluster3</th><th>ltcluster4</th></tr></thead><tbody><tr><td><code class="varname">node</code></td><td><code class="varname">node_id</code></td></tr><tr><td><code class="varname">loglevel</code></td><td><code class="varname">log_level</code></td></tr><tr><td><code class="varname">logfacility</code></td><td><code class="varname">log_facility</code></td></tr><tr><td><code class="varname">logfile</code></td><td><code class="varname">log_file</code></td></tr><tr><td><code class="varname">barman_server</code></td><td><code class="varname">barman_host</code></td></tr><tr><td><code class="varname">master_reponse_timeout</code></td><td><code class="varname">async_query_timeout</code></td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">Note</h3><p>
+        From <span class="productname">ltcluster</span> 4, <code class="literal">barman_server</code> refers
+        to the server configured in Barman (in <span class="productname">ltcluster</span> 3, the deprecated
+        <code class="literal">cluster</code> parameter was used for this);
+        the physical Barman hostname is configured with
+        <code class="literal">barman_host</code> (see <a class="xref" href="cloning-from-barman.html#CLONING-FROM-BARMAN-PREREQUISITES" title="5.1.1. Prerequisites for cloning from Barman">Section 5.1.1</a>
+          for details).
+      </p></div><p>
+     Following parameters have been removed:
+     </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">cluster</code>: is no longer required and will
+        be ignored.</li><li class="listitem" style="list-style-type: disc"><code class="varname">upstream_node</code>:  is replaced by the
+        command-line parameter <code class="literal">--upstream-node-id</code></li></ul></div><p>
+    </p></div><div class="sect3" id="id-1.4.8.6.7.6"><div class="titlepage"><div><div><h4 class="title">10.3.1.2. Conversion script</h4></div></div></div><p>
+     To assist with conversion of <code class="filename">ltcluster.conf</code> files, a Perl script
+     is provided in <code class="filename">contrib/convert-config.pl</code>.
+     Use like this:
+     </p><pre class="programlisting">
+    $ ./convert-config.pl /etc/ltcluster.conf
+    node_id=2
+    node_name='node2'
+    conninfo='host=node2 dbname=ltcluster user=ltcluster connect_timeout=2'
+    postgresql.confctl_options='-l /var/log/lightdb/startup.log'
+    rsync_options='--exclude=postgresql.local.conf --archive'
+    log_level='INFO'
+    postgresql.confbasebackup_options='--no-slot'
+    data_directory=''</pre><p>
+    </p><p>
+      The converted file is printed to <code class="literal">STDOUT</code> and the original file is not
+      changed.
+    </p><p>
+      Please note that the the conversion script will add an empty
+      placeholder parameter for <code class="varname">data_directory</code>, which
+      is a required parameter from <span class="productname">ltcluster</span> 4. This must be manually modified to contain
+      the correct data directory.
+    </p></div></div><div class="sect2" id="id-1.4.8.6.8"><div class="titlepage"><div><div><h3 class="title">10.3.2. Upgrading the ltcluster schema (LightDB 12 and earlier)</h3></div></div></div><p>
+    Ensure <span class="productname">ltclusterd</span> is not running, or any cron jobs which execute the
+    <code class="command">ltcluster</code> binary.
+   </p><p>
+    Install the latest <span class="productname">ltcluster</span> package; any <code class="literal">ltcluster 3.x</code> packages
+    should be uninstalled (if not automatically uninstalled already by your packaging system).
+   </p><div class="sect3" id="id-1.4.8.6.8.4"><div class="titlepage"><div><div><h4 class="title">10.3.2.1. Upgrading from ltcluster 3.1.1 or earlier</h4></div></div></div><div class="tip"><h3 class="title">Tip</h3><p>
+      If you don't care about any data from the existing <span class="productname">ltcluster</span> installation,
+      (e.g. the contents of the <code class="structname">events</code> and <code class="structname">monitoring</code>
+      tables), the follwing steps can be skipped; proceed to <a class="xref" href="upgrading-from-ltcluster-3.html#UPGRADE-REREGISTER-NODES" title="10.3.4. Re-register each node">Section 10.3.4</a>.
+     </p></div><p>
+     If your ltcluster version is 3.1.1 or earlier, you will need to update
+     the schema to the latest version in the 3.x series (3.3.2) before
+     converting the installation to ltcluster 4.
+    </p><p>
+      To do this, apply the following upgrade scripts as appropriate for
+      your current version:
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+          <a class="ulink" href="www.hs.net/lightdb/ltcluster/REL3_3_STABLE/sql/ltcluster3.0_ltcluster3.1.sql" target="_top">ltcluster3.0_ltcluster3.1.sql</a></li><li class="listitem" style="list-style-type: disc"><a class="ulink" href="www.hs.net/lightdb/ltcluster/REL3_3_STABLE/sql/ltcluster3.1.1_ltcluster3.1.2.sql" target="_top">ltcluster3.1.1_ltcluster3.1.2.sql</a></li></ul></div><p>
+    </p><p>
+      For more details see the
+      <a class="ulink" href="www.hs.net/lightdb/ltcluster/release-notes-3.3.2.html#upgrading" target="_top">ltcluster 3 upgrade notes</a>.
+    </p></div><div class="sect3" id="id-1.4.8.6.8.5"><div class="titlepage"><div><div><h4 class="title">10.3.2.2. Manually create the ltcluster extension</h4></div></div></div><p>
+     In the database used by the existing <span class="productname">ltcluster</span> installation, execute:
+     </p><pre class="programlisting">
+      CREATE EXTENSION ltcluster FROM unpackaged</pre><p>
+    </p><p>
+     This will move and convert all objects from the existing schema
+     into the new, standard <code class="literal">ltcluster</code> schema.
+    </p><div class="note"><h3 class="title">Note</h3><p>There must be only one schema matching <code class="literal">repmgr_%</code> in the
+        database, otherwise this step may not work.
+      </p></div></div></div><div class="sect2" id="id-1.4.8.6.9"><div class="titlepage"><div><div><h3 class="title">10.3.3. Upgrading the ltcluster schema (LightDB 13 and later)</h3></div></div></div><p>
+     Beginning with LightDB 13, the <code class="command">CREATE EXTENSION ... FROM unpackaged</code>
+     syntax is no longer available. In the unlikely event you have ended up with an
+     installation running LightDB 13 or later and containing the legacy <span class="productname">ltcluster</span>
+     schema, there is no convenient way of upgrading this; instead you'll just need
+     to re-register the nodes as detailed in <a class="link" href="upgrading-from-ltcluster-3.html#UPGRADE-REREGISTER-NODES" title="10.3.4. Re-register each node">the following section</a>,
+     which will create the <span class="productname">ltcluster</span> extension automatically.
+   </p><p>
+     Any historical data you wish to retain (e.g. the contents of the <code class="structname">events</code>
+     and <code class="structname">monitoring</code> tables) will need to be exported manually.
+   </p></div><div class="sect2" id="UPGRADE-REREGISTER-NODES"><div class="titlepage"><div><div><h3 class="title">10.3.4. Re-register each node</h3></div></div></div><p>
+     This is necessary to update the <code class="literal">ltcluster</code> metadata with some additional items.
+    </p><p>
+     On the primary node, execute e.g.
+     </p><pre class="programlisting">
+      ltcluster primary register -f /etc/ltcluster.conf --force</pre><p>
+    </p><p>
+      If not already present (e.g. after executing <code class="command">CREATE EXTENSION ltcluster FROM unpackaged</code>),
+      the <span class="productname">ltcluster</span> extension will be automatically created by <code class="command">ltcluster primary register</code>.
+    </p><p>
+     On each standby node, execute e.g.
+     </p><pre class="programlisting">
+      ltcluster standby register -f /etc/ltcluster.conf --force</pre><p>
+    </p><p>
+     Check the data is updated as expected by examining the <code class="structname">ltcluster.nodes</code>
+     table; restart <span class="productname">ltclusterd</span> if required.
+    </p><p>
+     The original <code class="literal">repmgr_$cluster</code> schema can be dropped at any time.
+    </p></div><div class="sect2" id="UPGRADE-DROP-LTCLUSTER-CLUSTER-SCHEMA"><div class="titlepage"><div><div><h3 class="title">10.3.5. Drop the legacy ltcluster schema</h3></div></div></div><p>
+      Once the cluster has been registered with the current <span class="productname">ltcluster</span> version, the legacy
+      <code class="literal">repmgr_$cluster</code> schema can be dropped at any time with:
+</p><pre class="programlisting">
+    DROP SCHEMA repmgr_$cluster CASCADE</pre><p>
+      (substitute <code class="literal">$cluster</code> with the value of the <code class="varname">clustername</code>
+      variable used in <span class="productname">ltcluster</span> 3.x).
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="upgrading-and-pg-upgrade.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="upgrading-ltcluster.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="using-ltclusterd.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">10.2. postgresql.confupgrade and ltcluster </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Part III. Using ltclusterd</td></tr></table></div></body></html>

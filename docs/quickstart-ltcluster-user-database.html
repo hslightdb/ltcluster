@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.3. Create the ltcluster user and database</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-lightdb-configuration.html" title="3.2. LightDB configuration" /><link rel="next" href="quickstart-authentication.html" title="3.4. Configuring authentication in pg_hba.conf" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.3. Create the ltcluster user and database</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-lightdb-configuration.html" title="3.2. LightDB configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-authentication.html" title="3.4. Configuring authentication in pg_hba.conf">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-LTCLUSTER-USER-DATABASE"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.3. Create the ltcluster user and database</h2></div></div></div><p>
+   Create a dedicated LightDB superuser account and a database for
+   the <span class="productname">ltcluster</span> metadata, e.g.
+  </p><pre class="programlisting">
+   createuser -s ltcluster
+   createdb ltcluster -O ltcluster
+  </pre><p>
+   For the examples in this document, the name <code class="literal">ltcluster</code> will be
+   used for both user and database, but any names can be used.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+    For the sake of simplicity, the <code class="literal">ltcluster</code> user is created
+    as a superuser. If desired, it's possible to create the <code class="literal">ltcluster</code>
+    user as a normal user. However for certain operations superuser permissions
+    are required; in this case the command line option <code class="command">--superuser</code>
+    can be provided to specify a superuser.
+   </p><p>
+    It's also assumed that the <code class="literal">ltcluster</code> user will be used to make the
+    replication connection from the standby to the primary; again this can be
+    overridden by specifying a separate replication user when registering each node.
+   </p></div><div class="tip"><h3 class="title">Tip</h3><p>
+     <span class="productname">ltcluster</span> will install the <code class="literal">ltcluster</code> extension, which creates a
+     <code class="literal">ltcluster</code> schema containing the <span class="productname">ltcluster</span>'s metadata tables as
+     well as other functions and views. We also recommend that you set the
+     <code class="literal">ltcluster</code> user's search path to include this schema name, e.g.
+     </p><pre class="programlisting">
+       ALTER USER ltcluster SET search_path TO ltcluster, "$user", public;</pre><p>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-lightdb-configuration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-authentication.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.2. LightDB configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.4. Configuring authentication in pg_hba.conf</td></tr></table></div></body></html>

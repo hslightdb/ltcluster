@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>10.1. Upgrading ltcluster 4.x and later</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="upgrading-ltcluster.html" title="Chapter 10. Upgrading ltcluster" /><link rel="next" href="upgrading-and-pg-upgrade.html" title="10.2. postgresql.confupgrade and ltcluster" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">10.1. Upgrading ltcluster 4.x and later</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="upgrading-ltcluster.html" title="Chapter 10. Upgrading ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="upgrading-ltcluster.html" title="Chapter 10. Upgrading ltcluster">Up</a></td><th width="60%" align="center">Chapter 10. Upgrading ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="upgrading-and-pg-upgrade.html" title="10.2. postgresql.confupgrade and ltcluster">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="UPGRADING-LTCLUSTER-EXTENSION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">10.1. Upgrading ltcluster 4.x and later</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="upgrading-ltcluster-extension.html#UPGRADING-MINOR-VERSION">10.1.1. Upgrading a minor version release</a></span></dt><dt><span class="sect2"><a href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION">10.1.2. Upgrading a major version release</a></span></dt><dt><span class="sect2"><a href="upgrading-ltcluster-extension.html#UPGRADING-CHECK-LTCLUSTERD">10.1.3. Checking ltclusterd status after an upgrade</a></span></dt></dl></div><a id="id-1.4.8.4.2" class="indexterm"></a><p>
+    From version 4, <span class="productname">ltcluster</span> consists of three elements:
+     </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+           the <span class="application">ltcluster</span> and <span class="productname">ltclusterd</span> executables
+         </li><li class="listitem" style="list-style-type: disc">
+           the objects for the <span class="productname">ltcluster</span> LightDB extension (SQL files for creating/updating
+           ltcluster metadata, and the extension control file)
+         </li><li class="listitem" style="list-style-type: disc">
+           the shared library module used by <span class="productname">ltclusterd</span> which
+           is resident in the LightDB backend
+         </li></ul></div><p>
+  </p><p>
+    With <span class="emphasis"><em>minor releases</em></span>, usually changes are only made to the <span class="application">ltcluster</span>
+    and <span class="productname">ltclusterd</span> executables. In this case, the upgrade is quite straightforward,
+    and is simply a case of installing the new version, and restarting <span class="productname">ltclusterd</span>
+    (if running).
+  </p><p>
+    For <span class="emphasis"><em>major releases</em></span>, the <span class="productname">ltcluster</span> LightDB extension will need to be updated
+    to the latest version. Additionally, if the shared library module has been updated (this is sometimes,
+    but not always the case), LightDB itself will need to be restarted on each node.
+  </p><div class="important"><h3 class="title">Important</h3><p>
+      Always check the <a class="link" href="appendix-release-notes.html" title="Appendix A. Release notes">release notes</a> for every
+      release as they may contain upgrade instructions particular to individual versions.
+    </p></div><div class="sect2" id="UPGRADING-MINOR-VERSION"><div class="titlepage"><div><div><h3 class="title">10.1.1. Upgrading a minor version release</h3></div></div></div><a id="id-1.4.8.4.7.2" class="indexterm"></a><p>
+      The process for installing minor version upgrades is quite straightforward:
+
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+            install the new <span class="productname">ltcluster</span> version
+          </li><li class="listitem" style="list-style-type: disc">
+            restart <span class="productname">ltclusterd</span> on all nodes where it is running
+          </li></ul></div><p>
+
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        Some packaging systems (e.g. <a class="link" href="packages-debian-ubuntu.html" title="C.2. Debian/Ubuntu Packages">Debian/Ubuntu</a>
+        may restart <span class="productname">ltclusterd</span> as part of the package upgrade process.
+      </p></div><p>
+	  Minor version upgrades can be performed in any order on the nodes in the replication
+	  cluster.
+	</p><p>
+	  A LightDB restart is <span class="emphasis"><em>not</em></span> required for minor version upgrades.
+	</p><div class="note"><h3 class="title">Note</h3><p>
+	    The same <span class="productname">ltcluster</span> "major version" (e.g. <code class="literal">4.2</code>) must be
+	    installed on all nodes in the replication cluster. While it's possible to have differing
+	    <span class="productname">ltcluster</span> "minor versions" (e.g. <code class="literal">4.2.1</code>)  on different nodes,
+	    we strongly recommend updating all nodes to the latest minor version.
+	  </p></div></div><div class="sect2" id="UPGRADING-MAJOR-VERSION"><div class="titlepage"><div><div><h3 class="title">10.1.2. Upgrading a major version release</h3></div></div></div><a id="id-1.4.8.4.8.2" class="indexterm"></a><p>
+	  "major version" upgrades need to be planned more carefully, as they may include
+	  changes to the <span class="productname">ltcluster</span> metadata (which need to be propagated from the primary to all
+	  standbys) and/or changes to the shared object file used by <span class="productname">ltclusterd</span>
+	  (which require a LightDB restart).
+	</p><p>
+	  With this in mind,
+	</p><p>
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+			Stop <span class="productname">ltclusterd</span> (if in use) on all nodes where it is running.
+          </li><li class="listitem">
+			Disable the <span class="productname">ltclusterd</span> service on all nodes where it is in use;
+            this is to prevent packages from prematurely restarting <span class="productname">ltclusterd</span>.
+          </li><li class="listitem">
+			Install the updated package (or compile the updated source) on all nodes.
+          </li><li class="listitem"><p>
+            If running a <code class="literal">systemd</code>-based Linux distribution, execute (as <code class="literal">root</code>,
+            or with appropriate <code class="literal">sudo</code> permissions):
+            </p><pre class="programlisting">
+systemctl daemon-reload</pre><p>
+          </p></li><li class="listitem"><p class="simpara">
+			If the <span class="productname">ltcluster</span> shared library module has been updated (check the <a class="link" href="appendix-release-notes.html" title="Appendix A. Release notes">release notes</a>!),
+            restart LightDB, then <span class="productname">ltclusterd</span> (if in use)	on each node,
+            The order in which this is applied to individual nodes is not critical,
+			and it's also fine to restart LightDB on all nodes first before starting <span class="productname">ltclusterd</span>.
+		  </p><p class="simpara">
+			Note that if the upgrade requires a LightDB restart, <span class="productname">ltclusterd</span>
+			will only function correctly once all nodes have been restarted.
+          </p></li><li class="listitem"><p>
+			On the primary node, execute
+			</p><pre class="programlisting">
+ALTER EXTENSION ltcluster UPDATE</pre><p>
+			in the database where <span class="productname">ltcluster</span> is installed.
+          </p></li><li class="listitem">
+			Reenable the <span class="productname">ltclusterd</span> service on all nodes where it is in use, and
+            ensure it is running.
+          </li></ol></div><p>
+	</p><div class="tip"><h3 class="title">Tip</h3><p>
+        If the <span class="productname">ltcluster</span> upgrade requires a LightDB restart, combine the <span class="productname">ltcluster</span> upgrade
+        with a LightDB minor version upgrade, which will require a restart in any case.
+      </p><p>
+		New LightDB minor versions are usually released every couple of months;
+        see the <a class="ulink" href="https://www.hs.net/lightdb/developer/roadmap/" target="_top">Roadmap</a>
+        for the current schedule.
+	  </p></div></div><div class="sect2" id="UPGRADING-CHECK-LTCLUSTERD"><div class="titlepage"><div><div><h3 class="title">10.1.3. Checking ltclusterd status after an upgrade</h3></div></div></div><a id="id-1.4.8.4.9.2" class="indexterm"></a><p>
+      From <a class="link" href="release-4.2.html" title="A.7. Release 4.2">ltcluster 4.2</a>, once the upgrade is complete, execute the
+      <code class="command"><a class="link" href="ltcluster-service-status.html" title="ltcluster service status">ltcluster service status</a></code>
+      (<span class="productname">ltcluster</span> 4.2 - 4.4: <code class="command"><a class="link" href="ltcluster-service-status.html" title="ltcluster service status">ltcluster daemon status</a></code>)
+      command (on any node) to show an overview of the status of <span class="productname">ltclusterd</span> on all nodes.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="upgrading-ltcluster.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="upgrading-ltcluster.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="upgrading-and-pg-upgrade.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 10. Upgrading ltcluster </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 10.2. postgresql.confupgrade and ltcluster</td></tr></table></div></body></html>

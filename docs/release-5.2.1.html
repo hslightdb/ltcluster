@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.1. Release 5.2.1</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="appendix-release-notes.html" title="Appendix A. Release notes" /><link rel="next" href="release-5.2.0.html" title="A.2. Release 5.2.0" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.1. Release 5.2.1</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="appendix-release-notes.html" title="Appendix A. Release notes">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-5.2.0.html" title="A.2. Release 5.2.0">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-5.2.1"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.1. Release 5.2.1</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-5.2.1.html#id-1.7.5.4">A.1.1. Improvements</a></span></dt><dt><span class="sect2"><a href="release-5.2.1.html#id-1.7.5.5">A.1.2. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Mon 7 December, 2020</em></span></p><p>
+      <span class="productname">ltcluster</span> 5.2.1 is a minor release.
+    </p><div class="sect2" id="id-1.7.5.4"><div class="titlepage"><div><div><h3 class="title">A.1.1. Improvements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>:
+              option <code class="option">--recovery-min-apply-delay</code> added, overriding any
+              setting present in <code class="filename">ltcluster.conf</code>.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.5.5"><div class="titlepage"><div><div><h3 class="title">A.1.2. Bug fixes</h3></div></div></div><p>
+
+         </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Configuration: fix parsing of <code class="option">replication_type</code> configuration parameter.  GitHub #672.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>:
+              handle case where <code class="filename">postgresql.auto.conf</code> is absent on the
+              source node.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>:
+              in LightDB 11 and later, an existing data directory's permissions
+              will not be changed to <code class="option">0700</code> if they are already set to
+              <code class="option">0750</code>.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: prevent termination when local node not available and
+              <code class="option">standby_disconnect_on_failover</code> is set.  GitHub #675.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: ensure <code class="option">reconnect_interval</code> is correctly handled.
+              GitHub #673.
+            </p></li><li class="listitem"><p>
+              <code class="command">ltcluster witness --help</code>: fix <code class="command">witness unregister</code>
+              description.  GitHub #676.
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="appendix-release-notes.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-5.2.0.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Appendix A. Release notes </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.2. Release 5.2.0</td></tr></table></div></body></html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.6. ltcluster configuration file</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-standby-preparation.html" title="3.5. Preparing the standby" /><link rel="next" href="quickstart-primary-register.html" title="3.7. Register the primary server" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.6. ltcluster configuration file</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-standby-preparation.html" title="3.5. Preparing the standby">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-primary-register.html" title="3.7. Register the primary server">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-LTCLUSTER-CONF"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.6. ltcluster configuration file</h2></div></div></div><p>
+   Create a <code class="filename">ltcluster.conf</code> file on the primary server. The file must
+   contain at least the following parameters:
+  </p><pre class="programlisting">
+    node_id=1
+    node_name='node1'
+    conninfo='host=node1 user=ltcluster dbname=ltcluster connect_timeout=2'
+    data_directory='/var/lib/lightdb/data'
+  </pre><p>
+   <code class="filename">ltcluster.conf</code> should not be stored inside the LightDB data directory,
+   as it could be overwritten when setting up or reinitialising the LightDB
+   server. See sections <a class="xref" href="configuration.html" title="Chapter 4. ltcluster configuration">Configuration</a> and <a class="xref" href="configuration-file.html" title="4.2. Configuration file">configuration file</a>
+   for further details about <code class="filename">ltcluster.conf</code>.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      <span class="productname">ltcluster</span> only uses <code class="option">pg_bindir</code> when it executes
+      LightDB binaries directly.
+    </p><p>
+      For user-defined scripts such as <code class="option">promote_command</code> and the
+      various <code class="option">service_*_command</code>s, you <span class="emphasis"><em>must</em></span>
+      always explicitly provide the full path to the binary or script being
+      executed, even if it is <span class="productname">ltcluster</span> itself.
+    </p><p>
+      This is because these options can contain user-defined scripts in arbitrary
+      locations, so prepending <code class="option">pg_bindir</code> may break them.
+    </p></div><div class="tip"><h3 class="title">Tip</h3><p>
+    For Debian-based distributions we recommend explictly setting
+    <code class="option">pg_bindir</code> to the directory where <code class="command">lt_ctl</code> and other binaries
+    not in the standard path are located. For LightDB 9.6 this would be <code class="filename">/usr/lib/lightdb/9.6/bin/</code>.
+   </p></div><div class="tip"><h3 class="title">Tip</h3><p>
+      If your distribution places the <span class="productname">ltcluster</span> binaries in a location other than the
+      LightDB installation directory, specify this with <code class="option">ltcluster_bindir</code>
+      to enable <span class="productname">ltcluster</span> to perform operations (e.g.
+      <code class="command"><a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a></code>)
+      on other nodes.
+    </p></div><p>
+   See the file
+   <a class="ulink" href="www.hs.net/lightdb/ltcluster/master/ltcluster.conf.sample" target="_top">ltcluster.conf.sample</a>
+    for details of all available configuration parameters.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-standby-preparation.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-primary-register.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.5. Preparing the standby </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.7. Register the primary server</td></tr></table></div></body></html>

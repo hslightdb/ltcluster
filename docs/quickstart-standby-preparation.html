@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.5. Preparing the standby</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-authentication.html" title="3.4. Configuring authentication in pg_hba.conf" /><link rel="next" href="quickstart-ltcluster-conf.html" title="3.6. ltcluster configuration file" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.5. Preparing the standby</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-authentication.html" title="3.4. Configuring authentication in pg_hba.conf">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-ltcluster-conf.html" title="3.6. ltcluster configuration file">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-STANDBY-PREPARATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.5. Preparing the standby</h2></div></div></div><p>
+   On the standby, do <span class="emphasis"><em>not</em></span> create a LightDB instance (i.e.
+   do not execute <span class="application">initdb</span> or any database creation
+   scripts provided by packages), but do ensure the destination
+   data directory (and any other directories which you want LightDB to use)
+   exist and are owned by the <code class="literal">lightdb</code> system user. Permissions
+   must be set to <code class="literal">0700</code> (<code class="literal">drwx------</code>).
+  </p><div class="tip"><h3 class="title">Tip</h3><p>
+      <span class="productname">ltcluster</span> will place a copy of the primary's database files in this directory.
+      It will however refuse to run if a LightDB instance has already been
+      created there.
+    </p></div><p>
+   Check the primary database is reachable from the standby using <span class="application">ltsql</span>:
+  </p><pre class="programlisting">
+    ltsql 'host=node1 user=ltcluster dbname=ltcluster connect_timeout=2'</pre><div class="note"><h3 class="title">Note</h3><p>
+    <span class="productname">ltcluster</span> stores connection information as <a class="ulink" href="https://www.hs.net/lightdb/docs/current/libpq-connect.html#LIBPQ-CONNSTRING" target="_top">libpq
+    connection strings</a> throughout. This documentation refers to them as <code class="literal">conninfo</code>
+    strings; an alternative name is <code class="literal">DSN</code> (<code class="literal">data source name</code>).
+    We'll use these in place of the <code class="command">-h hostname -d databasename -U username</code> syntax.
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-authentication.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-ltcluster-conf.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.4. Configuring authentication in pg_hba.conf </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.6. ltcluster configuration file</td></tr></table></div></body></html>

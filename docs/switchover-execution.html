@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>8.2. Executing the switchover command</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="preparing-for-switchover.html" title="8.1. Preparing for switchover" /><link rel="next" href="switchover-caveats.html" title="8.3. Caveats" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">8.2. Executing the switchover command</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="preparing-for-switchover.html" title="8.1. Preparing for switchover">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Up</a></td><th width="60%" align="center">Chapter 8. Performing a switchover with ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="switchover-caveats.html" title="8.3. Caveats">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="SWITCHOVER-EXECUTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">8.2. Executing the switchover command</h2></div></div></div><a id="id-1.4.6.8.2" class="indexterm"></a><p>
+   To demonstrate switchover, we will assume a replication cluster with a
+   primary (<code class="literal">node1</code>) and one standby (<code class="literal">node2</code>);
+   after the switchover <code class="literal">node2</code> should become the primary with
+   <code class="literal">node1</code> following it.
+  </p><p>
+   The switchover command must be run from the standby which is to be promoted,
+   and in its simplest form looks like this:
+   </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf standby switchover
+    NOTICE: executing switchover on node "node2" (ID: 2)
+    INFO: searching for primary node
+    INFO: checking if node 1 is primary
+    INFO: current primary node is 1
+    INFO: SSH connection to host "node1" succeeded
+    INFO: archive mode is "off"
+    INFO: replication lag on this standby is 0 seconds
+    NOTICE: local node "node2" (ID: 2) will be promoted to primary; current primary "node1" (ID: 1) will be demoted to standby
+    NOTICE: stopping current primary node "node1" (ID: 1)
+    NOTICE: issuing CHECKPOINT
+    DETAIL: executing server command "lt_ctl -l /var/log/lightdb/startup.log -D '/var/lib/pgsql/data' -m fast -W stop"
+    INFO: checking primary status; 1 of 6 attempts
+    NOTICE: current primary has been cleanly shut down at location 0/3001460
+    NOTICE: promoting standby to primary
+    DETAIL: promoting server "node2" (ID: 2) using "lt_ctl -l /var/log/lightdb/startup.log -w -D '/var/lib/pgsql/data' promote"
+    server promoting
+    NOTICE: STANDBY PROMOTE successful
+    DETAIL: server "node2" (ID: 2) was successfully promoted to primary
+    INFO: setting node 1's primary to node 2
+    NOTICE: starting server using  "lt_ctl -l /var/log/lightdb/startup.log -w -D '/var/lib/pgsql/data' restart"
+    NOTICE: NODE REJOIN successful
+    DETAIL: node 1 is now attached to node 2
+    NOTICE: switchover was successful
+    DETAIL: node "node2" is now primary
+    NOTICE: STANDBY SWITCHOVER is complete
+   </pre><p>
+  </p><p>
+   The old primary is now replicating as a standby from the new primary, and the
+   cluster status will now look like this:
+   </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status    | Upstream | Location | Connection string
+    ----+-------+---------+-----------+----------+----------+--------------------------------------
+     1  | node1 | standby |   running | node2    | default  | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | primary | * running |          | default  | host=node2 dbname=ltcluster user=ltcluster
+   </pre><p>
+  </p><p>
+    If <span class="productname">ltclusterd</span> is in use, it's worth double-checking that
+    all nodes are unpaused by executing
+    <code class="command"><a class="link" href="ltcluster-service-status.html" title="ltcluster service status">ltcluster service status</a></code>
+    (<span class="productname">ltcluster</span> 4.2 - 4.4: <code class="command"><a class="link" href="ltcluster-service-status.html" title="ltcluster service status">ltcluster daemon status</a></code>).
+  </p><div class="note"><h3 class="title">Note</h3><p>
+       Users of <span class="productname">ltcluster</span> versions prior to 4.2 will need to manually restart <span class="productname">ltclusterd</span>
+       on all nodes after the switchover is completed.
+     </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="preparing-for-switchover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="performing-switchover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="switchover-caveats.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">8.1. Preparing for switchover </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 8.3. Caveats</td></tr></table></div></body></html>

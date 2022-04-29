@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.8. Clone the standby server</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-primary-register.html" title="3.7. Register the primary server" /><link rel="next" href="quickstart-verify-replication.html" title="3.9. Verify replication is functioning" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.8. Clone the standby server</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-primary-register.html" title="3.7. Register the primary server">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-verify-replication.html" title="3.9. Verify replication is functioning">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-STANDBY-CLONE"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.8. Clone the standby server</h2></div></div></div><p>
+   Create a <code class="filename">ltcluster.conf</code> file on the standby server. It must contain at
+   least the same parameters as the primary's <code class="filename">ltcluster.conf</code>, but with
+   the mandatory values <code class="literal">node</code>, <code class="literal">node_name</code>, <code class="literal">conninfo</code>
+   (and possibly <code class="literal">data_directory</code>) adjusted accordingly, e.g.:
+  </p><pre class="programlisting">
+    node_id=2
+    node_name='node2'
+    conninfo='host=node2 user=ltcluster dbname=ltcluster connect_timeout=2'
+    data_directory='/var/lib/lightdb/data'</pre><p>
+   Use the <code class="command">--dry-run</code> option to check the standby can be cloned:
+  </p><pre class="programlisting">
+    $ ltcluster -h node1 -U ltcluster -d ltcluster -f /etc/ltcluster.conf standby clone --dry-run
+    NOTICE: using provided configuration file "/etc/ltcluster.conf"
+    NOTICE: destination directory "/var/lib/lightdb/data" provided
+    INFO: connecting to source node
+    NOTICE: checking for available walsenders on source node (2 required)
+    INFO: sufficient walsenders available on source node (2 required)
+    NOTICE: standby will attach to upstream node 1
+    HINT: consider using the -c/--fast-checkpoint option
+    INFO: all prerequisites for "standby clone" are met</pre><p>
+    If no problems are reported, the standby can then be cloned with:
+  </p><pre class="programlisting">
+    $ ltcluster -h node1 -U ltcluster -d ltcluster -f /etc/ltcluster.conf standby clone
+
+    NOTICE: using configuration file "/etc/ltcluster.conf"
+    NOTICE: destination directory "/var/lib/lightdb/data" provided
+    INFO: connecting to source node
+    NOTICE: checking for available walsenders on source node (2 required)
+    INFO: sufficient walsenders available on source node (2 required)
+    INFO: creating directory "/var/lib/lightdb/data"...
+    NOTICE: starting backup (using lt_basebackup)...
+    HINT: this may take some time; consider using the -c/--fast-checkpoint option
+    INFO: executing:
+      lt_basebackup -l "ltcluster base backup" -D /var/lib/lightdb/data -h node1 -U ltcluster -X stream
+    NOTICE: standby clone (using lt_basebackup) complete
+    NOTICE: you can now start your LightDB server
+    HINT: for example: lt_ctl -D /var/lib/lightdb/data start
+  </pre><p>
+   This has cloned the LightDB data directory files from the primary <code class="literal">node1</code>
+   using LightDB's <code class="command">lt_basebackup</code> utility. A <code class="filename">recovery.conf</code>
+   file containing the correct parameters to start streaming from this primary server will be created
+   automatically.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+    By default, any configuration files in the primary's data directory will be
+    copied to the standby. Typically these will be <code class="filename">postgresql.conf</code>,
+    <code class="filename">postgresql.auto.conf</code>, <code class="filename">pg_hba.conf</code> and
+    <code class="filename">pg_ident.conf</code>. These may require modification before the standby
+    is started.
+   </p></div><p>
+   Make any adjustments to the standby's LightDB configuration files now,
+   then start the server.
+  </p><p>
+   For more details on <code class="command">ltcluster standby clone</code>, see the
+   <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">command reference</a>.
+   A more detailed overview of cloning options is available in the
+   <a class="link" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">administration manual</a>.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-primary-register.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-verify-replication.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.7. Register the primary server </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.9. Verify replication is functioning</td></tr></table></div></body></html>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.3. Release 5.1.0</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-5.2.0.html" title="A.2. Release 5.2.0" /><link rel="next" href="release-5.0.html" title="A.4. Release 5.0" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.3. Release 5.1.0</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-5.2.0.html" title="A.2. Release 5.2.0">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-5.0.html" title="A.4. Release 5.0">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-5.1.0"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.3. Release 5.1.0</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-5.1.0.html#id-1.7.7.6">A.3.1. Compatibility changes</a></span></dt><dt><span class="sect2"><a href="release-5.1.0.html#id-1.7.7.7">A.3.2. General improvements</a></span></dt><dt><span class="sect2"><a href="release-5.1.0.html#id-1.7.7.8">A.3.3. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Mon 13 April, 2020</em></span></p><p>
+      <span class="productname">ltcluster</span> 5.1.0 is a major release.
+    </p><p>
+      For details on how to upgrade an existing <span class="productname">ltcluster</span> installation, see
+      documentation section <a class="link" href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION" title="10.1.2. Upgrading a major version release">Upgrading a major version release</a>.
+    </p><p>
+      If <span class="productname">ltclusterd</span> is in use, a LightDB restart <span class="emphasis"><em>is</em></span> required;
+      in that case we suggest combining this <span class="productname">ltcluster</span> upgrade with the next LightDB
+      minor release, which will require a LightDB restart in any case.
+    </p><div class="sect2" id="id-1.7.7.6"><div class="titlepage"><div><div><h3 class="title">A.3.1. Compatibility changes</h3></div></div></div><p>
+        The <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>
+        <code class="option">--recovery-conf-only</code> option has been renamed to
+        <code class="option">--replication-conf-only</code>. <code class="option">--recovery-conf-only</code> will
+        still be accepted as an alias.
+      </p></div><div class="sect2" id="id-1.7.7.7"><div class="titlepage"><div><div><h3 class="title">A.3.2. General improvements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              The requirement that the <span class="productname">ltcluster</span> user is a database superuser has been
+              removed as far as possible.
+            </p><p>
+              In theory, <span class="productname">ltcluster</span> can be operated with a normal database user for managing
+              the <span class="productname">ltcluster</span> database, and a separate replication user for managing replication
+              connections (and replication slots, if these are in use).
+            </p><p>
+              Some operations will still require superuser permissions, e.g. for issuing
+              a <code class="command">CHECKPOINT</code> as par of a switchover operation; in this case
+              a valid superuser should be provided with the <code class="option">-S</code>/<code class="option">--superuser</code>
+              option.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>:
+              Warn if neither of data page checksums or <code class="option">wal_log_hints</code> are active,
+              as this will preclude later usage of <code class="command">postgresql.confrewind</code>.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>:
+              when executed with <code class="option">--dry-run</code>, the method which would be used to promote the node
+              will be displayed.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>:
+              Improve logging and checking of potential failure situations.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              Replication configuration files (LightDB 11 and earlier:
+              <code class="filename">recovery.conf</code>; LightDB 12 and later: <code class="filename">postgresql.auto.conf</code>)
+              will be checked to ensure they are owned by the same user who owns the LightDB
+              data directory.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              Provide additional information in <code class="option">--dry-run mode</code> output.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              Checks that the demotion candidate's registered ltcluster.conf file can be found, to
+              prevent confusing references to an incorrectly configured data directory. GitHub 615.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check"><code class="command">ltcluster node check</code></a>:
+              accept option <code class="option">-S</code>/<code class="option">--superuser</code>. GitHub #621.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check"><code class="command">ltcluster node check</code></a>:
+              add  <code class="option">--upstream</code> option to check whether the node is attached
+              to the expected upstream node.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.7.8"><div class="titlepage"><div><div><h3 class="title">A.3.3. Bug fixes</h3></div></div></div><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Ensure <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><code class="command">ltcluster node rejoin</code></a>
+              checks for available replication slots on the rejoin target.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a> and
+              <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><code class="command">ltcluster node rejoin</code></a> will now return
+              an error code if the operation fails if a replication slot is not available or cannot
+              be created on the follow/rejoin target.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>:
+              in <code class="option">--dry-run mode</code>, display promote command which will be executed.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>
+              will check if the <code class="literal">ltcluster</code> user has permission to execute
+              <code class="function">pg_promote()</code> and fall back to <code class="command">lt_ctl promote</code> if
+              necessary.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              check for demotion candidate reattachment as late as possible to avoid spurious failure
+              reports.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: check for presence of <code class="option">promote_command</code> and
+              <code class="option">follow_command</code> on receipt of <code class="literal">SIGHUP</code>. GitHub 614.
+            </p></li><li class="listitem"><p>
+              Fix situation where replication connections were not created correctly, which
+              could lead to spurious replication connection failures in some situations, e.g.
+              where password files are used.
+            </p></li><li class="listitem"><p>
+              Ensure <code class="filename">postgresql.auto.conf</code> is created with
+              correct permissions (LightDB 12 and later).
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-5.2.0.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-5.0.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.2. Release 5.2.0 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.4. Release 5.0</td></tr></table></div></body></html>

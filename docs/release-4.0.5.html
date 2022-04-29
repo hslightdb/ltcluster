@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.11. Release 4.0.5</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-4.0.6.html" title="A.10. Release 4.0.6" /><link rel="next" href="release-4.0.4.html" title="A.12. Release 4.0.4" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.11. Release 4.0.5</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-4.0.6.html" title="A.10. Release 4.0.6">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.0.4.html" title="A.12. Release 4.0.4">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.0.5"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.11. Release 4.0.5</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.0.5.html#id-1.7.15.4">A.11.1. Usability enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.0.5.html#id-1.7.15.5">A.11.2. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Wed May 2, 2018</em></span></p><p>
+      <span class="productname">ltcluster</span> 4.0.5 contains a number of usability enhancements related to
+      <span class="application">pg_rewind</span> usage, <code class="filename">recovery.conf</code>
+      generation and (in <span class="productname">ltclusterd</span>) handling of various
+      corner-case situations, as well as a number of bug fixes.
+    </p><div class="sect2" id="id-1.7.15.4"><div class="titlepage"><div><div><h3 class="title">A.11.1. Usability enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Various documentation improvements, with particular emphasis on
+              the importance of setting appropriate <a class="link" href="configuration-file-service-commands.html" title="4.6. Service command settings">service commands</a>
+              instead of relying on <span class="application">lt_ctl</span>.
+            </p></li><li class="listitem"><p>
+              Poll demoted primary after restart as a standby during a switchover operation (GitHub #408).
+            </p></li><li class="listitem"><p>
+              Add configuration parameter <code class="option">config_directory</code> (GitHub #424).
+            </p></li><li class="listitem"><p>
+              Add sanity check if <code class="option">--upstream-node-id</code> not supplied when executing
+              <a class="xref" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register</a> (GitHub #395).
+            </p></li><li class="listitem"><p>
+              Enable <a class="link" href="ltcluster-node-rejoin.html#LTCLUSTER-NODE-REJOIN-PG-REWIND" title="Using lt_rewind">pg_rewind</a> to be used with
+              LightDB 9.3/9.4 (GitHub #413).
+            </p></li><li class="listitem"><p>
+              When generating replication connection strings, set <code class="literal">dbname=replication</code>
+              if appropriate (GitHub #421).
+            </p></li><li class="listitem"><p>
+              Enable provision of <code class="option">archive_cleanup_command</code> in <code class="filename">recovery.conf</code>
+              (GitHub #416).
+            </p></li><li class="listitem"><p>
+              Actively check for node to <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">rejoin</a> cluster (GitHub #415).
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: set <code class="literal">connect_timeout=2</code> (if not explicitly set)
+              when pinging a server.
+           </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.15.5"><div class="titlepage"><div><div><h3 class="title">A.11.2. Bug fixes</h3></div></div></div><p>
+
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Fix display of conninfo parsing error messages.
+           </p></li><li class="listitem"><p>
+              Fix minimum accepted value for <code class="varname">degraded_monitoring_timeout</code> (GitHub #411).
+           </p></li><li class="listitem"><p>
+              Fix superuser password handling (GitHub #400)
+            </p></li><li class="listitem"><p>
+              Fix parsing of <code class="varname">archive_ready_critical</code> configuration file parameter (GitHub #426).
+            </p></li><li class="listitem"><p>
+              Fix <code class="command"><a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a></code>
+              output (GitHub #389)
+           </p></li><li class="listitem"><p>
+               Fix memory leaks in witness code (GitHub #402).
+           </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: handle <code class="command">lt_ctl promote</code> timeout (GitHub #425).
+           </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: handle failover situation with only two nodes in the primary
+          location, and at least one node in another location (GitHub #407).
+            </p></li><li class="listitem"><p>
+               <span class="productname">ltclusterd</span>: prevent standby connection handle from going stale.
+           </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-4.0.6.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.0.4.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.10. Release 4.0.6 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.12. Release 4.0.4</td></tr></table></div></body></html>

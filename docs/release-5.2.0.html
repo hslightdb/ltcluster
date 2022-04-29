@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.2. Release 5.2.0</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-5.2.1.html" title="A.1. Release 5.2.1" /><link rel="next" href="release-5.1.0.html" title="A.3. Release 5.1.0" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.2. Release 5.2.0</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-5.2.1.html" title="A.1. Release 5.2.1">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-5.1.0.html" title="A.3. Release 5.1.0">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-5.2.0"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.2. Release 5.2.0</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-5.2.0.html#id-1.7.6.6">A.2.1. General improvements</a></span></dt><dt><span class="sect2"><a href="release-5.2.0.html#id-1.7.6.7">A.2.2. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-5.2.0.html#id-1.7.6.8">A.2.3. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Thu 22 October, 2020</em></span></p><p>
+      <span class="productname">ltcluster</span> 5.2.0 is a major release.
+    </p><p>
+      This release provides support for <a class="ulink" href="https://www.hs.net/lightdb/docs/13/release-13.html" target="_top">LightDB 13</a>, released in September 2020.
+    </p><p>
+      This release removes support for LightDB 9.3, which was
+      <a class="ulink" href="https://www.hs.net/lightdb/docs/9.3/release-9-3-25.html" target="_top">designated EOL in November 2018</a>.
+    </p><div class="sect2" id="id-1.7.6.6"><div class="titlepage"><div><div><h3 class="title">A.2.1. General improvements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Configuration: support <code class="command">include</code>, <code class="command">include_dir</code> and
+              <code class="command">include_if_exists</code> directives (see <a class="xref" href="configuration-file.html#CONFIGURATION-FILE-INCLUDE-DIRECTIVES" title="4.2.1.1. Configuration file include directives">configuration file include directives</a>).
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              Improve sanity check failure log output from the demotion candidate.
+            </p><p>
+              If database connection configuration is not consistent across all nodes, it's
+              possible remote <span class="productname">ltcluster</span> invocations (e.g. during switchover, from the promotion candidate
+              to the demotion candidate) will not be able to connect to the database. This will
+              now be explicitly reported as a database connection failure, rather than as a failure
+              of the respective sanity check.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a> /
+              <a class="link" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix">ltcluster cluster matrix</a>:
+              improve text mode output format, in particular so that node identifiers of arbitrary length are
+              displayed correctly.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-primary-unregister.html" title="ltcluster primary unregister">ltcluster primary unregister</a>:
+              the <code class="option">--force</code> can be provided to unregister an active primary node, provided
+              it has no registered standby nodes.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>: new option
+              <code class="option">--verify-backup</code> to run LightDB's
+              <a class="ulink" href="https://www.hs.net/lightdb/docs/13/app-pgverifybackup.html" target="_top">postgresql.confverifybackup</a>
+              utility after cloning a standby to verify the integrity of the copied data
+              (LightDB 13 and later).
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>:
+              when cloning from Barman, setting <code class="option">--waldir</code>
+              (LightDB 9.6 and earlier: <code class="option">--xlogdir</code>) in
+              <code class="option">postgresql.confbasebackup_options</code> will cause <span class="productname">ltcluster</span> to create
+              a WAL directory outside of the main data directory and symlink
+              it from there, in the same way as would happen when cloning
+              using <span class="application">postgresql.confbasebackup</span>.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow">ltcluster standby follow</a>:
+              In LightDB 13 and later, a standby no longer requires a restart to
+              follow a new upstream node.
+            </p><p>
+              The old behaviour (always restarting the standby to follow a new node)
+              can be restored by setting the configuration file parameter
+              <code class="varname">standby_follow_restart</code> to <code class="literal">true</code>.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a>:
+              enable a node to attach to a target node even the target node
+              has a lower timeline (LightDB 9.6 and later).
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a>:
+              in LightDB 13 and later, support <span class="application">postgresql.confrewind</span>'s
+              ability to automatically run crash recovery on a LightDB instance
+              which was not shut down cleanly.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a>:
+              option <code class="option">--db-connection</code> added to check if <span class="productname">ltcluster</span>
+              can connect to the database on the local node.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a>:
+              report database connection error if the <code class="option">--optformat</code> was provided.
+            </p></li><li class="listitem"><p>
+              Improve handling of pg_control read errors.
+            </p></li><li class="listitem"><p>
+              It is now possible to dump the contents of <span class="productname">ltcluster</span> metadata tables with
+              <span class="application">postgresql.confdump</span>.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.6.7"><div class="titlepage"><div><div><h3 class="title">A.2.2. ltclusterd enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Following additional parameters can be provided to <code class="varname">failover_validation_command</code>:
+              </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="literal">%n</code>: node ID</li><li class="listitem" style="list-style-type: disc"><code class="literal">%a</code>: node name</li><li class="listitem" style="list-style-type: disc"><code class="literal">%v</code>: number of visible nodes</li><li class="listitem" style="list-style-type: disc"><code class="literal">%u</code>: number of shared upstream nodes</li><li class="listitem" style="list-style-type: disc"><code class="literal">%t</code>: total number of nodes</li></ul></div><p>
+            </p></li><li class="listitem"><p>
+              Configuration option <code class="varname">always_promote</code> (default: <code class="literal">false</code>)
+              to control whether a node should be promoted if the <span class="productname">ltcluster</span> metadata is not up-to-date
+              on that node.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.6.8"><div class="titlepage"><div><div><h3 class="title">A.2.3. Bug fixes</h3></div></div></div><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a>:
+              fix issue with cloning from Barman where the tablespace mapping file was
+              not flushed to disk before attempting to retrieve files from Barman. GitHub #650.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a>:
+              ensure that when verifying a standby node has attached to its upstream, the
+              node has started streaming before confirming the success of the rejoin operation.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: ensure primary connection is reset if same as upstream. GitHub #633.
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-5.2.1.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-5.1.0.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.1. Release 5.2.1 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.3. Release 5.1.0</td></tr></table></div></body></html>

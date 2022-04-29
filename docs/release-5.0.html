@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.4. Release 5.0</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-5.1.0.html" title="A.3. Release 5.1.0" /><link rel="next" href="release-4.4.html" title="A.5. Release 4.4" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.4. Release 5.0</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-5.1.0.html" title="A.3. Release 5.1.0">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.4.html" title="A.5. Release 4.4">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-5.0"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.4. Release 5.0</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-5.0.html#id-1.7.8.6">A.4.1. Compatibility changes</a></span></dt><dt><span class="sect2"><a href="release-5.0.html#id-1.7.8.7">A.4.2. General enhancements</a></span></dt><dt><span class="sect2"><a href="release-5.0.html#id-1.7.8.8">A.4.3. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Tue 15 October, 2019</em></span></p><p>
+      <span class="productname">ltcluster</span> 5.0 is a major release.
+    </p><p>
+      For details on how to upgrade an existing <span class="productname">ltcluster</span> installation, see
+      documentation section <a class="link" href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION" title="10.1.2. Upgrading a major version release">Upgrading a major version release</a>.
+    </p><p>
+      If <span class="productname">ltclusterd</span> is in use, a LightDB restart <span class="emphasis"><em>is</em></span> required;
+      in that case we suggest combining this <span class="productname">ltcluster</span> upgrade with the next LightDB
+      minor release, which will require a LightDB restart in any case.
+    </p><div class="sect2" id="id-1.7.8.6"><div class="titlepage"><div><div><h3 class="title">A.4.1. Compatibility changes</h3></div></div></div><div class="sect3" id="LTCLUSTER-5-0-CONFIG-FILE-PARSING"><div class="titlepage"><div><div><h4 class="title">A.4.1.1. Configuration file parsing has been made stricter</h4></div></div></div><p>
+          <span class="productname">ltcluster</span> now parses <a class="link" href="configuration-file.html#CONFIGURATION-FILE-FORMAT" title="4.2.1. Configuration file format">configuration files</a>
+          in the same way that LightDB itself does, which means some files used with
+          earlier <span class="productname">ltcluster</span> versions may need slight modification before they can be used
+          with <span class="productname">ltcluster</span> 5 and later.
+        </p><p>
+          The main change is that string parameters should always be enclosed in single quotes.
+        </p><p>
+          For example, in <span class="productname">ltcluster</span> 4.4 and earlier, the following <code class="filename">ltcluster.conf</code>
+          entry was valid:
+          </p><pre class="programlisting">
+conninfo=host=node1 user=ltcluster dbname=ltcluster connect_timeout=2</pre><p>
+          This must now be changed to:
+          </p><pre class="programlisting">
+conninfo='host=node1 user=ltcluster dbname=ltcluster connect_timeout=2'</pre><p>
+        </p><p>
+          Note that simple string identifiers (e.g. <code class="literal">node_name=node1</code>)
+          may remain unquoted, though we recommend always enclosing
+          strings in single quotes.
+        </p><p>
+          Additionally, leading/trailing white space between single quotes will no longer
+          be trimmed; the entire string between single quotes will be
+          taken literally.
+        </p><p>
+          Strings enclosed in double quotes (e.g. <code class="literal">node_name="node1"</code>)
+          will now be rejected; previously they were accepted, but the double quotes were
+          interpreted as part of the string, which was a frequent cause of confusion.
+        </p><p>
+          This syntax matches that used by LightDB itself.
+        </p></div><div class="sect3" id="id-1.7.8.6.3"><div class="titlepage"><div><div><h4 class="title">A.4.1.2. Some "ltcluster daemon ..." commands renamed</h4></div></div></div><p>
+          Some "<code class="command">ltcluster daemon ...</code>" commands have been renamed to
+          "<code class="command">ltcluster service ...</code>" as they have a cluster-wide effect
+          and to avoid giving the impression they affect only the local <span class="productname">ltcluster</span> daemon.
+        </p><p>
+          The following commands are affected:
+
+          </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+                <code class="command">ltcluster daemon pause</code>
+                (now <a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause"><code class="command">ltcluster service pause</code></a>)
+              </li><li class="listitem" style="list-style-type: disc">
+                <code class="command">ltcluster daemon unpause</code>
+                (now <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster service unpause</code></a>)
+              </li><li class="listitem" style="list-style-type: disc">
+                <code class="command">ltcluster daemon status</code>
+                (now <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster service status</code></a>)
+              </li></ul></div><p>
+        </p><p>
+          The "<code class="command">ltcluster daemon ...</code>" form will still be accepted
+          for backwards compatibility.
+        </p></div><div class="sect3" id="id-1.7.8.6.4"><div class="titlepage"><div><div><h4 class="title">A.4.1.3. Some deprecated command line options removed</h4></div></div></div><p>
+         The following command line options, which have been deprecated since <span class="productname">ltcluster</span> 3.3
+         (and which no longer had any effect other than to generate a warning about their use)
+         have been removed:
+         </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="option">--data-dir</code></li><li class="listitem" style="list-style-type: disc"><code class="option">--no-conninfo-password</code></li><li class="listitem" style="list-style-type: disc"><code class="option">--recovery-min-apply-delay</code></li></ul></div><p>
+      </p></div></div><div class="sect2" id="id-1.7.8.7"><div class="titlepage"><div><div><h3 class="title">A.4.2. General enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Support for LightDB 12 added.
+            </p><p>
+              Beginning with LightDB 12, replication configuration has been integrated
+              into the main LightDB configuraton system and the conventional
+              <code class="filename">recovery.conf</code> file is no longer valid.
+            </p><p>
+              <span class="productname">ltcluster</span> has been modified to be compatible with this change.
+            </p><p>
+              <span class="productname">ltcluster</span> additionally takes advantage of the new <code class="command">pg_promote()</code>
+              function, which enables a standby to be promoted to primary using an SQL
+              command.
+            </p><p>
+              For an overview of general changes to replication configuration, see this blog entry:
+              <a class="ulink" href="https://www.hs.net/lightdb/en/blog/replication-configuration-changes-in-lightdb-12/" target="_top">Replication configuration changes in LightDB 12</a>
+            </p></li><li class="listitem"><p>
+              The <span class="productname">ltcluster</span> configuration file is now parsed using
+              <code class="command">flex</code>, meaning it will be parsed in
+              the same way as LightDB parses its own configuration
+              files.
+            </p><p>
+              This makes configuration file parsing more robust
+              and consistent.
+            </p><p>
+              See item <a class="link" href="release-5.0.html#LTCLUSTER-5-0-CONFIG-FILE-PARSING" title="A.4.1.1. Configuration file parsing has been made stricter">Configuration file parsing has been made stricter</a>
+              for details.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>:
+              checks for availability of the <span class="productname">ltcluster</span> extension on the upstream node have
+              been improved and error messages improved.
+            </p></li><li class="listitem"><p>
+			  When executing <span class="productname">ltcluster</span> remotely, if the <span class="productname">ltcluster</span> log level was explicitly
+			  provided (with <code class="option">-L</code>/<code class="option">--log-level</code>), that log level
+			  will be passed to the remote <span class="productname">ltcluster</span>.
+			</p><p>
+			  This makes it possible to return log output when executing ltcluster
+			  remotely at a different level to the one defined in the remote
+			  <span class="productname">ltcluster</span>'s <code class="filename">ltcluster.conf</code>.
+			</p><p>
+			  This is particularly useful when <code class="literal">DEBUG</code> output is required.
+			</p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.8.8"><div class="titlepage"><div><div><h3 class="title">A.4.3. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Check role membership when trying to read <code class="literal">pg_settings</code>.
+            </p><p>
+              Previously <span class="productname">ltcluster</span> assumed only superusers could read <code class="literal">pg_settings</code>,
+              but from LightDB 10, all members of the roles <code class="literal">pg_read_all_settings</code>
+              or <code class="literal">pg_monitor</code> are permitted to do this as well.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: Fix handling of upstream node change check.
+            </p><p>
+              <span class="productname">ltclusterd</span> has a check to see if the upstream node has unexpectedly
+              changed, e.g. if the ltclusterd service is paused and the LightDB
+              instance has been pointed to another node.
+            </p><p>
+              However this check was relying on the node record on the local node
+              being up-to-date, which may not be the case immediately after a
+              failover, when the node is still replaying records updated prior
+              to the node's own record being updated. In this case it will
+              mistakenly assume the node is following the original primary
+              and attempt to restart monitoring, which will fail as the original
+              primary is no longer available.
+            </p><p>
+              To prevent this, the node's record on the upstream node is checked
+              to see if the reported upstream <code class="literal">node_id</code> matches
+              the expected <code class="literal">node_id</code>. GitHub #587/#588.
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-5.1.0.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.4.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.3. Release 5.1.0 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.5. Release 4.4</td></tr></table></div></body></html>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.9. Release 4.1.0</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-4.1.1.html" title="A.8. Release 4.1.1" /><link rel="next" href="release-4.0.6.html" title="A.10. Release 4.0.6" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.9. Release 4.1.0</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-4.1.1.html" title="A.8. Release 4.1.1">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.0.6.html" title="A.10. Release 4.0.6">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.1.0"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.9. Release 4.1.0</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.1.0.html#id-1.7.13.8">A.9.1. Configuration file changes</a></span></dt><dt><span class="sect2"><a href="release-4.1.0.html#id-1.7.13.9">A.9.2. ltcluster enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.1.0.html#id-1.7.13.10">A.9.3. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.1.0.html#id-1.7.13.11">A.9.4. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Tue July 31, 2018</em></span></p><p>
+      <span class="productname">ltcluster</span> 4.1.0 introduces some changes to <span class="productname">ltclusterd</span>
+      behaviour and some additional configuration parameters.
+    </p><p>
+      This release can be installed as a simple package upgrade from ltcluster 4.0 ~ 4.0.6.
+      The following post-upgrade steps must be carried out:
+
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Execute <code class="command">ALTER EXTENSION ltcluster UPDATE</code>
+              on the primary server in the database where <span class="productname">ltcluster</span> is installed.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span> must be restarted on all nodes where it is running.
+            </p></li></ul></div><p>
+
+       A restart of the LightDB server is <span class="emphasis"><em>not</em></span> required
+       for this release (unless upgrading from ltcluster 3.x).
+    </p><p>
+       See <a class="xref" href="upgrading-ltcluster-extension.html" title="10.1. Upgrading ltcluster 4.x and later">Upgrading ltcluster 4.x and later</a> for more details.
+    </p><p>
+      Configuration changes are backwards-compatible and no changes to
+      <code class="filename">ltcluster.conf</code> are required. However users should
+      review the changes listed below.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        <span class="emphasis"><em>Repository changes</em></span>
+      </p><p>
+        Coinciding with this release, the Hundsun LightDB repository structure has changed.
+        See section <a class="xref" href="installation-packages.html" title="2.2. Installing ltcluster from packages">Installing from packages</a> for details, particularly
+        if you are using a RPM-based system.
+      </p></div><div class="sect2" id="id-1.7.13.8"><div class="titlepage"><div><div><h3 class="title">A.9.1. Configuration file changes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Default for <a class="xref" href="configuration-file-log-settings.html#LTCLUSTER-CONF-LOG-LEVEL">log_level</a> is now <code class="option">INFO</code>.
+              This produces additional informative log output, without creating excessive additional
+              log file volume, and matches the setting assumed for examples in the documentation.
+              (GitHub #470).
+            </p></li><li class="listitem"><p>
+              <code class="varname">recovery_min_apply_delay</code> now accepts a minimum value
+              of <code class="literal">zero</code> (GitHub #448).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.13.9"><div class="titlepage"><div><div><h3 class="title">A.9.2. ltcluster enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <span class="application">ltcluster</span>: always exit with an error if an unrecognised
+              command line option is provided. This matches the behaviour of other LightDB
+              utilities such as <span class="application">ltsql</span>. (GitHub #464).
+            </p></li><li class="listitem"><p>
+              <span class="application">ltcluster</span>: add <code class="option">-q/--quiet</code> option to suppress non-error
+              output. (GitHub #468).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show">ltcluster cluster show</a></code>,
+              <code class="command"><a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a></code> and
+              <code class="command"><a class="link" href="ltcluster-node-status.html" title="ltcluster node status">ltcluster node status</a></code>
+              return non-zero exit code if node status issues detected. (GitHub #456).
+            </p></li><li class="listitem"><p>
+              Add <code class="option">--csv</code> output option for
+              <code class="command"><a class="link" href="ltcluster-cluster-event.html" title="ltcluster cluster event">ltcluster cluster event</a></code>.
+              (GitHub #471).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-witness-unregister.html" title="ltcluster witness unregister">ltcluster witness unregister</a></code>
+              can be run on any node, by providing the ID of the witness node with <code class="option">--node-id</code>.
+              (GitHub #472).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">ltcluster standby switchover</a></code>
+              will refuse to run if an exclusive backup is taking place on the current primary.
+              (GitHub #476).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.13.10"><div class="titlepage"><div><div><h3 class="title">A.9.3. ltclusterd enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: create a PID file by default
+              (GitHub #457). For details, see <a class="xref" href="ltclusterd-daemon.html#LTCLUSTERD-PID-FILE" title="13.2.1. ltclusterd's PID file">ltclusterd's PID file</a>.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: daemonize process by default.
+              In case, for whatever reason, the user does not wish to daemonize the
+              process, provide <code class="option">--daemonize=false</code>.
+              (GitHub #458).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.13.11"><div class="titlepage"><div><div><h3 class="title">A.9.4. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register --wait-sync</a></code>:
+              fix behaviour when no timeout provided.
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup">ltcluster cluster cleanup</a></code>:
+              add missing help options. (GitHub #461/#462).
+            </p></li><li class="listitem"><p>
+              Ensure witness node follows new primary after switchover. (GitHub #453).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a></code> and
+              <code class="command"><a class="link" href="ltcluster-node-status.html" title="ltcluster node status">ltcluster node status</a></code>:
+              fix witness node handling. (GitHub #451).
+            </p></li><li class="listitem"><p>
+              When using <code class="command"><a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a></code>
+              with <code class="option">--recovery-conf-only</code> and replication slots, ensure
+              <code class="varname">primary_slot_name</code> is set correctly. (GitHub #474).
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-4.1.1.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.0.6.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.8. Release 4.1.1 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.10. Release 4.0.6</td></tr></table></div></body></html>

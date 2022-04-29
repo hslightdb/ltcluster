@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.2. LightDB configuration</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-prerequisites.html" title="3.1. Prerequisites for setting up a basic replication cluster with ltcluster" /><link rel="next" href="quickstart-ltcluster-user-database.html" title="3.3. Create the ltcluster user and database" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.2. LightDB configuration</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-prerequisites.html" title="3.1. Prerequisites for setting up a basic replication cluster with ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-ltcluster-user-database.html" title="3.3. Create the ltcluster user and database">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-LIGHTDB-CONFIGURATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.2. LightDB configuration</h2></div></div></div><p>
+    On the primary server, a LightDB instance must be initialised and running.
+    The following replication settings may need to be adjusted:
+   </p><pre class="programlisting">
+
+    # Enable replication connections; set this value to at least one more
+    # than the number of standbys which will connect to this server
+    # (note that ltcluster will execute "lt_basebackup" in WAL streaming mode,
+    # which requires two free WAL senders).
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-MAX-WAL-SENDERS
+
+    max_wal_senders = 10
+
+    # If using replication slots, set this value to at least one more
+    # than the number of standbys which will connect to this server.
+    # Note that ltcluster will only make use of replication slots if
+    # "use_replication_slots" is set to "true" in "ltcluster.conf".
+    # (If you are not intending to use replication slots, this value
+    # can be set to "0").
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-MAX-REPLICATION-SLOTS
+
+    max_replication_slots = 10
+
+    # Ensure WAL files contain enough information to enable read-only queries
+    # on the standby.
+    #
+    #  LightDB 9.5 and earlier: one of 'hot_standby' or 'logical'
+    #  LightDB 9.6 and later: one of 'replica' or 'logical'
+    #    ('hot_standby' will still be accepted as an alias for 'replica')
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-WAL-LEVEL
+
+    wal_level = 'hot_standby'
+
+    # Enable read-only queries on a standby
+    # (Note: this will be ignored on a primary but we recommend including
+    # it anyway, in case the primary later becomes a standby)
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-HOT-STANDBY
+
+    hot_standby = on
+
+    # Enable WAL file archiving
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-ARCHIVE-MODE
+
+    archive_mode = on
+
+    # Set archive command to a dummy command; this can later be changed without
+    # needing to restart the LightDB instance.
+    #
+    # See: https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-ARCHIVE-COMMAND
+
+    archive_command = '/bin/true'
+   </pre><div class="tip"><h3 class="title">Tip</h3><p>
+      Rather than editing these settings in the default <code class="filename">postgresql.conf</code>
+      file, create a separate file such as <code class="filename">postgresql.replication.conf</code> and
+      include it from the end of the main configuration file with:
+     <code class="command">include 'postgresql.replication.conf'</code>.
+    </p></div><p>
+     Additionally, if you are intending to use <span class="application">lt_rewind</span>,
+     and the cluster was not initialised using data checksums, you may want to consider enabling
+     <code class="varname">wal_log_hints</code>; for more details see <a class="xref" href="ltcluster-node-rejoin.html#LTCLUSTER-NODE-REJOIN-PG-REWIND" title="Using lt_rewind">Using lt_rewind</a>.
+   </p><p>
+      See also the <a class="link" href="configuration-prerequisites.html#CONFIGURATION-LIGHTDB" title="4.1.1. LightDB configuration for ltcluster">LightDB configuration</a> section in the
+      <a class="link" href="configuration.html" title="Chapter 4. ltcluster configuration">ltcluster configuration guide</a>.
+    </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-prerequisites.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-ltcluster-user-database.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.1. Prerequisites for setting up a basic replication cluster with <span class="productname">ltcluster</span> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.3. Create the ltcluster user and database</td></tr></table></div></body></html>

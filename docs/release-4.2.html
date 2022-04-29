@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.7. Release 4.2</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-4.3.html" title="A.6. Release 4.3" /><link rel="next" href="release-4.1.1.html" title="A.8. Release 4.1.1" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.7. Release 4.2</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-4.3.html" title="A.6. Release 4.3">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.1.1.html" title="A.8. Release 4.1.1">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.2"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.7. Release 4.2</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.2.html#id-1.7.11.6">A.7.1. Configuration file changes</a></span></dt><dt><span class="sect2"><a href="release-4.2.html#id-1.7.11.7">A.7.2. ltcluster enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.2.html#id-1.7.11.8">A.7.3. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.2.html#id-1.7.11.9">A.7.4. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Wed October 24, 2018</em></span></p><p>
+      <span class="productname">ltcluster</span> 4.2 is a major release, with the main new feature being the
+      ability to <a class="link" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pause ltclusterd</a>, e.g. during planned maintenance
+      operations. Various other usability enhancements and a couple of bug fixes are also included;
+      see notes below for details.
+    </p><p>
+      A restart of the LightDB server <span class="emphasis"><em>is</em></span> required
+      for this release. For detailed upgrade instructions, see
+      <a class="link" href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION" title="10.1.2. Upgrading a major version release">Upgrading a major version release</a>.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        On Debian-based systems, including Ubuntu, if using <span class="productname">ltclusterd</span>
+        please ensure that the in the file <code class="filename">/etc/init.d/ltclusterd</code>, the parameter
+        <code class="varname">LTCLUSTERD_OPTS</code> contains "<code class="literal">--daemonize=false</code>", e.g.:
+        </p><pre class="programlisting">
+# additional options
+LTCLUSTERD_OPTS="--daemonize=false"</pre><p>
+      </p><p>
+        For further details, see <a class="link" href="ltclusterd-daemon.html#LTCLUSTERD-CONFIGURATION-DEBIAN-UBUNTU" title="13.2.2. ltclusterd daemon configuration on Debian/Ubuntu">ltclusterd daemon configuration on Debian/Ubuntu</a>.
+      </p></div><div class="sect2" id="id-1.7.11.6"><div class="titlepage"><div><div><h3 class="title">A.7.1. Configuration file changes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              New parameter <code class="varname">shutdown_check_timeout</code> (default: 60 seconds) added;
+              this provides an explicit timeout for
+              <code class="command"><a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">ltcluster standby switchover</a></code>
+              to check that the demotion candidate (current primary) has shut down. Previously, the parameters
+              <code class="literal">reconnect_attempts</code> and <code class="literal">reconnect_interval</code>
+              were used to calculate a timeout, but these are actually
+              intended for primary failure detection. (GitHub #504).
+            </p></li></ul></div><p>
+
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              New parameter <code class="varname">ltcluster_bindir</code> added, to facilitate remote invocation of ltcluster
+              when the ltcluster binary is located somewhere other than the LightDB binary directory, as it
+              cannot be assumed all package maintainers will install <span class="productname">ltcluster</span> there.
+            </p><p>
+              This parameter is optional; if not set (the default), <span class="productname">ltcluster</span> will fall back
+              to <code class="option">pg_bindir</code> (if set).
+            </p><p>
+              (GitHub #246).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.11.7"><div class="titlepage"><div><div><h3 class="title">A.7.2. ltcluster enhancements</h3></div></div></div><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup">ltcluster cluster cleanup</a></code>
+              now accepts the <code class="option">--node-id</code> option to delete records for only one
+              node. (GitHub #493).
+            </p></li><li class="listitem"><p>
+              When running
+              <code class="command"><a class="link" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix">ltcluster cluster matrix</a></code> and
+              <code class="command"><a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a></code>,
+              <span class="productname">ltcluster</span> will report nodes unreachable via SSH, and emit return code <code class="literal">ERR_BAD_SSH</code>.
+              (GitHub #246).
+            </p><div class="note"><h3 class="title">Note</h3><p>
+                Users relying on
+                <code class="command"><a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a></code>
+                to return a non-zero return code as a way of detecting connectivity errors should be aware
+                that <code class="literal">ERR_BAD_SSH</code> will be returned if there is an SSH connection error
+                from the node where the command is executed, even if the command is able to establish
+                that LightDB connectivity is fine. Therefore the exact return code should be checked
+                to determine what kind of connectivity error has been detected.
+              </p></div></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.11.8"><div class="titlepage"><div><div><h3 class="title">A.7.3. ltclusterd enhancements</h3></div></div></div><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <span class="productname">ltclusterd</span> can now be "paused", i.e. instructed
+              not to take any action such as a failover, even if the prerequisites for such an
+              action are detected.
+            </p><p>
+              This removes the need to stop <span class="productname">ltclusterd</span> on all nodes when
+              performing a planned operation such as a switchover.
+            </p><p>
+              For further details, see <a class="link" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">Pausing ltclusterd</a>.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.11.9"><div class="titlepage"><div><div><h3 class="title">A.7.4. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: fix "Missing replication slots" label in
+              <code class="command"><a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a></code>.  (GitHub #507)
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: fix parsing of <code class="option">-d/--daemonize</code> option.
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-4.3.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.1.1.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.6. Release 4.3 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.8. Release 4.1.1</td></tr></table></div></body></html>

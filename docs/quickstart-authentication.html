@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.4. Configuring authentication in pg_hba.conf</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-ltcluster-user-database.html" title="3.3. Create the ltcluster user and database" /><link rel="next" href="quickstart-standby-preparation.html" title="3.5. Preparing the standby" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.4. Configuring authentication in pg_hba.conf</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-ltcluster-user-database.html" title="3.3. Create the ltcluster user and database">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart-standby-preparation.html" title="3.5. Preparing the standby">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-AUTHENTICATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.4. Configuring authentication in pg_hba.conf</h2></div></div></div><p>
+   Ensure the <code class="literal">ltcluster</code> user has appropriate permissions in <code class="filename">pg_hba.conf</code> and
+   can connect in replication mode; <code class="filename">pg_hba.conf</code> should contain entries
+   similar to the following:
+  </p><pre class="programlisting">
+    local   replication   ltcluster                              trust
+    host    replication   ltcluster      127.0.0.1/32            trust
+    host    replication   ltcluster      192.168.1.0/24          trust
+
+    local   ltcluster        ltcluster                              trust
+    host    ltcluster        ltcluster      127.0.0.1/32            trust
+    host    ltcluster        ltcluster      192.168.1.0/24          trust
+  </pre><p>
+   Note that these are simple settings for testing purposes.
+   Adjust according to your network environment and authentication requirements.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-ltcluster-user-database.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart-standby-preparation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.3. Create the ltcluster user and database </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 3.5. Preparing the standby</td></tr></table></div></body></html>

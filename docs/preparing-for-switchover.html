@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>8.1. Preparing for switchover</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster" /><link rel="next" href="switchover-execution.html" title="8.2. Executing the switchover command" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">8.1. Preparing for switchover</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Up</a></td><th width="60%" align="center">Chapter 8. Performing a switchover with ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="switchover-execution.html" title="8.2. Executing the switchover command">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="PREPARING-FOR-SWITCHOVER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">8.1. Preparing for switchover</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="preparing-for-switchover.html#SWITCHOVER-PG-REWIND">8.1.1. Switchover and postgresql.confrewind</a></span></dt></dl></div><a id="id-1.4.6.7.2" class="indexterm"></a><p>
+    As mentioned in the previous section, success of the switchover operation depends on
+    <span class="productname">ltcluster</span> being able to shut down the current primary server quickly and cleanly.
+   </p><p>
+     Ensure that the promotion candidate has sufficient free walsenders available
+     (LightDB configuration item <code class="varname">max_wal_senders</code>), and if replication
+     slots are in use, at least one free slot is available for the demotion candidate (
+     LightDB configuration item <code class="varname">max_replication_slots</code>).
+   </p><p>
+     Ensure that a passwordless SSH connection is possible from the promotion candidate
+     (standby) to the demotion candidate (current primary). If <code class="literal">--siblings-follow</code>
+     will be used, ensure that passwordless SSH connections are possible from the
+     promotion candidate to all nodes attached to the demotion candidate
+     (including the witness server, if in use).
+   </p><div class="note"><h3 class="title">Note</h3><p>
+       <span class="productname">ltcluster</span> expects to find the <span class="productname">ltcluster</span> binary in the same path on the remote
+       server as on the local server.
+     </p></div><p>
+    Double-check which commands will be used to stop/start/restart the current
+    primary; this can be done by e.g. executing <code class="command"><a class="link" href="ltcluster-node-service.html" title="ltcluster node service">ltcluster node service</a></code>
+    on the current primary:
+    </p><pre class="programlisting">
+     ltcluster -f /etc/ltcluster.conf node service --list-actions --action=stop
+     ltcluster -f /etc/ltcluster.conf node service --list-actions --action=start
+     ltcluster -f /etc/ltcluster.conf node service --list-actions --action=restart</pre><p>
+
+   </p><p>
+     These commands can be defined in <code class="filename">ltcluster.conf</code> with
+     <code class="option">service_start_command</code>, <code class="option">service_stop_command</code>
+     and <code class="option">service_restart_command</code>.
+   </p><div class="important"><h3 class="title">Important</h3><p>
+       If <span class="productname">ltcluster</span> is installed from a package. you should set these commands
+       to use the appropriate service commands defined by the package/operating
+       system as these will ensure LightDB is stopped/started properly
+       taking into account configuration and log file locations etc.
+     </p><p>
+       If the <code class="option">service_*_command</code> options aren't defined, <span class="productname">ltcluster</span> will
+       fall back to using <span class="application">postgresql.confctl</span> to stop/start/restart
+       LightDB, which may not work properly, particularly when executed on a remote
+       server.
+     </p><p>
+       For more details, see <a class="xref" href="configuration-file-service-commands.html" title="4.6. Service command settings">service command settings</a>.
+     </p></div><div class="note"><h3 class="title">Note</h3><p>
+     On <code class="literal">systemd</code> systems we strongly recommend using the appropriate
+     <code class="command">systemctl</code> commands (typically run via <code class="command">sudo</code>) to ensure
+     <code class="literal">systemd</code> is informed about the status of the LightDB service.
+    </p><p>
+     If using <code class="command">sudo</code> for the <code class="command">systemctl</code> calls, make sure the
+     <code class="command">sudo</code> specification doesn't require a real tty for the user. If not set
+     this way, <code class="command">ltcluster</code> will fail to stop the primary.
+    </p></div><p>
+     Check that access from applications is minimalized or preferably blocked
+     completely, so applications are not unexpectedly interrupted.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+       If an exclusive backup is running on the current primary, or if WAL replay is paused on the standby,
+       <span class="productname">ltcluster</span> will <span class="emphasis"><em>not</em></span> perform the switchover.
+     </p></div><p>
+     Check there is no significant replication lag on standbys attached to the
+     current primary.
+   </p><p>
+    If WAL file archiving is set up, check that there is no backlog of files waiting
+    to be archived, as LightDB will not finally shut down until all of these have been
+    archived. If there is a backlog exceeding <code class="varname">archive_ready_warning</code> WAL files,
+    <span class="productname">ltcluster</span> will emit a warning before attempting to perform a switchover; you can also check
+    manually with <code class="command">ltcluster node check --archive-ready</code>.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+        From <a class="link" href="release-4.2.html" title="A.7. Release 4.2">ltcluster 4.2</a>, <span class="productname">ltcluster</span> will instruct any running
+        <span class="productname">ltclusterd</span> instances to pause operations while the switchover
+        is being carried out, to prevent <span class="productname">ltclusterd</span> from
+        unintentionally promoting a node. For more details, see <a class="xref" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pausing the ltclusterd service</a>.
+      </p><p>
+        Users of <span class="productname">ltcluster</span> versions prior to 4.2 should ensure that <span class="productname">ltclusterd</span>
+        is not running on any nodes while a switchover is being executed.
+      </p></div><p>
+    Finally, consider executing <code class="command">ltcluster standby switchover</code> with the
+    <code class="literal">--dry-run</code> option; this will perform any necessary checks and inform you about
+    success/failure, and stop before the first actual command is run (which would be the shutdown of the
+    current primary). Example output:
+    </p><pre class="programlisting">
+      $ ltcluster standby switchover -f /etc/ltcluster.conf --siblings-follow --dry-run
+      NOTICE: checking switchover on node "node2" (ID: 2) in --dry-run mode
+      INFO: SSH connection to host "node1" succeeded
+      INFO: archive mode is "off"
+      INFO: replication lag on this standby is 0 seconds
+      INFO: all sibling nodes are reachable via SSH
+      NOTICE: local node "node2" (ID: 2) will be promoted to primary; current primary "node1" (ID: 1) will be demoted to standby
+      INFO: following shutdown command would be run on node "node1":
+        "postgresql.confctl -l /var/log/lightdb/startup.log -D '/var/lib/lightdb/data' -m fast -W stop"
+      INFO: parameter "shutdown_check_timeout" is set to 60 seconds
+    </pre><p>
+   </p><div class="important"><h3 class="title">Important</h3><p>
+       Be aware that <code class="option">--dry-run</code> checks the prerequisites
+       for performing the switchover and some basic sanity checks on the
+       state of the database which might effect the switchover operation
+       (e.g. replication lag); it cannot however guarantee the switchover
+       operation will succeed. In particular, if the current primary
+       does not shut down cleanly, <span class="productname">ltcluster</span> will not be able to reliably
+       execute the switchover (as there would be a danger of divergence
+       between the former and new primary nodes).
+     </p></div><div class="note"><h3 class="title">Note</h3><p>
+       See <a class="xref" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><span class="refentrytitle">ltcluster standby switchover</span></a> for a full list of available
+       command line options and <code class="filename">ltcluster.conf</code> settings relevant
+       to performing a switchover.
+     </p></div><div class="sect2" id="SWITCHOVER-PG-REWIND"><div class="titlepage"><div><div><h3 class="title">8.1.1. Switchover and postgresql.confrewind</h3></div></div></div><a id="id-1.4.6.7.19.2" class="indexterm"></a><p>
+      If the demotion candidate does not shut down smoothly or cleanly, there's a risk it
+      will have a slightly divergent timeline and will not be able to attach to the new
+      primary. To fix this situation without needing to reclone the old primary, it's
+      possible to use the <span class="application">postgresql.confrewind</span> utility, which will usually be
+      able to resync the two servers.
+    </p><p>
+      To have <span class="productname">ltcluster</span> execute <span class="application">postgresql.confrewind</span> if it detects this
+      situation after promoting the new primary, add the <code class="option">--force-rewind</code>
+      option.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If <span class="productname">ltcluster</span> detects a situation where it needs to execute <span class="application">postgresql.confrewind</span>,
+        it will execute a <code class="literal">CHECKPOINT</code> on the new primary before executing
+        <span class="application">postgresql.confrewind</span>.
+      </p></div><p>
+      For more details on <span class="application">postgresql.confrewind</span>, see:
+      <a class="ulink" href="https://www.hs.net/lightdb/docs/current/app-pgrewind.html" target="_top">https://www.hs.net/lightdb/docs/current/app-pgrewind.html</a>.
+    </p><p>
+      <span class="application">postgresql.confrewind</span> has been part of the core LightDB distribution since
+      version 9.5. Users of LightDB 9.4 will need to manually install it; the source code is available here:
+      <a class="ulink" href="https://github.com/vmware/postgresql.confrewind" target="_top">https://github.com/vmware/pg_rewind</a>.
+      If the <span class="application">lt_rewind</span>
+      binary is not installed in the LightDB <code class="filename">bin</code> directory, provide
+      its full path  on the demotion candidate  with <code class="option">--force-rewind</code>.
+    </p><p>
+      Note that building the 9.4 version of <span class="application">lt_rewind</span> requires the LightDB
+      source code.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="performing-switchover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="performing-switchover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="switchover-execution.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 8. Performing a switchover with ltcluster </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 8.2. Executing the switchover command</td></tr></table></div></body></html>

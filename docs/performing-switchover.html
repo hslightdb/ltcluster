@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 8. Performing a switchover with ltcluster</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="follow-new-primary.html" title="Chapter 7. Following a new primary" /><link rel="next" href="preparing-for-switchover.html" title="8.1. Preparing for switchover" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">Chapter 8. Performing a switchover with ltcluster</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="follow-new-primary.html" title="Chapter 7. Following a new primary">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-administration-manual.html" title="Part II. ltcluster administration manual">Up</a></td><th width="60%" align="center">Part II. ltcluster administration manual</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="preparing-for-switchover.html" title="8.1. Preparing for switchover">Next</a></td></tr></table><hr></hr></div><div class="chapter" id="PERFORMING-SWITCHOVER"><div class="titlepage"><div><div><h2 class="title">Chapter 8. Performing a switchover with ltcluster</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="preparing-for-switchover.html">8.1. Preparing for switchover</a></span></dt><dd><dl><dt><span class="sect2"><a href="preparing-for-switchover.html#SWITCHOVER-PG-REWIND">8.1.1. Switchover and postgresql.confrewind</a></span></dt></dl></dd><dt><span class="sect1"><a href="switchover-execution.html">8.2. Executing the switchover command</a></span></dt><dt><span class="sect1"><a href="switchover-caveats.html">8.3. Caveats</a></span></dt><dt><span class="sect1"><a href="switchover-troubleshooting.html">8.4. Troubleshooting switchover issues</a></span></dt><dd><dl><dt><span class="sect2"><a href="switchover-troubleshooting.html#SWITCHOVER-TROUBLESHOOTING-PRIMARY-SHUTDOWN">8.4.1. Demotion candidate (old primary) does not shut down</a></span></dt><dt><span class="sect2"><a href="switchover-troubleshooting.html#SWITCHOVER-TROUBLESHOOTING-EXCLUSIVE-BACKUP">8.4.2. Switchover aborts with an "exclusive backup" error</a></span></dt></dl></dd></dl></div><a id="id-1.4.6.2" class="indexterm"></a><p>
+  A typical use-case for replication is a combination of primary and standby
+  server, with the standby serving as a backup which can easily be activated
+  in case of a problem with the primary. Such an unplanned failover would
+  normally be handled by promoting the standby, after which an appropriate
+  action must be taken to restore the old primary.
+ </p><p>
+  In some cases however it's desirable to promote the standby in a planned
+  way, e.g. so maintenance can be performed on the primary; this kind of switchover
+  is supported by the <a class="xref" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><span class="refentrytitle">ltcluster standby switchover</span></a> command.
+ </p><p>
+  <code class="command">ltcluster standby switchover</code> differs from other <span class="productname">ltcluster</span>
+  actions in that it also performs actions on other servers (the demotion
+  candidate, and optionally any other servers which are to follow the new primary),
+  which means passwordless SSH access is required to those servers from the one where
+  <code class="command">ltcluster standby switchover</code> is executed.
+ </p><div class="note"><h3 class="title">Note</h3><p>
+   <code class="command">ltcluster standby switchover</code> performs a relatively complex
+   series of operations on two servers, and should therefore be performed after
+   careful preparation and with adequate attention. In particular you should
+   be confident that your network environment is stable and reliable.
+  </p><p>
+   Additionally you should be sure that the current primary can be shut down
+   quickly and cleanly. In particular, access from applications should be
+   minimalized or preferably blocked completely. Also be aware that if there
+   is a backlog of files waiting to be archived, LightDB will not shut
+   down until archiving completes.
+  </p><p>
+    We recommend running <code class="command">ltcluster standby switchover</code> at the
+    most verbose logging level (<code class="literal">--log-level=DEBUG --verbose</code>)
+    and capturing all output to assist troubleshooting any problems.
+  </p><p>
+   Please also read carefully the sections <a class="xref" href="preparing-for-switchover.html" title="8.1. Preparing for switchover">Preparing for switchover</a> and
+   <a class="xref" href="switchover-caveats.html" title="8.3. Caveats">Caveats</a> below.
+  </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="follow-new-primary.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-administration-manual.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="preparing-for-switchover.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 7. Following a new primary </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 8.1. Preparing for switchover</td></tr></table></div></body></html>

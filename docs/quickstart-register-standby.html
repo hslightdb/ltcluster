@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>3.10. Register the standby</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="quickstart-verify-replication.html" title="3.9. Verify replication is functioning" /><link rel="next" href="ltcluster-administration-manual.html" title="Part II. ltcluster administration manual" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">3.10. Register the standby</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="quickstart-verify-replication.html" title="3.9. Verify replication is functioning">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="quickstart.html" title="Chapter 3. Quick-start guide">Up</a></td><th width="60%" align="center">Chapter 3. Quick-start guide</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-administration-manual.html" title="Part II. ltcluster administration manual">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="QUICKSTART-REGISTER-STANDBY"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.10. Register the standby</h2></div></div></div><p>
+    Register the standby server with:
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf standby register
+    NOTICE: standby node "node2" (ID: 2) successfully registered</pre><p>
+  </p><p>
+    Check the node is registered by executing <code class="command">ltcluster cluster show</code> on the standby:
+    </p><pre class="programlisting">
+      $ ltcluster -f /etc/ltcluster.conf cluster show
+
+     ID | Name  | Role    | Status    | Upstream | Location | Priority | Timeline | Connection string
+    ----+-------+---------+-----------+----------+----------+----------+----------+--------------------------------------
+     1  | node1 | primary | * running |          | default  | 100      | 1        | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby |   running | node1    | default  | 100      | 1        | host=node2 dbname=ltcluster user=ltcluster</pre><p>
+  </p><p>
+   Both nodes are now registered with <span class="productname">ltcluster</span> and the records have been copied to the standby server.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="quickstart-verify-replication.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="quickstart.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-administration-manual.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.9. Verify replication is functioning </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Part II. ltcluster administration manual</td></tr></table></div></body></html>

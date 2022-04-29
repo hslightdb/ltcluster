@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.8. Release 4.1.1</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-4.2.html" title="A.7. Release 4.2" /><link rel="next" href="release-4.1.0.html" title="A.9. Release 4.1.0" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.8. Release 4.1.1</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-4.2.html" title="A.7. Release 4.2">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.1.0.html" title="A.9. Release 4.1.0">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.1.1"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.8. Release 4.1.1</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.1.1.html#id-1.7.12.5">A.8.1. ltcluster enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.1.1.html#id-1.7.12.6">A.8.2. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.1.1.html#id-1.7.12.7">A.8.3. Other</a></span></dt><dt><span class="sect2"><a href="release-4.1.1.html#id-1.7.12.8">A.8.4. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Wed September 5, 2018</em></span></p><p>
+      ltcluster 4.1.1 contains a number of usability enhancements and bug fixes.
+    </p><p>
+      We recommend upgrading to this version as soon as possible.
+      This release can be installed as a simple package upgrade from ltcluster 4.0 ~ 4.1.0;
+      <span class="productname">ltclusterd</span> (if running) should be restarted.
+      See <a class="xref" href="upgrading-ltcluster.html" title="Chapter 10. Upgrading ltcluster">Upgrading ltcluster</a> for more details.
+    </p><div class="sect2" id="id-1.7.12.5"><div class="titlepage"><div><div><h3 class="title">A.8.1. ltcluster enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">ltcluster standby switchover --dry-run</a></code>
+              no longer copies external configuration files to test they can be copied; this avoids making
+              any changes to the target system. (GitHub #491).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup">ltcluster cluster cleanup</a></code>:
+              add <code class="literal">cluster_cleanup</code> event. (GitHub #492).
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">ltcluster standby switchover</a></code>:
+              improve detection of free walsenders. (GitHub #495).
+            </p></li><li class="listitem"><p>
+              Improve messages emitted during
+              <code class="command"><a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote">ltcluster standby promote</a></code>.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.12.6"><div class="titlepage"><div><div><h3 class="title">A.8.2. ltclusterd enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Always reopen the log file after
+              receiving <code class="literal">SIGHUP</code>. Previously this only happened if
+              a configuration file change was detected.
+              (GitHub #485).
+            </p></li><li class="listitem"><p>
+              Report version number <span class="emphasis"><em>after</em></span>
+              logger initialisation. (GitHub #487).
+            </p></li><li class="listitem"><p>
+              Improve cascaded standby failover handling. (GitHub #480).
+            </p></li><li class="listitem"><p>
+              Improve reconnection handling after brief network outages; if
+              monitoring data being collected, this could lead to orphaned
+              sessions on the primary. (GitHub #480).
+            </p></li><li class="listitem"><p>
+              Check <code class="varname">promote_command</code> and <code class="varname">follow_command</code>
+              are defined when reloading configuration. These were checked on startup but
+              not reload by <span class="productname">ltclusterd</span>, which made it possible to
+              make <span class="productname">ltclusterd</span> with invalid values. It's unlikely
+              anyone would want to do this, but we should make it impossible anyway.
+              (GitHub #486).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.12.7"><div class="titlepage"><div><div><h3 class="title">A.8.3. Other</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Text of any failed queries will now be logged as <code class="literal">ERROR</code> to assist
+              logfile analysis at log levels higher than <code class="literal">DEBUG</code>.
+              (GitHub #498).
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.12.8"><div class="titlepage"><div><div><h3 class="title">A.8.4. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a></code>:
+              remove new upstream's replication slot if it still exists on the rejoined
+              standby. (GitHub #499).
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: fix startup on witness node when local data is stale. (GitHub #488, #489).
+            </p></li><li class="listitem"><p>
+              Truncate version string reported by LightDB if necessary; some
+              distributions insert additional detail after the actual version.
+              (GitHub #490).
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-4.2.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.1.0.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.7. Release 4.2 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.9. Release 4.1.0</td></tr></table></div></body></html>

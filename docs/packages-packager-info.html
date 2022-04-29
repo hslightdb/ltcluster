@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>C.5. Information for packagers</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="packages-old-versions.html" title="C.4. Installing old package versions" /><link rel="next" href="appendix-support.html" title="Appendix D. ltcluster support" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">C.5. Information for packagers</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="packages-old-versions.html" title="C.4. Installing old package versions">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-packages.html" title="Appendix C. ltcluster package details">Up</a></td><th width="60%" align="center">Appendix C. <span xmlns="http://www.w3.org/1999/xhtml" class="productname">ltcluster</span> package details</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="appendix-support.html" title="Appendix D. ltcluster support">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="PACKAGES-PACKAGER-INFO"><div class="titlepage"><div><div><h2 class="title" style="clear: both">C.5. Information for packagers</h2></div></div></div><a id="id-1.9.8.2" class="indexterm"></a><p>
+      We recommend patching the following parameters when
+      building the package as built-in default values for user convenience.
+      These values can nevertheless be overridden by the user, if desired.
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+          Configuration file location: the default configuration file location
+          can be hard-coded by patching <code class="varname">package_conf_file</code>
+          in <code class="filename">configfile.c</code>:
+          </p><pre class="programlisting">
+		/* packagers: if feasible, patch configuration file path into "package_conf_file" */
+		char		package_conf_file[MAXPGPATH] = "";</pre><p>
+        </p><p>
+          See also: <a class="xref" href="configuration-file.html" title="4.2. Configuration file">configuration file</a>
+        </p></li><li class="listitem"><p>
+          PID file location: the default <span class="productname">ltclusterd</span> PID file
+          location can be hard-coded by patching <code class="varname">package_pid_file</code>
+          in <code class="filename">ltclusterd.c</code>:
+          </p><pre class="programlisting">
+		/* packagers: if feasible, patch PID file path into "package_pid_file" */
+		char		package_pid_file[MAXPGPATH] = "";</pre><p>
+        </p><p>
+          See also: <a class="xref" href="ltclusterd-daemon.html#LTCLUSTERD-PID-FILE" title="13.2.1. ltclusterd's PID file">ltclusterd's PID file</a>
+        </p></li></ul></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="packages-old-versions.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-packages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="appendix-support.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">C.4. Installing old package versions </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix D. <span class="productname">ltcluster</span> support</td></tr></table></div></body></html>

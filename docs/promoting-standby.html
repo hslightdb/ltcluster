@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 6. Promoting a standby server with ltcluster</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cloning-advanced.html" title="5.4. Advanced cloning options" /><link rel="next" href="follow-new-primary.html" title="Chapter 7. Following a new primary" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">Chapter 6. Promoting a standby server with ltcluster</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cloning-advanced.html" title="5.4. Advanced cloning options">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-administration-manual.html" title="Part II. ltcluster administration manual">Up</a></td><th width="60%" align="center">Part II. ltcluster administration manual</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="follow-new-primary.html" title="Chapter 7. Following a new primary">Next</a></td></tr></table><hr></hr></div><div class="chapter" id="PROMOTING-STANDBY"><div class="titlepage"><div><div><h2 class="title">Chapter 6. Promoting a standby server with ltcluster</h2></div></div></div><a id="id-1.4.4.2" class="indexterm"></a><p>
+   If a primary server fails or needs to be removed from the replication cluster,
+   a new primary server must be designated, to ensure the cluster continues
+   to function correctly. This can be done with <a class="xref" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><span class="refentrytitle">ltcluster standby promote</span></a>,
+   which promotes the standby on the current server to primary.
+ </p><p>
+  To demonstrate this, set up a replication cluster with a primary and two attached
+  standby servers so that the cluster looks like this:
+  </p><pre class="programlisting">
+     $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status    | Upstream | Location | Connection string
+    ----+-------+---------+-----------+----------+----------+--------------------------------------
+     1  | node1 | primary | * running |          | default  | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby |   running | node1    | default  | host=node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running | node1    | default  | host=node3 dbname=ltcluster user=ltcluster</pre><p>
+ </p><p>
+  Stop the current primary with e.g.:
+  </p><pre class="programlisting">
+   $ lt_ctl -D /var/lib/lightdb/data -m fast stop</pre><p>
+ </p><p>
+  At this point the replication cluster will be in a partially disabled state, with
+  both standbys accepting read-only connections while attempting to connect to the
+  stopped primary. Note that the <span class="productname">ltcluster</span> metadata table will not yet have been updated;
+  executing <a class="xref" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><span class="refentrytitle">ltcluster cluster show</span></a> will note the discrepancy:
+  </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status        | Upstream | Location | Connection string
+    ----+-------+---------+---------------+----------+----------+--------------------------------------
+     1  | node1 | primary | ? unreachable |          | default  | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby |   running     | node1    | default  | host=node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running     | node1    | default  | host=node3 dbname=ltcluster user=ltcluster
+
+    WARNING: following issues were detected
+    node "node1" (ID: 1) is registered as an active primary but is unreachable</pre><p>
+ </p><p>
+  Now promote the first standby with:
+  </p><pre class="programlisting">
+   $ ltcluster -f /etc/ltcluster.conf standby promote</pre><p>
+ </p><p>
+  This will produce output similar to the following:
+  </p><pre class="programlisting">
+    INFO: connecting to standby database
+    NOTICE: promoting standby
+    DETAIL: promoting server using "lt_ctl -l /var/log/lightdb/startup.log -w -D '/var/lib/lightdb/data' promote"
+    server promoting
+    INFO: reconnecting to promoted server
+    NOTICE: STANDBY PROMOTE successful
+    DETAIL: node 2 was successfully promoted to primary</pre><p>
+ </p><p>
+  Executing <a class="xref" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><span class="refentrytitle">ltcluster cluster show</span></a> will show the current state; as there is now an
+  active primary, the previous warning will not be displayed:
+  </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status    | Upstream | Location | Connection string
+    ----+-------+---------+-----------+----------+----------+--------------------------------------
+     1  | node1 | primary | - failed  |          | default  | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | primary | * running |          | default  | host=node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running | node1    | default  | host=node3 dbname=ltcluster user=ltcluster</pre><p>
+ </p><p>
+  However the sole remaining standby (<code class="literal">node3</code>) is still trying to replicate from the failed
+  primary; <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a> must now be executed to rectify this situation
+  (see <a class="xref" href="follow-new-primary.html" title="Chapter 7. Following a new primary">Chapter 7</a> for example).
+ </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cloning-advanced.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-administration-manual.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="follow-new-primary.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.4. Advanced cloning options </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 7. Following a new primary</td></tr></table></div></body></html>

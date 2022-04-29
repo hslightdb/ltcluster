@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.6. Release 4.3</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-4.4.html" title="A.5. Release 4.4" /><link rel="next" href="release-4.2.html" title="A.7. Release 4.2" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.6. Release 4.3</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-4.4.html" title="A.5. Release 4.4">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.2.html" title="A.7. Release 4.2">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.3"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.6. Release 4.3</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.3.html#id-1.7.10.7">A.6.1. ltcluster client enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.3.html#id-1.7.10.8">A.6.2. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.3.html#id-1.7.10.9">A.6.3. Bug fixes</a></span></dt></dl></div><p><span class="emphasis"><em>Tue April 2, 2019</em></span></p><p>
+      <span class="productname">ltcluster</span> 4.3 is a major release.
+    </p><p>
+      For details on how to upgrade an existing <span class="productname">ltcluster</span> installation, see
+      documentation section <a class="link" href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION" title="10.1.2. Upgrading a major version release">Upgrading a major version release</a>.
+    </p><p>
+      If <span class="productname">ltclusterd</span> is in use, a LightDB restart <span class="emphasis"><em>is</em></span> required;
+      in that case we suggest combining this <span class="productname">ltcluster</span> upgrade with the next LightDB
+      minor release, which will require a LightDB restart in any case.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        On Debian-based systems, including Ubuntu, if using <span class="productname">ltclusterd</span>
+        please ensure that in the file <code class="filename">/etc/init.d/ltclusterd</code>, the parameter
+        <code class="varname">LTCLUSTERD_OPTS</code> contains "<code class="literal">--daemonize=false</code>", e.g.:
+        </p><pre class="programlisting">
+# additional options
+LTCLUSTERD_OPTS="--daemonize=false"</pre><p>
+      </p><p>
+        For further details, see <a class="link" href="ltclusterd-daemon.html#LTCLUSTERD-CONFIGURATION-DEBIAN-UBUNTU" title="13.2.2. ltclusterd daemon configuration on Debian/Ubuntu">ltclusterd configuration on Debian/Ubuntu</a>.
+      </p></div><div class="sect2" id="id-1.7.10.7"><div class="titlepage"><div><div><h3 class="title">A.6.1. ltcluster client enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>:
+              option <code class="option">--upstream-node-id</code> can now be used to specify another standby
+              to follow.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>:
+              verify that it is actually possible to follow another node.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><code class="command">ltcluster node rejoin</code></a>:
+              verify that it is actually possible to attach the node to the current primary.
+            </p></li><li class="listitem"><p>
+              New commands <a class="link" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><code class="command">ltcluster daemon start</code></a> and
+              <a class="link" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><code class="command">ltcluster daemon stop</code></a>:
+              these provide a standardized way of starting and stopping <span class="productname">ltclusterd</span>.
+              GitHub #528.
+            </p><div class="note"><h3 class="title">Note</h3><p>
+                These commands require the configuration file settings
+                <code class="varname">ltclusterd_service_start_command</code> and <code class="varname">ltclusterd_service_stop_command</code>
+                in <code class="filename">ltcluster.conf</code> to be set.
+              </p></div></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster daemon status</code></a>
+              additionally displays the node priority and the interval (in seconds) since the
+              <span class="productname">ltclusterd</span> instance last verified its upstream node was available.
+            </p></li><li class="listitem"><p>
+              Add <code class="option">--compact</code> option to <code class="command"><a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show">ltcluster cluster show</a></code> (GitHub #521).
+            </p><p>
+              This makes it easier to copy the output into emails, chats etc. as a compact table.
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show">ltcluster cluster show</a></code>:
+          differentiate between unreachable nodes and nodes which are running but rejecting connections.
+            </p><p>
+          This makes it possible to see whether a node is unreachable at network level,
+          or if it is running but rejecting connections for some reason.
+            </p></li><li class="listitem"><p>
+              Add <code class="option">--dry-run</code> to <code class="command"><a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote">ltcluster standby promote</a></code> (GitHub #522).
+            </p></li><li class="listitem"><p>
+              <code class="command">ltcluster --version-number</code> outputs the "raw"
+              ltcluster version number (e.g. <code class="literal">40300</code>). This is intended
+              for use by scripts etc. requiring an easily parseable representation
+              of the <span class="productname">ltcluster</span> version.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check"><code class="command">ltcluster node check --data-directory-config</code></a>
+              option added; this is to confirm <span class="productname">ltcluster</span> is correctly configured. GitHub #523.
+            </p></li><li class="listitem"><p>
+              Add check to <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>
+              to ensure the data directory on the demotion candidate is configured correctly in <code class="filename">ltcluster.conf</code>.
+              This is to ensure that <span class="productname">ltcluster</span>, when remotely executed on the demotion candidate, can correctly verify
+              that LightDB on the demotion candidate was shut down cleanly. GitHub #523.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.10.8"><div class="titlepage"><div><div><h3 class="title">A.6.2. ltclusterd enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <span class="productname">ltclusterd</span> will no longer consider nodes where <span class="productname">ltclusterd</span>
+              is not running as promotion candidates.
+            </p><p>
+              Previously, if <span class="productname">ltclusterd</span> was not running on a node, but
+              that node qualified as the promotion candidate, it would never be promoted due to
+              the absence of a running <span class="productname">ltclusterd</span>.
+            </p></li><li class="listitem"><p>
+              Add option <code class="option">connection_check_type</code> to enable selection of the method
+              <span class="productname">ltclusterd</span> uses to determine whether the upstream node is available.
+            </p><p>
+              Possible values are <code class="literal">ping</code> (default; uses <code class="command">PQping()</code> to
+              determine server availability), <code class="literal">connection</code> (attempst to make a new connection to
+              the upstream node), and <code class="literal">query</code> (determines server availability
+              by executing an SQL statement on the node via the existing connection).
+            </p></li><li class="listitem"><p>
+              New configuration option <a class="link" href="ltclusterd-failover-validation.html" title="12.5. Failover validation"><code class="option">failover_validation_command</code></a>
+              to allow an external mechanism to validate the failover decision made by <span class="productname">ltclusterd</span>.
+            </p></li><li class="listitem"><p>
+              New configuration option <a class="link" href="ltclusterd-standby-disconnection-on-failover.html" title="12.4. Standby disconnection on failover"><code class="option">standby_disconnect_on_failover</code></a>
+              to force standbys to disconnect their WAL receivers before making a failover decision.
+            </p></li><li class="listitem"><p>
+              In a failover situation, <span class="productname">ltclusterd</span> will not attempt to promote a
+              node if another primary has already appeared (e.g. by being promoted manually).
+              GitHub #420.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.10.9"><div class="titlepage"><div><div><h3 class="title">A.6.3. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show">ltcluster cluster show</a></code>:
+              fix display of node IDs with multiple digits.
+            </p></li><li class="listitem"><p>
+              ensure <code class="command"><a class="link" href="ltcluster-primary-unregister.html" title="ltcluster primary unregister">ltcluster primary unregister</a></code>
+              behaves correctly when executed on a witness server. GitHub #548.
+            </p></li><li class="listitem"><p>
+              ensure <code class="command"><a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register</a></code>
+              fails when <code class="option">--upstream-node-id</code> is the same as the local node ID.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>,
+              recheck primary/upstream connection(s) after the data copy operation is complete, as these may
+              have gone away.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <code class="command"><a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">ltcluster standby switchover</a></code>,
+              prevent escaping issues with connection URIs when executing <code class="command"><a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a></code>
+              on the demotion candidate. GitHub #525.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+              verify the standby (promotion candidate) is currently attached to the primary (demotion candidate). GitHub #519.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+              avoid a potential race condition when comparing received WAL on the standby to the primary's shutdown location,
+              as the standby's walreceiver may not have yet flushed all received WAL to disk. GitHub #518.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <code class="command"><a class="link" href="ltcluster-witness-register.html" title="ltcluster witness register">ltcluster witness register</a></code>,
+              check the node to connected is actually the primary (i.e. not the witness server).  GitHub #528.
+            </p></li><li class="listitem"><p>
+              <code class="command"><a class="link" href="ltcluster-node-check.html" title="ltcluster node check">ltcluster node check</a></code>
+              will only consider physical replication slots, as the purpose
+              of slot checks is to warn about potential issues with
+              streaming replication standbys which are no longer attached.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: on a cascaded standby, don't fail over if
+              <code class="literal">failover=manual</code>. GitHub #531.
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-4.4.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.2.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.5. Release 4.4 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.7. Release 4.2</td></tr></table></div></body></html>

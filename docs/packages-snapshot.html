@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>C.3. Snapshot packages</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="packages-debian-ubuntu.html" title="C.2. Debian/Ubuntu Packages" /><link rel="next" href="packages-old-versions.html" title="C.4. Installing old package versions" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">C.3. Snapshot packages</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="packages-debian-ubuntu.html" title="C.2. Debian/Ubuntu Packages">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-packages.html" title="Appendix C. ltcluster package details">Up</a></td><th width="60%" align="center">Appendix C. <span xmlns="http://www.w3.org/1999/xhtml" class="productname">ltcluster</span> package details</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="packages-old-versions.html" title="C.4. Installing old package versions">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="PACKAGES-SNAPSHOT"><div class="titlepage"><div><div><h2 class="title" style="clear: both">C.3. Snapshot packages</h2></div></div></div><a id="id-1.9.6.2" class="indexterm"></a><a id="id-1.9.6.3" class="indexterm"></a><p>
+      For testing new features and bug fixes, from time to time Hundsun LightDB provides
+      so-called "snapshot packages" via its public repository. These packages
+      are built from the <span class="productname">ltcluster</span> source at a particular point in time, and are not formal
+      releases.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        We do not recommend installing these packages in a production environment
+        unless specifically advised.
+      </p></div><p>
+      To install a snapshot package, it's necessary to install the Hundsun LightDB public snapshot repository,
+      following the instructions here: <a class="ulink" href="https://dl.2ndquadrant.com/default/release/site/" target="_top">https://dl.2ndquadrant.com/default/release/site/</a> but replace <code class="literal">release</code> with <code class="literal">snapshot</code>
+      in the appropriate URL.
+    </p><p>
+      For example, to install the snapshot RPM repository for lt_ 9.6, execute (as <code class="literal">root</code>):
+      </p><pre class="programlisting">
+curl https://dl.2ndquadrant.com/default/snapshot/get/9.6/rpm | bash</pre><p>
+
+      or as a normal user with root sudo access:
+      </p><pre class="programlisting">
+curl https://dl.2ndquadrant.com/default/snapshot/get/9.6/rpm | sudo bash</pre><p>
+    </p><p>
+      Alternatively you can browse the repository here:
+      <a class="ulink" href="https://dl.2ndquadrant.com/default/snapshot/browse/" target="_top">https://dl.2ndquadrant.com/default/snapshot/browse/</a>.
+    </p><p>
+      Once the repository is installed, installing or updating <span class="productname">ltcluster</span> will result in the latest snapshot
+      package being installed.
+    </p><p>
+      The package name will be formatted like this:
+      </p><pre class="programlisting">
+ltcluster96-4.1.1-0.0git320.g5113ab0.1.el7.x86_64.rpm</pre><p>
+      containg the snapshot build number (here: <code class="literal">320</code>) and the hash
+      of the <span class="application">git</span> commit it was built from (here: <code class="literal">g5113ab0</code>).
+    </p><p>
+      Note that the next formal release (in the above example <code class="literal">4.1.1</code>), once available,
+      will install in place of any snapshot builds.
+    </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="packages-debian-ubuntu.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-packages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="packages-old-versions.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">C.2. Debian/Ubuntu Packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> C.4. Installing old package versions</td></tr></table></div></body></html>

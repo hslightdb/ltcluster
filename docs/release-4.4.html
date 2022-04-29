@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>A.5. Release 4.4</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="release-5.0.html" title="A.4. Release 5.0" /><link rel="next" href="release-4.3.html" title="A.6. Release 4.3" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">A.5. Release 4.4</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-5.0.html" title="A.4. Release 5.0">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-release-notes.html" title="Appendix A. Release notes">Up</a></td><th width="60%" align="center">Appendix A. Release notes</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="release-4.3.html" title="A.6. Release 4.3">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-4.4"><div class="titlepage"><div><div><h2 class="title" style="clear: both">A.5. Release 4.4</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-4.4.html#id-1.7.9.7">A.5.1. ltcluster client enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.4.html#id-1.7.9.8">A.5.2. ltclusterd enhancements</a></span></dt><dt><span class="sect2"><a href="release-4.4.html#id-1.7.9.9">A.5.3. Bug fixes</a></span></dt><dt><span class="sect2"><a href="release-4.4.html#id-1.7.9.10">A.5.4. Other</a></span></dt></dl></div><p><span class="emphasis"><em>Thu 27 June, 2019</em></span></p><p>
+      <span class="productname">ltcluster</span> 4.4 is a major release.
+    </p><p>
+      For details on how to upgrade an existing <span class="productname">ltcluster</span> installation, see
+      documentation section <a class="link" href="upgrading-ltcluster-extension.html#UPGRADING-MAJOR-VERSION" title="10.1.2. Upgrading a major version release">Upgrading a major version release</a>.
+    </p><p>
+      If <span class="productname">ltclusterd</span> is in use, a LightDB restart <span class="emphasis"><em>is</em></span> required;
+      in that case we suggest combining this <span class="productname">ltcluster</span> upgrade with the next LightDB
+      minor release, which will require a LightDB restart in any case.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        On Debian-based systems, including Ubuntu, if using <span class="productname">ltclusterd</span>
+        please ensure that in the file <code class="filename">/etc/init.d/ltclusterd</code>, the parameter
+        <code class="varname">LTCLUSTERD_OPTS</code> contains "<code class="literal">--daemonize=false</code>", e.g.:
+        </p><pre class="programlisting">
+# additional options
+LTCLUSTERD_OPTS="--daemonize=false"</pre><p>
+      </p><p>
+        For further details, see <a class="link" href="ltclusterd-daemon.html#LTCLUSTERD-CONFIGURATION-DEBIAN-UBUNTU" title="13.2.2. ltclusterd daemon configuration on Debian/Ubuntu">ltclusterd configuration on Debian/Ubuntu</a>.
+      </p></div><div class="sect2" id="id-1.7.9.7"><div class="titlepage"><div><div><h3 class="title">A.5.1. ltcluster client enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>:
+              prevent a standby from being cloned from a witness server (LightDB 9.6 and later only).
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-witness-register.html" title="ltcluster witness register"><code class="command">ltcluster witness register</code></a>:
+              prevent a witness server from being registered on the replication cluster primary server
+              (LightDB 9.6 and later only).
+            </p><p>
+              Registering a witness on the primary node would defeat the purpose of having a witness server,
+              which is intended to remain running even if the cluster's primary goes down.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>:
+              note that an active, reachable cluster primary is required for this command;
+              and provide a more helpful error message if no reachable primary could be found.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+              if <code class="option">--siblings-follow</code> is not supplied, list all nodes which ltcluster considers
+              to be siblings (this will include the witness server, if in use), and
+              which will remain attached to the old primary.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+              ignore nodes which are unreachable and marked as inactive.
+              Previously it would abort if any node was unreachable,
+              as that means it was unable to check if ltclusterd is running.
+            </p><p>
+              However if the node has been marked as inactive in the ltcluster metadata, it's
+              reasonable to assume the node is no longer part of the replication cluster
+              and does not need to be checked.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>
+              and <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>:
+              when executing with the <code class="option">--dry-run</code> option, continue checks as far as possible
+              even if errors are encountered.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>:
+              add <code class="option">--siblings-follow</code> (similar to
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>).
+            </p><div class="note"><h3 class="title">Note</h3><p>
+                If using <span class="productname">ltclusterd</span>, when invoking
+                <code class="command">ltcluster standby promote</code> (either directly via
+                the <code class="option">promote_command</code>, or in a script called
+                via <code class="option">promote_command</code>), <code class="option">--siblings-follow</code>
+                <span class="emphasis"><em>must not</em></span> be included as a
+                command line option for <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>.
+              </p></div></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>:
+              add <code class="option">--ltclusterd-force-unpause</code> to unpause all <span class="productname">ltclusterd</span> instances after executing a switchover.
+              This will ensure that any <span class="productname">ltclusterd</span> instances which were paused before the switchover will be
+              unpaused.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster daemon status</code></a>:
+              make output similar to that of
+              <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>
+              for consistency and to make it easier to identify nodes not in the expected
+              state.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>:
+              display each node's timeline ID (LightDB 9.6 and later only).
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>
+              and <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster daemon status</code></a>:
+              show the upstream node name as reported by each individual node - this helps visualise
+              situations where the cluster is in an unexpected state, and provide a better idea of the
+              actual cluster state.
+            </p><p>
+              For example, if a cluster has divided somehow and a set of nodes are
+              following a new primary, when running either of these commands, <span class="productname">ltcluster</span>
+              will now show the name of the primary those nodes are actually
+              following, rather than the now outdated node name recorded
+              on the other side of the "split". A warning will also be issued
+              about the unexpected situation.
+            </p></li><li class="listitem"><p>
+              <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>
+              and <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster daemon status</code></a>:
+              check if a node is attached to its advertised upstream node, and issue a
+              warning if the node is not attached.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.9.8"><div class="titlepage"><div><div><h3 class="title">A.5.2. ltclusterd enhancements</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              On the primary node, <span class="productname">ltclusterd</span> is now able to monitor standby connections and,
+              if the number of nodes connected falls below a certain (configurable) value,
+              execute a custom script.
+            </p><p>
+              This provided an additional method for fencing an isolated primary node, and/or taking
+              other action if one or more standys become disconnected.
+            </p><p>
+              See section <a class="link" href="ltclusterd-primary-child-disconnection.html" title="12.7. Monitoring standby disconnections on the primary node">Monitoring standby disconnections on the primary node</a>
+              for more details.
+            </p></li><li class="listitem"><p>
+              In a failover situation, <span class="productname">ltclusterd</span> nodes on the standbys of the failed primary
+              are now able confirm among themselves that none can still see the primary
+              before continuing with the failover.
+            </p><p>
+              The <code class="filename">ltcluster.conf</code> option <code class="option">primary_visibility_consensus</code> must
+              be set to <code class="literal">true</code> to enable this functionality.
+            </p><p>
+              See section <a class="xref" href="ltclusterd-primary-visibility-consensus.html" title="12.3. Primary visibility consensus">Primary visibility consensus</a>
+              for more details.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.9.9"><div class="titlepage"><div><div><h3 class="title">A.5.3. Bug fixes</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              Ensure BDR2-specific functionality cannot be used on BDR3 and later.
+            </p><p>
+              The BDR support present in <span class="productname">ltcluster</span> is for specific BDR2 use cases.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>
+              in <code class="option">--dry-run</code> mode, ensure provision of the <code class="option">--force</code> option
+              does not result in an existing data directory being modified in any way.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-primary-register.html" title="ltcluster primary register"><code class="command">ltcluster primary register</code></a>
+              with the <code class="option">--force</code> option, if another primary record exists but the associated node is
+              unreachable (or running as a standby), set that node's record to inactive to enable the current node
+              to be registered as a primary.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><code class="command">ltcluster standby clone</code></a>
+              with the <code class="option">--upstream-conninfo</code>, ensure that <code class="varname">application_name</code>
+              is set correctly in <code class="varname">primary_conninfo</code>.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: when executing <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+              don't abort if one or more nodes are not reachable <span class="emphasis"><em>and</em></span>
+              they are marked as inactive.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltcluster</span>: canonicalize the data directory path when parsing the configuration file, so
+              the provided path matches the path LightDB reports as its data directory.
+              Otherwise, if e.g. the data directory is configured with a trailing slash,
+              <a class="link" href="ltcluster-node-check.html" title="ltcluster node check"><code class="command">ltcluster node check --data-directory-config</code></a>
+              will return a spurious error.
+            </p></li><li class="listitem"><p>
+              <span class="productname">ltclusterd</span>: fix memory leak which occurs while the monitored LightDB node is <span class="emphasis"><em>not</em></span>
+              running.
+            </p></li></ul></div><p>
+      </p></div><div class="sect2" id="id-1.7.9.10"><div class="titlepage"><div><div><h3 class="title">A.5.4. Other</h3></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+              The <span class="productname">ltcluster</span> documentation has been converted to DocBook XML format,
+              as currently used by the main LightDB project.
+              This means it can now be built against any LightDB version from 9.5
+              (previously it was not possible to build the documentation against
+              LightDB 10 or later), and makes it easier to provide the documentation
+              in other formats such as PDF.
+            </p><p>
+              For further details see: <a class="xref" href="installation-source.html#INSTALLATION-BUILD-LTCLUSTER-DOCS" title="2.3.4. Building ltcluster documentation">Building ltcluster documentation</a>
+            </p></li></ul></div><p>
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-5.0.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-release-notes.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="release-4.3.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.4. Release 5.0 </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.6. Release 4.3</td></tr></table></div></body></html>
