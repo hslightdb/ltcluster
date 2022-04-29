@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby promote</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-unregister.html" title="ltcluster standby unregister" /><link rel="next" href="ltcluster-standby-follow.html" title="ltcluster standby follow" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby promote</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-unregister.html" title="ltcluster standby unregister">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-follow.html" title="ltcluster standby follow">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-PROMOTE"><div class="titlepage"></div><a id="id-1.6.7.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby promote</span></h2><p>ltcluster standby promote — promote a standby to a primary</p></div><div class="refsect1" id="id-1.6.7.4"><h2>Description</h2><p>
+      Promotes a standby to a primary if the current primary has failed. This
+      command requires a valid <code class="filename">ltcluster.conf</code> file for the standby, either
+      specified explicitly with <code class="literal">-f/--config-file</code> or located in a
+      default location; no additional arguments are required.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        If <span class="productname">ltclusterd</span> is active, you must execute
+        <code class="command"><a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause">ltcluster service pause</a></code>
+        (<span class="productname">ltcluster</span> 4.2 - 4.4: <code class="command"><a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause">ltcluster service pause</a></code>)
+        to temporarily disable <span class="productname">ltclusterd</span> while making any changes
+        to the replication cluster.
+      </p></div><p>
+      If the standby promotion succeeds, the server will not need to be
+      restarted. However any other standbys will need to follow the new primary,
+      and will need to be restarted to do this.
+    </p><p>
+      Beginning with <a class="link" href="release-4.4.html" title="A.5. Release 4.4">ltcluster 4.4</a>,
+      the option <code class="option">--siblings-follow</code> can be used to have
+      all other standbys (and a witness server, if in use)
+	  follow the new primary.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If using <span class="productname">ltclusterd</span>, when invoking
+        <code class="command">ltcluster standby promote</code> (either directly via
+        the <code class="option">promote_command</code>, or in a script called
+        via <code class="option">promote_command</code>), <code class="option">--siblings-follow</code>
+        <span class="emphasis"><em>must not</em></span> be included as a
+        command line option for <code class="command">ltcluster standby promote</code>.
+      </p></div><p>
+      In <a class="link" href="release-4.3.html" title="A.6. Release 4.3">ltcluster 4.3</a> and earlier,
+      <code class="command"><a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow">ltcluster standby follow</a></code>
+      must be executed on each standby individually.
+    </p><p>
+      <span class="productname">ltcluster</span> will wait for up to <code class="varname">promote_check_timeout</code> seconds
+      (default: <code class="literal">60</code>) to verify that the standby has been promoted, and will
+      check the promotion every <code class="varname">promote_check_interval</code> seconds (default: 1 second).
+      Both values can be defined in <code class="filename">ltcluster.conf</code>.
+    </p><div class="warning"><h3 class="title">Warning</h3><p>
+        In LightDB 12 and earlier, if WAL replay is paused on the standby, and not all
+        WAL files on the standby have been replayed, <span class="productname">ltcluster</span> will not attempt to promote it.
+      </p><p>
+        This is because if WAL replay is paused, LightDB itself will not react to a promote command
+        until WAL replay is resumed and all pending WAL has been replayed. This means
+        attempting to promote LightDB in this state will leave LightDB in a condition where the
+        promotion may occur at a unpredictable point in the future.
+      </p><p>
+        Note that if the standby is in archive recovery, <span class="productname">ltcluster</span> will not be able to determine
+        if more WAL is pending replay, and will abort the promotion attempt if WAL replay is paused.
+      </p><p>
+        This restriction does <span class="emphasis"><em>not</em></span> apply to LightDB 13 and later.
+      </p></div></div><div class="refsect1" id="id-1.6.7.5"><h2>Example</h2><p>
+      </p><pre class="programlisting">
+      $ ltcluster -f /etc/ltcluster.conf standby promote
+      NOTICE: promoting standby to primary
+      DETAIL: promoting server "node2" (ID: 2) using "postgresql.confctl -l /var/log/lightdb/startup.log -w -D '/var/lib/lightdb/data' promote"
+      server promoting
+      NOTICE: STANDBY PROMOTE successful
+      DETAIL: server "node2" (ID: 2) was successfully promoted to primary</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.7.6"><h2>User permission requirements</h2><p><span class="emphasis"><em>pg_promote() (LightDB 12 and later)</em></span></p><p>
+      From LightDB 12, <span class="productname">ltcluster</span> will attempt to use the built-in <code class="function">pg_promote()</code>
+      function to promote a standby to primary.
+    </p><p>
+      By default, execution of <code class="function">pg_promote()</code> is restricted to superusers.
+      If the <code class="literal">ltcluster</code> user does not have permission to execute
+      <code class="function">pg_promote()</code>, <span class="productname">ltcluster</span> will fall back to using "<code class="command">lt_ctl promote</code>".
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        Execute <code class="command">ltcluster standby promote</code> with the <code class="option">--dry-run</code>
+        to check whether the <span class="productname">ltcluster</span> user has permission to execute <code class="function">pg_promote()</code>.
+      </p><p>
+        If the <code class="literal">ltcluster</code> user is not a superuser, execution permission for this
+        function can be granted with e.g.:
+        </p><pre class="programlisting">
+    GRANT EXECUTE ON FUNCTION pg_catalog.pg_promote TO ltcluster</pre><p>
+      </p><p>
+        Note that permissions are only effective for the database they are granted in, so
+        this <span class="emphasis"><em>must</em></span> be executed in the <span class="productname">ltcluster</span> database to be effective.
+      </p></div><p>
+      For more details on <code class="function">pg_promote()</code>, see the
+      <a class="ulink" href="https://www.hs.net/lightdb/docs/current/functions-admin.html#FUNCTIONS-RECOVERY-CONTROL-TABLE" target="_top">LightDB documentation</a>.
+    </p></div><div class="refsect1" id="id-1.6.7.7"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check if this node can be promoted, but don't carry out the promotion.
+          </p></dd><dt><span class="term"><code class="option">--siblings-follow</code></span></dt><dd><p>
+            Have all sibling nodes (nodes formerly attached to the same upstream
+            node as the promotion candidate) follow this node after it has been promoted.
+          </p><p>
+			Note that a witness server, if in use, is also
+			counted as a "sibling node" as it needs to be instructed to
+			synchronise its metadata with the new primary.
+		  </p><div class="important"><h3 class="title">Important</h3><p>
+              Do <span class="emphasis"><em>not</em></span> provide this option when configuring
+              <span class="productname">ltclusterd</span>'s <code class="option">promote_command</code>.
+            </p></div></dd><dt><span class="term"><code class="option">-F</code><br /></span><span class="term"><code class="option">--force</code></span></dt><dd><p>
+            Ignore warnings and continue anyway.
+          </p><p>
+            This option is relevant in the following situations if <code class="option">--siblings-follow</code> was specified:
+            </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+                  If one or more sibling nodes was not reachable via SSH, the standby will be promoted anyway.
+                </li><li class="listitem" style="list-style-type: disc">
+                  If the promotion candidate has insufficient free walsenders to accomodate the standbys which will
+                  be attached to it, the standby will be promoted anyway.
+                </li><li class="listitem" style="list-style-type: disc">
+                  If replication slots are in use but the promotion candidate has insufficient free replication slots
+                  to accomodate the standbys which will be attached to it, the standby will be promoted anyway.
+                </li></ul></div><p>
+          </p><p>
+            Note that if the <code class="option">-F</code>/<code class="option">--force</code> option is used when any of the above
+            situations is encountered, the onus is on the user to manually resolve any resulting issues.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.7.8"><h2>Configuration file settings</h2><p>
+     The following parameters in <code class="filename">ltcluster.conf</code> are relevant to the
+     promote operation:
+    </p><p>
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><a id="id-1.6.7.8.3.1.1.1" class="indexterm"></a><p class="simpara">
+           <code class="literal">promote_check_interval</code>:
+           interval (in seconds, default: 1 second) to wait between each check
+           to determine whether the standby has been promoted.
+		 </p></li><li class="listitem" style="list-style-type: disc"><a id="id-1.6.7.8.3.1.2.1" class="indexterm"></a><p class="simpara">
+           <code class="literal">promote_check_timeout</code>:
+           time (in seconds, default: 60 seconds) to wait to verify that the standby has been promoted
+           before exiting with <code class="literal">ERR_PROMOTION_FAIL</code>.
+		 </p></li><li class="listitem" style="list-style-type: disc"><a id="id-1.6.7.8.3.1.3.1" class="indexterm"></a><p class="simpara">
+           <code class="literal">service_promote_command</code>:
+           a command which will be executed instead of <code class="command">lt_ctl promote</code>
+           or (in LightDB 12 and later) <code class="function">pg_promote()</code>.
+         </p><p class="simpara">
+           This is intended for systems which provide a package-level promote command,
+           such as Debian's <span class="application">pg_ctlcluster</span>, to promote the
+           LightDB from standby to primary.
+         </p></li></ul></div><p>
+	</p></div><div class="refsect1" id="id-1.6.7.9"><h2>Exit codes</h2><p>
+      Following exit codes can be emitted by <code class="command">ltcluster standby promote</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            The standby was successfully promoted to primary.
+          </p></dd><dt><span class="term"><code class="option">ERR_DB_CONN (6)</code></span></dt><dd><p>
+            <span class="productname">ltcluster</span> was unable to connect to the local LightDB node.
+          </p><p>
+            LightDB must be running before the node can be promoted.
+          </p></dd><dt><span class="term"><code class="option">ERR_PROMOTION_FAIL (8)</code></span></dt><dd><p>
+            The node could not be promoted to primary for one of the following
+            reasons:
+            </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+                  there is an existing primary node in the replication cluster
+                </li><li class="listitem" style="list-style-type: disc">
+                  the node is not a standby
+                </li><li class="listitem" style="list-style-type: disc">
+                  WAL replay is paused on the node
+                </li><li class="listitem" style="list-style-type: disc">
+                  execution of the LightDB promote command failed
+                </li></ul></div><p>
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-PROMOTE-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">standby_promote</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-unregister.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-follow.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby unregister </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby follow</td></tr></table></div></body></html>

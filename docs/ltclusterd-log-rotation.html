@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>13.4. ltclusterd log rotation</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-connection-settings.html" title="13.3. ltclusterd connection settings" /><link rel="next" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">13.4. ltclusterd log rotation</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-connection-settings.html" title="13.3. ltclusterd connection settings">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Up</a></td><th width="60%" align="center">Chapter 13. ltclusterd setup and configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-LOG-ROTATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">13.4. ltclusterd log rotation</h2></div></div></div><a id="id-1.5.4.9.2" class="indexterm"></a><a id="id-1.5.4.9.3" class="indexterm"></a><p>
+   To ensure the current <span class="productname">ltclusterd</span> logfile
+   (specified in <code class="filename">ltcluster.conf</code> with the parameter
+   <code class="option">log_file</code>) does not grow indefinitely, configure your
+   system's <code class="command">logrotate</code> to regularly rotate it.
+  </p><p>
+   Sample configuration to rotate logfiles weekly with retention for
+   up to 52 weeks and rotation forced if a file grows beyond 100Mb:
+   </p><pre class="programlisting">
+    /var/log/ltcluster/ltclusterd.log {
+        missingok
+        compress
+        rotate 52
+        maxsize 100M
+        weekly
+        create 0600 lightdb lightdb
+        postrotate
+            /usr/bin/killall -HUP ltclusterd
+        endscript
+    }</pre><p>
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-connection-settings.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-operation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">13.3. ltclusterd connection settings </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 14. ltclusterd operation</td></tr></table></div></body></html>

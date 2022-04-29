@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby follow</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-promote.html" title="ltcluster standby promote" /><link rel="next" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby follow</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-promote.html" title="ltcluster standby promote">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-FOLLOW"><div class="titlepage"></div><a id="id-1.6.8.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby follow</span></h2><p>ltcluster standby follow — attach a running standby to a new upstream node</p></div><div class="refsect1" id="id-1.6.8.4"><h2>Description</h2><p>
+      Attaches the standby ("follow candidate") to a new upstream node
+      ("follow target"). Typically this will be the primary, but this
+      command can also be used to attach the standby to another standby.
+    </p><p>
+      This command requires a valid <code class="filename">ltcluster.conf</code> file for the standby,
+      either specified explicitly with <code class="literal">-f/--config-file</code> or located in a
+      default location; no additional arguments are required.
+    </p><p>The standby node ("follow candidate") <span class="emphasis"><em>must</em></span>
+      be running. If the new upstream ("follow target") is not the primary,
+      the cluster primary <span class="emphasis"><em>must</em></span> be running and accessible from the
+      standby node.
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        To re-add an inactive node to the replication cluster, use
+        <a class="xref" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><span class="refentrytitle">ltcluster node rejoin</span></a>.
+      </p></div><p>
+      By default <span class="productname">ltcluster</span> will attempt to attach the standby to the current primary.
+      If <code class="option">--upstream-node-id</code> is provided, <span class="productname">ltcluster</span> will attempt
+      to attach the standby to the specified node, which can be another standby.
+    </p><p>
+      In LightDB 12 and earlier, this command will force a restart of LightDB on the standby node.
+    </p><p>
+      In LightDB 13 and later, by default this command will signal LightDB to reload its
+      configuration, which will cause LightDB to follow the new upstream without
+      a restart. If this behaviour is not desired for whatever reason, the configuration
+      file parameter <code class="varname">standby_follow_restart</code> can be set <code class="literal">true</code>
+      to always force a restart.
+    </p><p>
+      <code class="command">ltcluster standby follow</code> will wait up to
+      <code class="varname">standby_follow_timeout</code> seconds (default: <code class="literal">30</code>)
+      to verify the standby has actually connected to the new upstream node.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If <code class="option">recovery_min_apply_delay</code> is set for the standby, it
+        will not attach to the new upstream node until it has replayed available
+        WAL.
+      </p><p>
+        Conversely, if the standby is attached to an upstream standby
+        which has <code class="option">recovery_min_apply_delay</code> set, the upstream
+        standby's replay state may actually be behind that of its new downstream node.
+      </p></div></div><div class="refsect1" id="id-1.6.8.5"><h2>Example</h2><p>
+      </p><pre class="programlisting">
+      $ ltcluster -f /etc/ltcluster.conf standby follow
+      INFO: setting node 3's primary to node 2
+      NOTICE: restarting server using "postgresql.confctl -l /var/log/lightdb/startup.log -w -D '/var/lib/lightdb/data' restart"
+      waiting for server to shut down........ done
+      server stopped
+      waiting for server to start.... done
+      server started
+      NOTICE: STANDBY FOLLOW successful
+      DETAIL: node 3 is now attached to node 2</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.8.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually follow a new upstream node.
+          </p><p>
+            This will also verify whether the standby is capable of following the new upstream node.
+          </p><div class="important"><h3 class="title">Important</h3><p>
+              If a standby was turned into a primary by removing <code class="filename">recovery.conf</code>
+              (<span class="application">LightDB 12</span> and later: <code class="filename">standby.signal</code>),
+              <span class="productname">ltcluster</span> will <span class="emphasis"><em>not</em></span> be able to determine whether that primary's timeline
+              has diverged from the timeline of the standby ("follow candidate").
+            </p><p>
+              We recommend always to use <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>
+              to promote a standby to primary, as this will ensure that the new primary
+              will perform a timeline switch (making it practical to check for timeline divergence)
+              and also that <span class="productname">ltcluster</span> metadata is updated correctly.
+            </p></div></dd><dt><span class="term"><code class="option">--upstream-node-id</code></span></dt><dd><p>
+            Node ID of the new upstream node ("follow target").
+          </p><p>
+            If not provided, <span class="productname">ltcluster</span> will attempt to follow the current primary node.
+          </p><p>
+            Note that when using <span class="productname">ltclusterd</span>, <code class="option">--upstream-node-id</code>
+            should always be configured;
+            see <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION" title="13.1.1. Required configuration for automatic failover">Automatic failover configuration</a>
+            for details.
+          </p></dd><dt><span class="term"><code class="option">-w</code><br /></span><span class="term"><code class="option">--wait</code></span></dt><dd><p>
+            Wait for a primary to appear. <span class="productname">ltcluster</span> will wait for up to
+            <code class="varname">primary_follow_timeout</code> seconds
+            (default: 60 seconds) to verify that the standby is following the new primary.
+            This value can be defined in <code class="filename">ltcluster.conf</code>.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.8.7"><h2>Execution</h2><p>
+      Execute with the <code class="literal">--dry-run</code> option to test the follow operation as
+      far as possible, without actually changing the status of the node.
+    </p><p>
+      Note that <span class="productname">ltcluster</span> will first attempt to determine whether the standby
+      ("follow candidate") is capable of following the
+      new upstream node ("follow target").
+    </p><p>
+      If, for example, the new upstream node has diverged from this node's timeline,
+      for example if the new upstream node was promoted to primary while this node
+      was still attached to the original primary, it will <span class="emphasis"><em>not</em></span>
+      be possible to follow the new upstream node, and <span class="productname">ltcluster</span> will emit an error
+      message like this:
+      </p><pre class="programlisting">
+ERROR: this node cannot attach to follow target node "node3" (ID 3)
+DETAIL: follow target server's timeline 2 forked off current database system timeline 1 before current recovery point 0/6108880</pre><p>
+    </p><p>
+      In this case, it may be possible to have this node follow the new upstream
+      using <code class="command"><a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">ltcluster node rejoin</a></code>
+      with the <code class="option">--force-rewind</code> to execute <code class="command">postgresql.confrewind</code>.
+      This does mean that transactions which exist on this node, but not the new upstream,
+      will be lost.
+    </p></div><div class="refsect1" id="id-1.6.8.8"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster standby follow</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            The follow operation succeeded; or if <code class="option">--dry-run</code> was provided,
+            no issues were detected which would prevent the follow operation.
+          </p></dd><dt><span class="term"><code class="option">ERR_BAD_CONFIG (1)</code></span></dt><dd><p>
+            A configuration issue was detected which prevented <span class="productname">ltcluster</span> from
+            continuing with the follow operation.
+          </p></dd><dt><span class="term"><code class="option">ERR_NO_RESTART (4)</code></span></dt><dd><p>
+            The node could not be restarted.
+          </p></dd><dt><span class="term"><code class="option">ERR_DB_CONN (6)</code></span></dt><dd><p>
+            <span class="productname">ltcluster</span> was unable to establish a database connection to one of the nodes.
+          </p></dd><dt><span class="term"><code class="option">ERR_FOLLOW_FAIL (23)</code></span></dt><dd><p>
+            <span class="productname">ltcluster</span> was unable to complete the follow command.
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-FOLLOW-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">standby_follow</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p><p>
+      If provided, <span class="productname">ltcluster</span> will substitute the placeholders <code class="literal">%p</code> with the node ID of the node
+      being followed, <code class="literal">%c</code> with its <code class="literal">conninfo</code> string, and
+      <code class="literal">%a</code> with its node name.
+    </p></div><div class="refsect1" id="id-1.6.8.10"><h2>See also</h2><p>
+     <a class="xref" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><span class="refentrytitle">ltcluster node rejoin</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-promote.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-switchover.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby promote </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby switchover</td></tr></table></div></body></html>

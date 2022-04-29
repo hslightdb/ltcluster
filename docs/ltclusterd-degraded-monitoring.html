@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>14.3. "degraded monitoring" mode</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-wal-replay-pause.html" title="14.2. ltclusterd and paused WAL replay" /><link rel="next" href="ltclusterd-monitoring.html" title="14.4. Storing monitoring data" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">14.3. "degraded monitoring" mode</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-wal-replay-pause.html" title="14.2. ltclusterd and paused WAL replay">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation">Up</a></td><th width="60%" align="center">Chapter 14. ltclusterd operation</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-monitoring.html" title="14.4. Storing monitoring data">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-DEGRADED-MONITORING"><div class="titlepage"><div><div><h2 class="title" style="clear: both">14.3. "degraded monitoring" mode</h2></div></div></div><a id="id-1.5.5.5.2" class="indexterm"></a><a id="id-1.5.5.5.3" class="indexterm"></a><p>
+  In certain circumstances, <span class="productname">ltclusterd</span> is not able to fulfill its primary mission
+  of monitoring the node's upstream server. In these cases it enters "degraded monitoring"
+  mode, where <span class="productname">ltclusterd</span> remains active but is waiting for the situation
+  to be resolved.
+ </p><p>
+  Situations where this happens are:
+  </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">a failover situation has occurred, no nodes in the primary node's location are visible</li><li class="listitem" style="list-style-type: disc">a failover situation has occurred, but no promotion candidate is available</li><li class="listitem" style="list-style-type: disc">a failover situation has occurred, but the promotion candidate could not be promoted</li><li class="listitem" style="list-style-type: disc">a failover situation has occurred, but the node was unable to follow the new primary</li><li class="listitem" style="list-style-type: disc">a failover situation has occurred, but no primary has become available</li><li class="listitem" style="list-style-type: disc">a failover situation has occurred, but automatic failover is not enabled for the node</li><li class="listitem" style="list-style-type: disc">ltclusterd is monitoring the primary node, but it is not available (and no other node has been promoted as primary)</li></ul></div><p>
+ </p><p>
+  Example output in a situation where there is only one standby with <code class="literal">failover=manual</code>,
+  and the primary node is unavailable (but is later restarted):
+  </p><pre class="programlisting">
+    [2017-08-29 10:59:19] [INFO] node "node2" (ID: 2) monitoring upstream node "node1" (ID: 1) in normal state (automatic failover disabled)
+    [2017-08-29 10:59:33] [WARNING] unable to connect to upstream node "node1" (ID: 1)
+    [2017-08-29 10:59:33] [INFO] checking state of node 1, 1 of 5 attempts
+    [2017-08-29 10:59:33] [INFO] sleeping 1 seconds until next reconnection attempt
+    (...)
+    [2017-08-29 10:59:37] [INFO] checking state of node 1, 5 of 5 attempts
+    [2017-08-29 10:59:37] [WARNING] unable to reconnect to node 1 after 5 attempts
+    [2017-08-29 10:59:37] [NOTICE] this node is not configured for automatic failover so will not be considered as promotion candidate
+    [2017-08-29 10:59:37] [NOTICE] no other nodes are available as promotion candidate
+    [2017-08-29 10:59:37] [HINT] use "ltcluster standby promote" to manually promote this node
+    [2017-08-29 10:59:37] [INFO] node "node2" (ID: 2) monitoring upstream node "node1" (ID: 1) in degraded state (automatic failover disabled)
+    [2017-08-29 10:59:53] [INFO] node "node2" (ID: 2) monitoring upstream node "node1" (ID: 1) in degraded state (automatic failover disabled)
+    [2017-08-29 11:00:45] [NOTICE] reconnected to upstream node "node1" (ID: 1) after 68 seconds, resuming monitoring
+    [2017-08-29 11:00:57] [INFO] node "node2" (ID: 2) monitoring upstream node "node1" (ID: 1) in normal state (automatic failover disabled)</pre><p>
+
+ </p><p>
+  By default, <code class="literal">ltclusterd</code> will continue in degraded monitoring mode indefinitely.
+  However a timeout (in seconds) can be set with <code class="varname">degraded_monitoring_timeout</code>,
+  after which <span class="productname">ltclusterd</span> will terminate.
+ </p><div class="note"><h3 class="title">Note</h3><p>
+     If <span class="productname">ltclusterd</span> is monitoring a primary mode which has been stopped
+     and manually restarted as a standby attached to a new primary, it will automatically detect
+     the status change and update the node record to reflect the node's new status
+     as an active standby. It will then resume monitoring the node as a standby.
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-wal-replay-pause.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-operation.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-monitoring.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">14.2. ltclusterd and paused WAL replay </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 14.4. Storing monitoring data</td></tr></table></div></body></html>

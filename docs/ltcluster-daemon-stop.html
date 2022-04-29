@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster daemon stop</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-daemon-start.html" title="ltcluster daemon start" /><link rel="next" href="appendix-release-notes.html" title="Appendix A. Release notes" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster daemon stop</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-daemon-start.html" title="ltcluster daemon start">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="appendix-release-notes.html" title="Appendix A. Release notes">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-DAEMON-STOP"><div class="titlepage"></div><a id="id-1.6.25.1" class="indexterm"></a><a id="id-1.6.25.2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster daemon stop</span></h2><p>ltcluster daemon stop — Stop the <span class="productname">ltclusterd</span> daemon on the local node</p></div><div class="refsect1" id="id-1.6.25.5"><h2>Description</h2><p>
+      This command stops the <span class="productname">ltclusterd</span> daemon on the
+      local node.
+    </p><p>
+      By default, <span class="productname">ltcluster</span> will wait for up to 15 seconds to confirm that <span class="productname">ltclusterd</span>
+      stopped. This behaviour can be overridden by specifying a diffent value using the <code class="option">--wait</code>
+      option, or disabled altogether with the <code class="option">--no-wait</code> option.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If LightDB is not running on the local node, under some circumstances <span class="productname">ltcluster</span> may not
+        be able to confirm if <span class="productname">ltclusterd</span> has actually stopped.
+      </p></div><div class="important"><h3 class="title">Important</h3><p>
+        The <code class="filename">ltcluster.conf</code> parameter <code class="varname">ltclusterd_service_stop_command</code>
+        must be set for <code class="command">ltcluster daemon stop</code> to work; see section
+        <a class="xref" href="ltcluster-daemon-stop.html#LTCLUSTER-DAEMON-STOP-CONFIGURATION" title="Configuration file settings">ltcluster daemon stop configuration</a> for details.
+      </p></div></div><div class="refsect1" id="id-1.6.25.6"><h2>Configuration</h2><p>
+      <code class="command">ltcluster daemon stop</code> will execute the command defined by the
+      <code class="varname">ltclusterd_service_stop_command</code> parameter in <code class="filename">ltcluster.conf</code>.
+      This must be set to a shell command which will stop <span class="productname">ltclusterd</span>;
+      if <span class="productname">ltcluster</span> was installed from a package, this will be the service command defined by the
+      package. For more details see <a class="link" href="appendix-packages.html" title="Appendix C. ltcluster package details">Appendix: <span class="productname">ltcluster</span> package details</a>.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        If <span class="productname">ltcluster</span> was installed from a system package, and you do not configure
+        <code class="varname">ltclusterd_service_stop_command</code> to an appropriate service command, this may
+        result in the system becoming confused about the state of the <span class="productname">ltclusterd</span>
+        service; this is particularly the case with <code class="literal">systemd</code>.
+      </p></div></div><div class="refsect1" id="id-1.6.25.7"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually attempt to stop <span class="productname">ltclusterd</span>.
+          </p><p>
+            This action will output the command which would be executed.
+          </p></dd><dt><span class="term"><code class="option">-w</code><br /></span><span class="term"><code class="option">--wait</code></span></dt><dd><p>
+            Wait for the specified number of seconds to confirm that <span class="productname">ltclusterd</span>
+            stopped successfully.
+          </p><p>
+            Note that providing <code class="option">--wait=0</code> is the equivalent of <code class="option">--no-wait</code>.
+          </p></dd><dt><span class="term"><code class="option">--no-wait</code></span></dt><dd><p>
+            Don't wait to confirm that <span class="productname">ltclusterd</span>
+            stopped successfully.
+          </p><p>
+            This is equivalent to providing <code class="option">--wait=0</code>.
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-DAEMON-STOP-CONFIGURATION"><h2>Configuration file settings</h2><p>
+     The following parameter in <code class="filename">ltcluster.conf</code> is relevant
+     to <code class="command">ltcluster daemon stop</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">ltclusterd_service_stop_command</code></span></dt><dd><a id="id-1.6.25.8.3.1.2.1" class="indexterm"></a><p>
+            <code class="command">ltcluster daemon stop</code> will execute the command defined by the
+            <code class="varname">ltclusterd_service_stop_command</code> parameter in <code class="filename">ltcluster.conf</code>.
+            This must be set to a shell command which will stop <span class="productname">ltclusterd</span>;
+            if <span class="productname">ltcluster</span> was installed from a package, this will be the service command defined by the
+            package. For more details see <a class="link" href="appendix-packages.html" title="Appendix C. ltcluster package details">Appendix: <span class="productname">ltcluster</span> package details</a>.
+          </p><div class="important"><h3 class="title">Important</h3><p>
+              If <span class="productname">ltcluster</span> was installed from a system package, and you do not configure
+              <code class="varname">ltclusterd_service_stop_command</code> to an appropriate service command, this may
+              result in the system becoming confused about the state of the <span class="productname">ltclusterd</span>
+              service; this is particularly the case with <code class="literal">systemd</code>.
+            </p></div></dd></dl></div></div><div class="refsect1" id="id-1.6.25.9"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster daemon stop</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            <span class="productname">ltclusterd</span> could be stopped.
+          </p></dd><dt><span class="term"><code class="option">ERR_BAD_CONFIG (1)</code></span></dt><dd><p>
+            <code class="varname">ltclusterd_service_stop_command</code> is not defined in
+            <code class="filename">ltcluster.conf</code>.
+          </p></dd><dt><span class="term"><code class="option">ERR_LTCLUSTERD_SERVICE (27)</code></span></dt><dd><p>
+            <span class="productname">ltclusterd</span> could not be stopped.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.25.10"><h2>See also</h2><p>
+      <a class="xref" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><span class="refentrytitle">ltcluster daemon start</span></a>,
+      <a class="xref" href="ltclusterd-daemon.html" title="13.2. ltclusterd daemon">ltclusterd daemon</a>,
+      <a class="xref" href="ltcluster-service-status.html" title="ltcluster service status"><span class="refentrytitle">ltcluster service status</span></a>,
+      <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a>,
+      <a class="xref" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><span class="refentrytitle">ltcluster service unpause</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-daemon-start.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="appendix-release-notes.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster daemon start </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix A. Release notes</td></tr></table></div></body></html>

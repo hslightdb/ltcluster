@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster primary unregister</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-primary-register.html" title="ltcluster primary register" /><link rel="next" href="ltcluster-standby-clone.html" title="ltcluster standby clone" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster primary unregister</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-primary-register.html" title="ltcluster primary register">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-clone.html" title="ltcluster standby clone">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-PRIMARY-UNREGISTER"><div class="titlepage"></div><a id="id-1.6.3.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster primary unregister</span></h2><p>ltcluster primary unregister — unregister an inactive primary node</p></div><div class="refsect1" id="id-1.6.3.4"><h2>Description</h2><p>
+      <code class="command">ltcluster primary unregister</code> unregisters an inactive primary node
+      from the <span class="productname">ltcluster</span> metadata. This is typically when the primary has failed and is
+      being removed from the cluster after a new primary has been promoted.
+    </p></div><div class="refsect1" id="id-1.6.3.5"><h2>Execution</h2><p>
+      <code class="command">ltcluster primary unregister</code> can be run on any active <span class="productname">ltcluster</span> node,
+      with the ID of the node to unregister passed as <code class="option">--node-id</code>.
+    </p><p>
+      Execute with the <code class="literal">--dry-run</code> option to check what would happen without
+      actually unregistering the node.
+    </p><p>
+      <code class="command">ltcluster master unregister</code> can be used as an alias for
+      <code class="command">ltcluster primary unregister</code>.
+    </p></div><div class="refsect1" id="id-1.6.3.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually unregister the primary.
+          </p></dd><dt><span class="term"><code class="option">--node-id</code></span></dt><dd><p>
+            ID of the inactive primary to be unregistered.
+          </p></dd><dt><span class="term"><code class="option">--force</code></span></dt><dd><p>
+            Forcibly unregister the node if it is registered as an active primary,
+            as long as it has no registered standbys; or if it is registered as
+            a primary but running as a standby.
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-PRIMARY-UNREGISTER-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">primary_unregister</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-primary-register.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-clone.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster primary register </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby clone</td></tr></table></div></body></html>

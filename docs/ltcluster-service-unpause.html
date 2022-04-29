@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster service unpause</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-service-pause.html" title="ltcluster service pause" /><link rel="next" href="ltcluster-daemon-start.html" title="ltcluster daemon start" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster service unpause</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-service-pause.html" title="ltcluster service pause">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-daemon-start.html" title="ltcluster daemon start">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-SERVICE-UNPAUSE"><div class="titlepage"></div><a id="id-1.6.23.1" class="indexterm"></a><a id="id-1.6.23.2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster service unpause</span></h2><p>ltcluster service unpause — Instruct all <span class="productname">ltclusterd</span> instances in the replication cluster to resume failover operations</p></div><div class="refsect1" id="id-1.6.23.5"><h2>Description</h2><p>
+      This command can be run on any active node in the replication cluster to instruct all
+      running <span class="productname">ltclusterd</span> instances to "unpause"
+      (following a previous execution of <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a>)
+      and resume normal failover/monitoring operation.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        It's important to wait a few seconds after restarting LightDB on any node before running
+        <code class="command">ltcluster service pause</code>, as the <span class="productname">ltclusterd</span> instance
+        on the restarted node will take a second or two before it has updated its status.
+      </p></div></div><div class="refsect1" id="id-1.6.23.6"><h2>Prerequisites</h2><p>
+      LightDB must be accessible on all nodes (using the <code class="varname">conninfo</code> string shown by
+      <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>)
+      from the node where <code class="command">ltcluster service pause</code> is executed.
+    </p></div><div class="refsect1" id="id-1.6.23.7"><h2>Execution</h2><p>
+     <code class="command">ltcluster service unpause</code> can be executed on any active node in the
+      replication cluster. A valid <code class="filename">ltcluster.conf</code> file is required.
+      It will have no effect on nodes which are not already paused.
+    </p></div><div class="refsect1" id="id-1.6.23.8"><h2>Example</h2><p>
+    </p><pre class="programlisting">
+$ ltcluster -f /etc/ltcluster.conf service unpause
+NOTICE: node 1 (node1) unpaused
+NOTICE: node 2 (node2) unpaused
+NOTICE: node 3 (node3) unpaused</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.23.9"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check if nodes are reachable but don't unpause <span class="productname">ltclusterd</span>.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.23.10"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster service unpause</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            <span class="productname">ltclusterd</span> could be unpaused on all nodes.
+          </p></dd><dt><span class="term"><code class="option">ERR_LTCLUSTERD_PAUSE (26)</code></span></dt><dd><p>
+           <span class="productname">ltclusterd</span> could not be unpaused on one or mode nodes.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.23.11"><h2>See also</h2><p>
+      <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a>,
+      <a class="xref" href="ltcluster-service-status.html" title="ltcluster service status"><span class="refentrytitle">ltcluster service status</span></a>,
+      <a class="xref" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pausing the ltclusterd service</a>,
+      <a class="xref" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><span class="refentrytitle">ltcluster daemon start</span></a>,
+      <a class="xref" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><span class="refentrytitle">ltcluster daemon stop</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-service-pause.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-daemon-start.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster service pause </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster daemon start</td></tr></table></div></body></html>

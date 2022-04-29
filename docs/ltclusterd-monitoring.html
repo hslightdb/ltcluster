@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>14.4. Storing monitoring data</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-degraded-monitoring.html" title="14.3. &quot;degraded monitoring&quot; mode" /><link rel="next" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">14.4. Storing monitoring data</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-degraded-monitoring.html" title="14.3. &quot;degraded monitoring&quot; mode">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation">Up</a></td><th width="60%" align="center">Chapter 14. ltclusterd operation</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-MONITORING"><div class="titlepage"><div><div><h2 class="title" style="clear: both">14.4. Storing monitoring data</h2></div></div></div><a id="id-1.5.5.6.2" class="indexterm"></a><a id="id-1.5.5.6.3" class="indexterm"></a><p>
+   When <span class="productname">ltclusterd</span> is running with the option <code class="literal">monitoring_history=true</code>,
+  it will constantly write standby node status information to the
+  <code class="varname">monitoring_history</code> table, providing a near-real time
+  overview of replication status on all nodes
+  in the cluster.
+ </p><p>
+   The view <code class="literal">replication_status</code> shows the most recent state
+   for each node, e.g.:
+  </p><pre class="programlisting">
+    ltcluster=# select * from ltcluster.replication_status;
+    -[ RECORD 1 ]-------------+------------------------------
+    primary_node_id           | 1
+    standby_node_id           | 2
+    standby_name              | node2
+    node_type                 | standby
+    active                    | t
+    last_monitor_time         | 2017-08-24 16:28:41.260478+09
+    last_wal_primary_location | 0/6D57A00
+    last_wal_standby_location | 0/5000000
+    replication_lag           | 29 MB
+    replication_time_lag      | 00:00:11.736163
+    apply_lag                 | 15 MB
+    communication_time_lag    | 00:00:01.365643</pre><p>
+ </p><p>
+  The interval in which monitoring history is written is controlled by the
+  configuration parameter <code class="varname">monitor_interval_secs</code>;
+  default is 2.
+ </p><p>
+  As this can generate a large amount of monitoring data in the table
+  <code class="literal">ltcluster.monitoring_history</code>. it's advisable to regularly
+  purge historical data using the <a class="xref" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup"><span class="refentrytitle">ltcluster cluster cleanup</span></a>
+  command; use the <code class="literal">-k/--keep-history</code> option to
+  specify how many day's worth of data should be retained.
+ </p><p>
+  It's possible to use <span class="productname">ltclusterd</span> to run in monitoring
+  mode only (without automatic failover capability) for some or all
+  nodes by setting <code class="literal">failover=manual</code> in the node's
+  <code class="filename">ltcluster.conf</code> file. In the event of the node's upstream failing,
+  no failover action will be taken and the node will require manual intervention to
+  be reattached to replication. If this occurs, an
+  <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a>
+  <code class="varname">standby_disconnect_manual</code> will be created.
+ </p><p>
+  Note that when a standby node is not streaming directly from its upstream
+  node, e.g. recovering WAL from an archive, <code class="varname">apply_lag</code> will always appear as
+  <code class="literal">0 bytes</code>.
+ </p><div class="tip"><h3 class="title">Tip</h3><p>
+   If monitoring history is enabled, the contents of the <code class="literal">ltcluster.monitoring_history</code>
+   table will be replicated to attached standbys. This means there will be a small but
+   constant stream of replication activity which may not be desirable. To prevent
+   this, convert the table to an <code class="literal">UNLOGGED</code> one with:
+   </p><pre class="programlisting">
+     ALTER TABLE ltcluster.monitoring_history SET UNLOGGED;</pre><p>
+  </p><p>
+   This will however mean that monitoring history will not be available on
+   another node following a failover, and the view <code class="literal">ltcluster.replication_status</code>
+   will not work on standbys.
+  </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-degraded-monitoring.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-operation.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-command-reference.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">14.3. "degraded monitoring" mode </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Part IV. ltcluster command reference</td></tr></table></div></body></html>

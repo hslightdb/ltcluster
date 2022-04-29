@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby unregister</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-register.html" title="ltcluster standby register" /><link rel="next" href="ltcluster-standby-promote.html" title="ltcluster standby promote" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby unregister</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-register.html" title="ltcluster standby register">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-promote.html" title="ltcluster standby promote">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-UNREGISTER"><div class="titlepage"></div><a id="id-1.6.6.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby unregister</span></h2><p>ltcluster standby unregister — remove a standby's information from the <span class="productname">ltcluster</span> metadata</p></div><div class="refsect1" id="id-1.6.6.4"><h2>Description</h2><p>
+      Unregisters a standby with <span class="productname">ltcluster</span>. This command does not affect the actual
+      replication, just removes the standby's entry from the <span class="productname">ltcluster</span> metadata.
+    </p></div><div class="refsect1" id="id-1.6.6.5"><h2>Execution</h2><p>
+      To unregister a running standby, execute:
+      </p><pre class="programlisting">
+        ltcluster standby unregister -f /etc/ltcluster.conf</pre><p>
+    </p><p>
+      This will remove the standby record from <span class="productname">ltcluster</span>'s internal metadata
+      table (<code class="literal">ltcluster.nodes</code>). A <code class="literal">standby_unregister</code>
+      event notification will be recorded in the <code class="literal">ltcluster.events</code> table.
+    </p><p>
+      If the standby is not running, the command can be executed on another
+      node by providing the id of the node to be unregistered using
+      the command line parameter <code class="literal">--node-id</code>, e.g. executing the following
+      command on the primary server will unregister the standby with
+      id <code class="literal">3</code>:
+      </p><pre class="programlisting">
+        ltcluster standby unregister -f /etc/ltcluster.conf --node-id=3</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.6.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--node-id</code></span></dt><dd><p>
+            <code class="varname">node_id</code> of the node to unregister (optional)
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-UNREGISTER-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">standby_unregister</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-register.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-promote.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby register </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby promote</td></tr></table></div></body></html>

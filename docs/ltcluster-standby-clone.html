@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby clone</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-primary-unregister.html" title="ltcluster primary unregister" /><link rel="next" href="ltcluster-standby-register.html" title="ltcluster standby register" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby clone</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-primary-unregister.html" title="ltcluster primary unregister">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-register.html" title="ltcluster standby register">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-CLONE"><div class="titlepage"></div><a id="id-1.6.4.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby clone</span></h2><p>ltcluster standby clone — clone a LightDB standby node from another LightDB node</p></div><div class="refsect1" id="id-1.6.4.4"><h2>Description</h2><p>
+      <code class="command">ltcluster standby clone</code> clones a LightDB node from another
+      LightDB node, typically the primary, but optionally from any other node in
+      the cluster or from Barman. It creates the replication configuration required
+      to attach the cloned node to the primary node (or another standby, if cascading replication
+      is in use).
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        <code class="command">ltcluster standby clone</code> does not start the standby, and after cloning
+        a standby, the command <code class="command">ltcluster standby register</code> must be executed to
+        notify <span class="productname">ltcluster</span> of its existence.
+      </p></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-CLONE-CONFIG-FILE-COPYING"><h2>Handling configuration files</h2><p>
+    Note that by default, all configuration files in the source node's data
+    directory will be copied to the cloned node.  Typically these will be
+    <code class="filename">postgresql.conf</code>, <code class="filename">postgresql.auto.conf</code>,
+    <code class="filename">pg_hba.conf</code> and <code class="filename">pg_ident.conf</code>.
+    These may require modification before the standby is started.
+   </p><p>
+    In some cases (e.g. on Debian or Ubuntu Linux installations), LightDB's
+    configuration files are located outside of the data directory and will
+    not be copied by default. <span class="productname">ltcluster</span> can copy these files, either to the same
+    location on the standby server (provided appropriate directory and file permissions
+    are available), or into the standby's data directory. This requires passwordless
+    SSH access to the primary server. Add the option <code class="option">--copy-external-config-files</code>
+    to the <code class="command">ltcluster standby clone</code> command; by default files will be copied to
+    the same path as on the upstream server. Note that the user executing <code class="command">ltcluster</code>
+    must have write access to those directories.
+   </p><p>
+    To have the configuration files placed in the standby's data directory, specify
+    <code class="literal">--copy-external-config-files=pgdata</code>, but note that
+    any include directives in the copied files may need to be updated.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+	   When executing <code class="command">ltcluster standby clone</code> with the
+	   <code class="option">--copy-external-config-files</code> aand <code class="option">--dry-run</code>
+	   options, <span class="productname">ltcluster</span> will check the SSH connection to the source node, but
+	   will not verify whether the files can actually be copied.
+	 </p><p>
+	   During the actual clone operation, a check will be made before the database itself
+	   is cloned to determine whether the files can actually be copied; if any problems are
+	   encountered, the clone operation will be aborted, enabling the user to fix
+	   any issues before retrying the clone operation.
+	 </p></div><div class="tip"><h3 class="title">Tip</h3><p>
+     For reliable configuration file management we recommend using a
+     configuration management tool such as Ansible, Chef, Puppet or Salt.
+    </p></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-CLONE-RECOVERY-CONF"><h2>Customising replication configuration</h2><a id="id-1.6.4.6.2" class="indexterm"></a><a id="id-1.6.4.6.3" class="indexterm"></a><p>
+     By default, <span class="productname">ltcluster</span> will create a minimal replication configuration
+     containing following parameters:
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">primary_conninfo</code></li><li class="listitem" style="list-style-type: disc"><code class="varname">primary_slot_name</code> (if replication slots in use)</li></ul></div><p>
+     For LightDB 11 and earlier, these parameters will also be set:
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">standby_mode</code> (always <code class="literal">'on'</code>)</li><li class="listitem" style="list-style-type: disc"><code class="varname">recovery_target_timeline</code> (always <code class="literal">'latest'</code>)</li></ul></div><p>
+     The following additional parameters can be specified in <code class="filename">ltcluster.conf</code>
+     for inclusion in the replication configuration:
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">restore_command</code></li><li class="listitem" style="list-style-type: disc"><code class="varname">archive_cleanup_command</code></li><li class="listitem" style="list-style-type: disc"><code class="varname">recovery_min_apply_delay</code></li></ul></div><div class="note"><h3 class="title">Note</h3><p>
+       We recommend using <a class="ulink" href="https://www.pgbarman.org/" target="_top">Barman</a> to manage
+       WAL file archiving. For more details on combining <span class="productname">ltcluster</span> and <span class="application">Barman</span>,
+       in particular using <code class="varname">restore_command</code> to configure Barman as a backup source of
+       WAL files, see <a class="xref" href="cloning-from-barman.html" title="5.1. Cloning a standby from Barman">Cloning from Barman</a>.
+     </p></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-CLONE-WAL-MANAGEMENT"><h2>Managing WAL during the cloning process</h2><p>
+    When initially cloning a standby, you will need to ensure
+    that all required WAL files remain available while the cloning is taking
+    place. To ensure this happens when using the default <code class="command">postgresql.confbasebackup</code> method,
+    <span class="productname">ltcluster</span> will set <code class="command">postgresql.confbasebackup</code>'s <code class="literal">--wal-method</code>
+    parameter to <code class="literal">stream</code>,
+    which will ensure all WAL files generated during the cloning process are
+    streamed in parallel with the main backup. Note that this requires two
+    replication connections to be available (<span class="productname">ltcluster</span> will verify sufficient
+    connections are available before attempting to clone, and this can be checked
+    before performing the clone using the <code class="literal">--dry-run</code> option).
+   </p><p>
+    To override this behaviour, in <code class="filename">ltcluster.conf</code> set
+    <code class="command">postgresql.confbasebackup</code>'s <code class="literal">--wal-method</code>
+    parameter to <code class="literal">fetch</code>:
+    </p><pre class="programlisting">
+      postgresql.confbasebackup_options='--wal-method=fetch'</pre><p>
+
+    and ensure that <code class="literal">wal_keep_segments</code> (LightDB 13 and later:
+    <code class="literal">wal_keep_size</code>) is set to an appropriately high value. Note
+    however that this is not a particularly reliable way of ensuring sufficient
+    WAL is retained and is not recommended.
+    See the <a class="ulink" href="https://www.hs.net/lightdb/docs/current/app-pgbasebackup.html" target="_top">
+    postgresql.confbasebackup</a> documentation for details.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+      If using LightDB 9.6 or earlier, replace <code class="literal">--wal-method</code>
+      with <code class="literal">--xlog-method</code>.
+    </p></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-CLONE-WAL-DIRECTORY"><h2>Placing WAL files into a different directory</h2><p>
+     To ensure that WAL files are placed in a directory outside of the main data
+     directory (e.g. to keep them on a separate disk for performance reasons),
+     specify the location with  <code class="option">--waldir</code>
+     (LightDB 9.6 and earlier: <code class="option">--xlogdir</code>) in
+     the <code class="filename">ltcluster.conf</code> parameter <code class="option">postgresql.confbasebackup_options</code>,
+     e.g.:
+     </p><pre class="programlisting">
+postgresql.confbasebackup_options='--waldir=/path/to/wal-directory'</pre><p>
+     This setting will also be honored by <span class="productname">ltcluster</span> when cloning from Barman
+     (<span class="productname">ltcluster</span> 5.2 and later).
+   </p></div><div class="refsect1" id="LTCLUSTER-STANDBY-CREATE-RECOVERY-CONF"><h2>Using a standby cloned by another method</h2><a id="id-1.6.4.9.2" class="indexterm"></a><a id="id-1.6.4.9.3" class="indexterm"></a><p>
+     <span class="productname">ltcluster</span> supports standbys cloned by another method (e.g. using <span class="application">barman</span>'s
+     <code class="command"><a class="ulink" href="https://docs.pgbarman.org/#recover" target="_top">barman recover</a></code> command).
+   </p><p>
+     To integrate the standby as a <span class="productname">ltcluster</span> node, once the standby has been cloned,
+     ensure the <code class="filename">ltcluster.conf</code>
+     file is created for the node, and that it has been registered using
+     <code class="command"><a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register</a></code>.
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+       To register a standby which is not running, execute
+       <a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register --force</a>
+       and provide the connection details for the primary.
+     </p><p>
+       See <a class="xref" href="ltcluster-standby-register.html#LTCLUSTER-STANDBY-REGISTER-INACTIVE-NODE" title="Registering an inactive node">Registering an inactive node</a> for more details.
+     </p></div><p>
+     Then execute the command <code class="command">ltcluster standby clone --replication-conf-only</code>.
+     This will create the <code class="filename">recovery.conf</code> file needed to attach
+     the node to its upstream (in LightDB 12 and later: append replication configuration
+     to <code class="filename">postgresql.auto.conf</code>), and will also create a replication slot on the
+     upstream node if required.
+   </p><p>
+     The upstream node must be running so the correct replication configuration can be obtained.
+   </p><p>
+     If the standby is running, the replication configuration will not be written unless the
+     <code class="option">-F/--force</code> option is provided.
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+       Execute <code class="command">ltcluster standby clone --replication-conf-only --dry-run</code>
+       to check the prerequisites for creating the recovery configuration,
+       and display the configuration changes which would be made without actually
+	   making any changes.
+     </p></div><p>
+     In LightDB 13 and later, the LightDB configuration must be reloaded for replication
+     configuration changes to take effect.
+   </p><p>
+     In LightDB 12 and earlier, the LightDB instance must be restarted for replication
+     configuration changes to take effect.
+   </p></div><div class="refsect1" id="id-1.6.4.10"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">-d, --dbname=CONNINFO</code></span></dt><dd><p>
+            Connection string of the upstream node to use for cloning.
+          </p></dd><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually clone the standby.
+          </p><p>
+            If <code class="option">--replication-conf-only</code> specified, the contents of
+            the generated recovery configuration will be displayed
+            but not written.
+          </p></dd><dt><span class="term"><code class="option">-c, --fast-checkpoint</code></span></dt><dd><p>
+            Force fast checkpoint (not effective when cloning from Barman).
+          </p></dd><dt><span class="term"><code class="option">--copy-external-config-files[={samepath|pgdata}]</code></span></dt><dd><p>
+            Copy configuration files located outside the data directory on the source
+            node to the same path on the standby (default) or to the
+            LightDB data directory.
+          </p></dd><dt><span class="term"><code class="option">--no-upstream-connection</code></span></dt><dd><p>
+            When using Barman, do not connect to upstream node.
+          </p></dd><dt><span class="term"><code class="option">--recovery-min-apply-delay</code></span></dt><dd><p>
+            Set LightDB configuration <code class="option">recovery_min_apply_delay</code> parameter
+            to the provided value.
+          </p><p>
+            This overrides any <code class="option">recovery_min_apply_delay</code> provided via
+            <code class="filename">ltcluster.conf</code>.
+          </p><p>
+            For more details on this parameter, see:
+            <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-RECOVERY-MIN-APPLY-DELAY" target="_top">recovery_min_apply_delay</a>.
+          </p></dd><dt><span class="term"><code class="option">-R, --remote-user=USERNAME</code></span></dt><dd><p>
+            Remote system username for SSH operations (default: current local system username).
+          </p></dd><dt><span class="term"><code class="option">--replication-conf-only</code></span></dt><dd><p>
+            Create recovery configuration for a previously cloned instance.
+          </p><p>
+			In LightDB 12 and later, the replication configuration will be
+			written to <code class="filename">postgresql.auto.conf</code>.
+		  </p><p>
+			In LightDB 11 and earlier, the replication configuration will be
+			written to <code class="filename">recovery.conf</code>.
+		  </p></dd><dt><span class="term"><code class="option">--replication-user</code></span></dt><dd><p>
+            User to make replication connections with (optional, not usually required).
+          </p></dd><dt><span class="term"><code class="option">--superuser</code></span></dt><dd><p>
+            If the <span class="productname">ltcluster</span> user is not a superuser, the name of a valid superuser must
+            be provided with this option.
+          </p></dd><dt><span class="term"><code class="option">--upstream-conninfo</code></span></dt><dd><p>
+            <code class="literal">primary_conninfo</code> value to include in the recovery configuration
+            when the intended upstream server does not yet exist.
+          </p><p>
+            Note that <span class="productname">ltcluster</span> may modify the provided value, in particular to set the
+            correct <code class="literal">application_name</code>.
+          </p></dd><dt><span class="term"><code class="option">--upstream-node-id</code></span></dt><dd><p>
+            ID of the upstream node to replicate from (optional, defaults to primary node)
+          </p></dd><dt><span class="term"><code class="option">--verify-backup</code></span></dt><dd><p>
+            
+            Verify a cloned node using the
+            <a class="ulink" href="https://www.hs.net/lightdb/docs/13/app-pgverifybackup.html" target="_top">postgresql.confverifybackup</a>
+            utility (LightDB 13 and later).
+          </p><p>
+            This option can currently only be used when cloning directly from an upstream
+            node.
+          </p></dd><dt><span class="term"><code class="option">--without-barman </code></span></dt><dd><p>
+            Do not use Barman even if configured.
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-CLONE-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">standby_clone</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div><div class="refsect1" id="id-1.6.4.12"><h2>See also</h2><p>
+      See <a class="xref" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">cloning standbys</a> for details about various aspects of cloning.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-primary-unregister.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-register.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster primary unregister </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby register</td></tr></table></div></body></html>

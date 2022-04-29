@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.5. Failover validation</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-standby-disconnection-on-failover.html" title="12.4. Standby disconnection on failover" /><link rel="next" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.5. Failover validation</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-standby-disconnection-on-failover.html" title="12.4. Standby disconnection on failover">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-FAILOVER-VALIDATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.5. Failover validation</h2></div></div></div><a id="id-1.5.3.8.2" class="indexterm"></a><a id="id-1.5.3.8.3" class="indexterm"></a><p>
+    From <a class="link" href="release-4.3.html" title="A.6. Release 4.3">ltcluster 4.3</a>, <span class="productname">ltcluster</span> makes it possible to provide a script
+    to <span class="productname">ltclusterd</span> which, in a failover situation,
+    will be executed by the promotion candidate (the node which has been selected
+    to be the new primary) to confirm whether the node should actually be promoted.
+  </p><p>
+    To use this, <code class="option">failover_validation_command</code> in <code class="filename">ltcluster.conf</code>
+    to a script executable by the <code class="literal">lightdb</code> system user, e.g.:
+    </p><pre class="programlisting">
+      failover_validation_command=/path/to/script.sh %n</pre><p>
+  </p><p>
+    The <code class="literal">%n</code> parameter will be replaced with the node ID when the script is
+    executed. A number of other parameters are also available, see section
+    "<a class="xref" href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-OPTIONAL" title="13.1.2. Optional configuration for automatic failover">Optional configuration for automatic failover</a>" for details.
+  </p><p>
+    This script must return an exit code of <code class="literal">0</code> to indicate the node should promote itself.
+    Any other value will result in the promotion being aborted and the election rerun.
+    There is a pause of <code class="option">election_rerun_interval</code> seconds before the election is rerun.
+  </p><p>
+    Sample <span class="productname">ltclusterd</span> log file output during which the failover validation
+    script rejects the proposed promotion candidate:
+    </p><pre class="programlisting">
+[2019-03-13 21:01:30] [INFO] visible nodes: 2; total nodes: 2; no nodes have seen the primary within the last 4 seconds
+[2019-03-13 21:01:30] [NOTICE] promotion candidate is "node2" (ID: 2)
+[2019-03-13 21:01:30] [NOTICE] executing "failover_validation_command"
+[2019-03-13 21:01:30] [DETAIL] /usr/local/bin/failover-validation.sh 2
+[2019-03-13 21:01:30] [INFO] output returned by failover validation command:
+Node ID: 2
+
+[2019-03-13 21:01:30] [NOTICE] failover validation command returned a non-zero value: "1"
+[2019-03-13 21:01:30] [NOTICE] promotion candidate election will be rerun
+[2019-03-13 21:01:30] [INFO] 1 followers to notify
+[2019-03-13 21:01:30] [NOTICE] notifying node "node3" (ID: 3) to rerun promotion candidate selection
+INFO:  node 3 received notification to rerun promotion candidate election
+[2019-03-13 21:01:30] [NOTICE] rerunning election after 15 seconds ("election_rerun_interval")</pre><p>
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-standby-disconnection-on-failover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="cascading-replication.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">12.4. Standby disconnection on failover </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 12.6. ltclusterd and cascading replication</td></tr></table></div></body></html>

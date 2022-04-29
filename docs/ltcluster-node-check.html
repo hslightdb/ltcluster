@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster node check</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-node-status.html" title="ltcluster node status" /><link rel="next" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster node check</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-node-status.html" title="ltcluster node status">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-NODE-CHECK"><div class="titlepage"></div><a id="id-1.6.13.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster node check</span></h2><p>ltcluster node check — performs some health checks on a node from a replication perspective</p></div><div class="refsect1" id="id-1.6.13.4"><h2>Description</h2><p>
+      Performs some health checks on a node from a replication perspective.
+      This command must be run on the local node.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+		Currently <span class="productname">ltcluster</span> performs health checks on physical replication
+		slots only, with the aim of warning about streaming replication standbys which
+		have become detached and the associated risk of uncontrolled WAL file
+		growth.
+	  </p></div></div><div class="refsect1" id="id-1.6.13.5"><h2>Example</h2><p>
+      Execution on the primary server:
+      </p><pre class="programlisting">
+       $ ltcluster -f /etc/ltcluster.conf node check
+       Node "node1":
+            Server role: OK (node is primary)
+            Replication lag: OK (N/A - node is primary)
+            WAL archiving: OK (0 pending files)
+            Upstream connection: OK (N/A - is primary)
+            Downstream servers: OK (2 of 2 downstream nodes attached)
+            Replication slots: OK (node has no physical replication slots)
+            Missing replication slots: OK (node has no missing physical replication slots)
+            Configured data directory: OK (configured "data_directory" is "/var/lib/lightdb/data")</pre><p>
+    </p><p>
+      Execution on a standby server:
+      </p><pre class="programlisting">
+       $ ltcluster -f /etc/ltcluster.conf node check
+       Node "node2":
+            Server role: OK (node is standby)
+            Replication lag: OK (0 seconds)
+            WAL archiving: OK (0 pending archive ready files)
+            Upstream connection: OK (node "node2" (ID: 2) is attached to expected upstream node "node1" (ID: 1))
+            Downstream servers: OK (this node has no downstream nodes)
+            Replication slots: OK (node has no physical replication slots)
+            Missing physical replication slots: OK (node has no missing physical replication slots)
+            Configured data directory: OK (configured "data_directory" is "/var/lib/lightdb/data")</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.13.6"><h2>Individual checks</h2><p>
+      Each check can be performed individually by supplying
+      an additional command line parameter, e.g.:
+      </p><pre class="programlisting">
+        $ ltcluster node check --role
+        OK (node is primary)</pre><p>
+    </p><p>
+	  Parameters for individual checks are as follows:
+    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+        <code class="option">--role</code>: checks if the node has the expected role
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--replication-lag</code>: checks if the node is lagging by more than
+        <code class="varname">replication_lag_warning</code> or <code class="varname">replication_lag_critical</code>
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--archive-ready</code>: checks for WAL files which have not yet been archived,
+        and returns <code class="literal">WARNING</code> or <code class="literal">CRITICAL</code> if the number
+        exceeds <code class="varname">archive_ready_warning</code> or <code class="varname">archive_ready_critical</code> respectively.
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--downstream</code>: checks that the expected downstream nodes are attached
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--upstream</code>: checks that the node is attached to its expected upstream
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--slots</code>: checks there are no inactive physical replication slots
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--missing-slots</code>: checks there are no missing physical replication slots
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="option">--data-directory-config</code>: checks the data directory configured in
+        <code class="filename">ltcluster.conf</code> matches the actual data directory.
+        This check is not directly related to replication, but is useful to verify <span class="productname">ltcluster</span>
+        is correctly configured.
+      </li></ul></div><p>
+  </p></div><div class="refsect1" id="id-1.6.13.7"><h2>Additional checks</h2><p>
+      Several checks are provided for diagnostic purposes and are not
+      included in the general output:
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p class="simpara">
+            <code class="option">--db-connection</code>: checks if <span class="productname">ltcluster</span> can connect to the
+            database on the local node.
+          </p><p class="simpara">
+            This option is particularly useful in combination with <code class="command">SSH</code>, as
+            it can be used to troubleshoot connection issues encountered when <span class="productname">ltcluster</span> is
+            executed remotely (e.g. during a switchover operation).
+          </p></li><li class="listitem" style="list-style-type: disc"><p class="simpara">
+            <code class="option">--replication-config-owner</code>: checks if the file containing replication
+            configuration (LightDB 12 and later: <code class="filename">postgresql.auto.conf</code>;
+            LightDB 11 and earlier: <code class="filename">recovery.conf</code>) is
+            owned by the same user who owns the data directory.
+          </p><p class="simpara">
+            Incorrect ownership of these files (e.g. if they are owned by <code class="literal">root</code>)
+            will cause operations which need to update the replication configuration
+            (e.g. <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>
+            or <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>)
+            to fail.
+          </p></li></ul></div><p>
+    </p></div><div class="refsect1" id="id-1.6.13.8"><h2>Connection options</h2><p>
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+            <code class="option">-S</code>/<code class="option">--superuser</code>: connect as the
+            named superuser instead of the <span class="productname">ltcluster</span> user
+          </li></ul></div><p>
+    </p></div><div class="refsect1" id="id-1.6.13.9"><h2>Output format</h2><p>
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+            <code class="option">--csv</code>: generate output in CSV format (not available
+            for individual checks)
+          </li><li class="listitem" style="list-style-type: disc">
+            <code class="option">--nagios</code>: generate output in a Nagios-compatible format
+            (for individual checks only)
+          </li></ul></div><p>
+    </p></div><div class="refsect1" id="id-1.6.13.10"><h2>Exit codes</h2><p>
+      When executing <code class="command">ltcluster node check</code> with one of the individual
+      checks listed above, <span class="productname">ltcluster</span> will emit one of the following Nagios-style exit codes
+      (even if <code class="option">--nagios</code> is not supplied):
+
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+            <code class="literal">0</code>: OK
+          </li><li class="listitem" style="list-style-type: disc">
+            <code class="literal">1</code>: WARNING
+          </li><li class="listitem" style="list-style-type: disc">
+            <code class="literal">2</code>: ERROR
+          </li><li class="listitem" style="list-style-type: disc">
+            <code class="literal">3</code>: UNKNOWN
+          </li></ul></div><p>
+    </p><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster status check</code>
+      if no individual check was specified.
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            No issues were detected.
+          </p></dd><dt><span class="term"><code class="option">ERR_NODE_STATUS (25)</code></span></dt><dd><p>
+            One or more issues were detected.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.13.11"><h2>See also</h2><p>
+     <a class="xref" href="ltcluster-node-status.html" title="ltcluster node status"><span class="refentrytitle">ltcluster node status</span></a>, <a class="xref" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><span class="refentrytitle">ltcluster cluster show</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-node-status.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-node-rejoin.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster node status </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster node rejoin</td></tr></table></div></body></html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster witness register</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover" /><link rel="next" href="ltcluster-witness-unregister.html" title="ltcluster witness unregister" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster witness register</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-witness-unregister.html" title="ltcluster witness unregister">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-WITNESS-REGISTER"><div class="titlepage"></div><a id="id-1.6.10.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster witness register</span></h2><p>ltcluster witness register — add a witness node's information to the <span class="productname">ltcluster</span> metadata</p></div><div class="refsect1" id="id-1.6.10.4"><h2>Description</h2><p>
+      <code class="command">ltcluster witness register</code> adds a witness server's node
+      record to the <span class="productname">ltcluster</span> metadata, and if necessary initialises the witness
+      node by installing the <span class="productname">ltcluster</span> extension and copying the <span class="productname">ltcluster</span> metadata
+      to the witness server. This command needs to be executed to enable
+      use of the witness server with <span class="productname">ltclusterd</span>.
+    </p><p>
+      When executing <code class="command">ltcluster witness register</code>, database connection
+      information for the cluster primary server must also be provided.
+    </p><p>
+      In most cases it's only necessary to provide the primary's hostname with
+      the <code class="option">-h</code>/<code class="option">--host</code> option; <span class="productname">ltcluster</span> will
+      automatically use the <code class="varname">user</code> and <code class="varname">dbname</code>
+      values defined in the <code class="varname">conninfo</code> string defined in the
+      witness node's <code class="filename">ltcluster.conf</code>, unless these are explicitly
+      provided as command line options.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        The primary server must be registered with <code class="command"><a class="link" href="ltcluster-primary-register.html" title="ltcluster primary register">ltcluster primary register</a></code> before the witness
+        server can be registered.
+      </p></div><p>
+      Execute with the <code class="option">--dry-run</code> option to check what would happen
+      without actually registering the witness server.
+    </p></div><div class="refsect1" id="id-1.6.10.5"><h2>Example</h2><p>
+      </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf witness register -h node1
+    INFO: connecting to witness node "node3" (ID: 3)
+    INFO: connecting to primary node
+    NOTICE: attempting to install extension "ltcluster"
+    NOTICE: "ltcluster" extension successfully installed
+    INFO: witness registration complete
+    NOTICE: witness node "node3" (ID: 3) successfully registered
+      </pre><p>
+    </p></div><div class="refsect1" id="id-1.6.10.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually register the witness
+          </p></dd><dt><span class="term"><code class="option">-F</code>/<code class="option">--force</code></span></dt><dd><p>
+            Overwrite an existing node record
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-WITNESS-REGISTER-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">witness_register</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-switchover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-witness-unregister.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby switchover </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster witness unregister</td></tr></table></div></body></html>

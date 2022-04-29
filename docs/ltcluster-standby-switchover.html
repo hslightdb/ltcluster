@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby switchover</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-follow.html" title="ltcluster standby follow" /><link rel="next" href="ltcluster-witness-register.html" title="ltcluster witness register" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby switchover</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-follow.html" title="ltcluster standby follow">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-witness-register.html" title="ltcluster witness register">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-SWITCHOVER"><div class="titlepage"></div><a id="id-1.6.9.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby switchover</span></h2><p>ltcluster standby switchover — promote a standby to primary and demote the existing primary to a standby</p></div><div class="refsect1" id="id-1.6.9.4"><h2>Description</h2><p>
+      Promotes a standby to primary and demotes the existing primary to a standby.
+      This command must be run on the standby to be promoted, and requires a
+      passwordless SSH connection to the current primary.
+    </p><p>
+      If other nodes are connected to the demotion candidate, <span class="productname">ltcluster</span> can instruct
+      these to follow the new primary if the option <code class="literal">--siblings-follow</code>
+      is specified. This requires a passwordless SSH connection between the promotion
+      candidate (new primary) and the nodes attached to the demotion candidate
+      (existing primary). Note that a witness server, if in use, is also
+	  counted as a "sibling node" as it needs to be instructed to
+	  synchronise its metadata with the new primary.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        Performing a switchover is a non-trivial operation. In particular it
+        relies on the current primary being able to shut down cleanly and quickly.
+        <span class="productname">ltcluster</span> will attempt to check for potential issues but cannot guarantee
+        a successful switchover.
+      </p><p>
+        <span class="productname">ltcluster</span> will refuse to perform the switchover if an exclusive backup is running on
+        the current primary, or if WAL replay is paused on the standby.
+      </p></div><p>
+      For more details on performing a switchover, including preparation and configuration,
+      see section <a class="xref" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Performing a switchover with ltcluster</a>.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        From <a class="link" href="release-4.2.html" title="A.7. Release 4.2">ltcluster 4.2</a>, <span class="productname">ltcluster</span> will instruct any running
+        <span class="productname">ltclusterd</span> instances to pause operations while the switchover
+        is being carried out, to prevent <span class="productname">ltclusterd</span> from
+        unintentionally promoting a node. For more details, see <a class="xref" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pausing the ltclusterd service</a>.
+      </p><p>
+        Users of <span class="productname">ltcluster</span> versions prior to 4.2 should ensure that <span class="productname">ltclusterd</span>
+        is not running on any nodes while a switchover is being executed.
+      </p></div></div><div class="refsect1" id="id-1.6.9.5"><h2>User permission requirements</h2><p><span class="emphasis"><em>CHECKPOINT</em></span></p><p>
+      <span class="productname">ltcluster</span> executes <code class="command">CHECKPOINT</code> on the demotion candidate as part of the shutdown
+      process to ensure it shuts down as smoothly as possible.
+    </p><p>
+      Note that <code class="command">CHECKPOINT</code> requires database superuser permissions to execute.
+      If the <code class="literal">ltcluster</code> user is not a superuser, the name of a superuser should be
+      provided with the <code class="option">-S</code>/<code class="option">--superuser</code>.
+    </p><p>
+      If <span class="productname">ltcluster</span> is unable to execute the <code class="command">CHECKPOINT</code> command, the switchover
+      can still be carried out, albeit at a greater risk that the demotion candidate may not
+      be able to shut down as smoothly as might otherwise have been the case.
+    </p><p><span class="emphasis"><em>pg_promote() (LightDB 12 and later)</em></span></p><p>
+      From LightDB 12, <span class="productname">ltcluster</span> defaults to using the built-in <code class="command">pg_promote()</code> function to
+      promote a standby to primary.
+    </p><p>
+      Note that execution of <code class="function">pg_promote()</code> is restricted to superusers or to
+      any user who has been granted execution permission for this function. If the <span class="productname">ltcluster</span> user
+      is not permitted to execute <code class="function">pg_promote()</code>, <span class="productname">ltcluster</span> will fall back to using
+      "<code class="command">postgresql.confctl promote</code>". For more details see
+      <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote">ltcluster standby promote</a>.
+    </p></div><div class="refsect1" id="id-1.6.9.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--always-promote</code></span></dt><dd><p>
+            Promote standby to primary, even if it is behind or has diverged
+            from the original primary. The original primary will be shut down in any case,
+            and will need to be manually reintegrated into the replication cluster.
+          </p></dd><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually execute a switchover.
+          </p><div class="important"><h3 class="title">Important</h3><p>
+              Success of <code class="option">--dry-run</code> does not imply the switchover will
+              complete successfully, only that
+              the prerequisites for performing the operation are met.
+            </p></div></dd><dt><span class="term"><code class="option">-F</code><br /></span><span class="term"><code class="option">--force</code></span></dt><dd><p>
+            Ignore warnings and continue anyway.
+          </p><p>
+            Specifically, if a problem is encountered when shutting down the current primary,
+            using <code class="option">-F/--force</code> will cause <span class="productname">ltcluster</span> to continue by promoting
+            the standby to be the new primary, and if <code class="option">--siblings-follow</code> is
+            specified, attach any other standbys to the new primary.
+          </p></dd><dt><span class="term"><code class="option">--force-rewind[=/path/to/postgresql.confrewind]</code></span></dt><dd><p>
+            Use <span class="application">postgresql.confrewind</span> to reintegrate the old primary if necessary
+            (and the prerequisites for using <span class="application">postgresql.confrewind</span> are met).
+            If using LightDB 9.4, and the <span class="application">postgresql.confrewind</span>
+            binary is not installed in the LightDB <code class="filename">bin</code> directory,
+            provide its full path. For more details see also <a class="xref" href="preparing-for-switchover.html#SWITCHOVER-PG-REWIND" title="8.1.1. Switchover and postgresql.confrewind">Switchover and postgresql.confrewind</a>.
+          </p></dd><dt><span class="term"><code class="option">-R</code><br /></span><span class="term"><code class="option">--remote-user</code></span></dt><dd><p>
+            System username for remote SSH operations (defaults to local system user).
+          </p></dd><dt><span class="term"><code class="option">--ltclusterd-no-pause</code></span></dt><dd><p>
+            Don't pause <span class="productname">ltclusterd</span> while executing a switchover.
+          </p><p>
+            This option should not be used unless you take steps by other means
+            to ensure <span class="productname">ltclusterd</span> is paused or not
+            running on all nodes.
+          </p><p>
+            This option cannot be used together with <code class="option">--ltclusterd-force-unpause</code>.
+          </p></dd><dt><span class="term"><code class="option">--ltclusterd-force-unpause</code></span></dt><dd><p>
+            Always unpause all <span class="productname">ltclusterd</span> instances after executing a switchover. This will ensure that
+			any <span class="productname">ltclusterd</span> instances which were paused before the switchover will be
+			unpaused.
+          </p><p>
+            This option cannot be used together with <code class="option">--ltclusterd-no-pause</code>.
+          </p></dd><dt><span class="term"><code class="option">--siblings-follow</code></span></dt><dd><p>
+            Have nodes attached to the old primary follow the new primary.
+          </p><p>
+            This will also ensure that a witness node, if in use, is updated
+            with the new primary's data.
+          </p><div class="note"><h3 class="title">Note</h3><p>
+              In a future <span class="productname">ltcluster</span> release, <code class="option">--siblings-follow</code> will be applied
+              by default.
+            </p></div></dd><dt><span class="term"><code class="option">-S</code>/<code class="option">--superuser</code></span></dt><dd><p>
+            Use the named superuser instead of the normal <span class="productname">ltcluster</span> user to perform
+            actions requiring superuser permissions.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.9.7"><h2>Configuration file settings</h2><p>
+     The following parameters in <code class="filename">ltcluster.conf</code> are relevant to the
+     switchover operation:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">replication_lag_critical</code></span></dt><dd><a id="id-1.6.9.7.3.1.2.1" class="indexterm"></a><p>
+            If replication lag (in seconds) on the standby exceeds this value, the
+            switchover will be aborted (unless the <code class="literal">-F/--force</code> option
+            is provided)
+          </p></dd><dt><span class="term"><code class="option">shutdown_check_timeout</code></span></dt><dd><a id="id-1.6.9.7.3.2.2.1" class="indexterm"></a><p>
+            The maximum number of seconds to wait for the
+            demotion candidate (current primary) to shut down, before aborting the switchover.
+          </p><p>
+            Note that this parameter is set on the node where <code class="command">ltcluster standby switchover</code>
+            is executed (promotion candidate); setting it on the demotion candidate (former primary) will
+            have no effect.
+          </p><div class="note"><h3 class="title">Note</h3><p>
+             In versions prior to <a class="link" href="release-4.2.html" title="A.7. Release 4.2"><span class="productname">ltcluster</span> 4.2</a>, <code class="command">ltcluster standby switchover</code> would
+             use the values defined in <code class="literal">reconnect_attempts</code> and <code class="literal">reconnect_interval</code>
+             to determine the timeout for demotion candidate shutdown.
+           </p></div></dd><dt><span class="term"><code class="option">wal_receive_check_timeout</code></span></dt><dd><a id="id-1.6.9.7.3.3.2.1" class="indexterm"></a><p>
+            After the primary has shut down, the maximum number of seconds to wait for the
+            walreceiver on the standby to flush WAL to disk before comparing WAL receive location
+            with the primary's shut down location.
+         </p></dd><dt><span class="term"><code class="option">standby_reconnect_timeout</code></span></dt><dd><a id="id-1.6.9.7.3.4.2.1" class="indexterm"></a><p>
+            The maximum number of seconds to attempt to wait for the demotion candidate (former primary)
+            to reconnect to the promoted primary (default: 60 seconds)
+          </p><p>
+            Note that this parameter is set on the node where <code class="command">ltcluster standby switchover</code>
+            is executed (promotion candidate); setting it on the demotion candidate (former primary) will
+            have no effect.
+          </p></dd><dt><span class="term"><code class="option">node_rejoin_timeout</code></span></dt><dd><a id="id-1.6.9.7.3.5.2.1" class="indexterm"></a><p>
+            maximum number of seconds to attempt to wait for the demotion candidate (former primary)
+            to reconnect to the promoted primary (default: 60 seconds)
+          </p><p>
+            Note that this parameter is set on the the demotion candidate (former primary);
+            setting it on the node where <code class="command">ltcluster standby switchover</code> is
+            executed will have no effect.
+          </p><p>
+            However, this value <span class="emphasis"><em>must</em></span> be less than <code class="option">standby_reconnect_timeout</code> on the
+            promotion candidate (the node where <code class="command">ltcluster standby switchover</code> is executed).
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.9.8"><h2>Execution</h2><p>
+      Execute with the <code class="literal">--dry-run</code> option to test the switchover as far as
+      possible without actually changing the status of either node.
+    </p><p>
+      External database connections, e.g. from an application, should not be permitted while
+      the switchover is taking place. In particular, active transactions on the primary
+      can potentially disrupt the shutdown process.
+    </p></div><div class="refsect1" id="LTCLUSTER-STANDBY-SWITCHOVER-EVENTS"><h2>Event notifications</h2><p>
+      <code class="literal">standby_switchover</code> and <code class="literal">standby_promote</code>
+      <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notifications</a> will be generated for the new primary,
+      and a <code class="literal">node_rejoin</code> event notification for the former primary (new standby).
+    </p><p>
+      If using an event notification script, <code class="literal">standby_switchover</code>
+      will populate the placeholder parameter <code class="literal">%p</code> with the node ID of
+      the former primary.
+    </p></div><div class="refsect1" id="id-1.6.9.10"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster standby switchover</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            The switchover completed successfully; or if <code class="option">--dry-run</code> was provided,
+            no issues were detected which would prevent the switchover operation.
+          </p></dd><dt><span class="term"><code class="option">ERR_SWITCHOVER_FAIL (18)</code></span></dt><dd><p>
+            The switchover could not be executed.
+          </p></dd><dt><span class="term"><code class="option">ERR_SWITCHOVER_INCOMPLETE (22)</code></span></dt><dd><p>
+            The switchover was executed but a problem was encountered.
+            Typically this means the former primary could not be reattached
+            as a standby. Check preceding log messages for more information.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.9.11"><h2>See also</h2><p>
+      <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a>, <a class="xref" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><span class="refentrytitle">ltcluster node rejoin</span></a>
+    </p><p>
+      For more details on performing a switchover operation, see the section <a class="xref" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Performing a switchover with ltcluster</a>.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-follow.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-witness-register.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby follow </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster witness register</td></tr></table></div></body></html>

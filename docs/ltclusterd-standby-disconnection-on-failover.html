@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.4. Standby disconnection on failover</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-primary-visibility-consensus.html" title="12.3. Primary visibility consensus" /><link rel="next" href="ltclusterd-failover-validation.html" title="12.5. Failover validation" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.4. Standby disconnection on failover</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-primary-visibility-consensus.html" title="12.3. Primary visibility consensus">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-failover-validation.html" title="12.5. Failover validation">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-STANDBY-DISCONNECTION-ON-FAILOVER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.4. Standby disconnection on failover</h2></div></div></div><a id="id-1.5.3.7.2" class="indexterm"></a><a id="id-1.5.3.7.3" class="indexterm"></a><p>
+    If <code class="option">standby_disconnect_on_failover</code> is set to <code class="literal">true</code> in
+    <code class="filename">ltcluster.conf</code>, in a failover situation <span class="productname">ltclusterd</span> will forcibly disconnect
+    the local node's WAL receiver, and wait for the WAL receiver on all sibling nodes to be
+	disconnected, before making a failover decision.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      <code class="option">standby_disconnect_on_failover</code> is available with LightDB 9.5 and later.
+      Additionally this requires that the <code class="literal">ltcluster</code> database user is a superuser.
+    </p></div><p>
+    By doing this, it's possible to ensure that, at the point the failover decision is made, no nodes
+    are receiving data from the primary and their LSN location will be static.
+  </p><div class="important"><h3 class="title">Important</h3><p>
+      <code class="option">standby_disconnect_on_failover</code> <span class="emphasis"><em>must</em></span> be set to the same value on
+      all nodes.
+    </p></div><p>
+    Note that when using <code class="option">standby_disconnect_on_failover</code> there will be a delay of 5 seconds
+    plus however many seconds it takes to confirm the WAL receiver is disconnected before
+    <span class="productname">ltclusterd</span> proceeds with the failover decision.
+  </p><p>
+	<span class="productname">ltclusterd</span> will wait up to <code class="option">sibling_nodes_disconnect_timeout</code> seconds (default:
+	<code class="literal">30</code>) to confirm that the WAL receiver on all sibling nodes hase been
+	disconnected before proceding with the failover operation. If the timeout is reached, the
+	failover operation will go ahead anyway.
+  </p><p>
+    Following the failover operation, no matter what the outcome, each node will reconnect its WAL receiver.
+  </p><p>
+    If using <code class="option">standby_disconnect_on_failover</code>, we recommend that the
+    <code class="option">primary_visibility_consensus</code> option is also used.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-primary-visibility-consensus.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-failover-validation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">12.3. Primary visibility consensus </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 12.5. Failover validation</td></tr></table></div></body></html>

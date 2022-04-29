@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster cluster matrix</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-cluster-show.html" title="ltcluster cluster show" /><link rel="next" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster cluster matrix</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-cluster-show.html" title="ltcluster cluster show">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-CLUSTER-MATRIX"><div class="titlepage"></div><a id="id-1.6.17.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster cluster matrix</span></h2><p>ltcluster cluster matrix — 
+      runs ltcluster cluster show on each node and summarizes output
+    </p></div><div class="refsect1" id="id-1.6.17.4"><h2>Description</h2><p>
+      <code class="command">ltcluster cluster matrix</code> runs <code class="command"><a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show">ltcluster cluster show</a></code> on each
+      node and arranges the results in a matrix, recording success or failure.
+    </p><p>
+      <code class="command">ltcluster cluster matrix</code> requires a valid <code class="filename">ltcluster.conf</code>
+      file on each node. Additionally, passwordless <code class="command">ssh</code> connections are required between
+      all nodes.
+    </p></div><div class="refsect1" id="id-1.6.17.5"><h2>Example</h2><p>
+    Example 1 (all nodes up):
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster matrix
+
+    Name   | Id |  1 |  2 |  3
+    -------+----+----+----+----
+     node1 |  1 |  * |  * |  *
+     node2 |  2 |  * |  * |  *
+     node3 |  3 |  * |  * |  *</pre><p>
+  </p><p>
+    Example 2 (<code class="literal">node1</code> and <code class="literal">node2</code> up, <code class="literal">node3</code> down):
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster matrix
+
+    Name   | Id |  1 |  2 |  3
+    -------+----+----+----+----
+     node1 |  1 |  * |  * |  x
+     node2 |  2 |  * |  * |  x
+     node3 |  3 |  ? |  ? |  ?
+    </pre><p>
+  </p><p>
+   Each row corresponds to one server, and indicates the result of
+   testing an outbound connection from that server.
+  </p><p>
+    Since <code class="literal">node3</code> is down, all the entries in its row are filled with
+    <code class="literal">?</code>, meaning that there we cannot test outbound connections.
+  </p><p>
+    The other two nodes are up; the corresponding rows have <code class="literal">x</code> in the
+    column corresponding to <code class="literal">node3</code>, meaning that inbound connections to
+    that node have failed, and <code class="literal">*</code> in the columns corresponding to
+    <code class="literal">node1</code> and <code class="literal">node2</code>, meaning that inbound connections
+    to these nodes have succeeded.
+  </p><p>
+    Example 3 (all nodes up, firewall dropping packets originating
+    from <code class="literal">node1</code> and directed to port 5432 on <code class="literal">node3</code>) -
+    running <code class="command">ltcluster cluster matrix</code> from <code class="literal">node1</code> gives the following output:
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster matrix
+
+    Name   | Id |  1 |  2 |  3
+    -------+----+----+----+----
+     node1 |  1 |  * |  * |  x
+     node2 |  2 |  * |  * |  *
+     node3 |  3 |  ? |  ? |  ?</pre><p>
+  </p><p>
+    Note this may take some time depending on the <code class="varname">connect_timeout</code>
+    setting in the node <code class="varname">conninfo</code> strings; default is
+    <code class="literal">1 minute</code> which means without modification the above
+    command would take around 2 minutes to run; see comment elsewhere about setting
+    <code class="varname">connect_timeout</code>)
+  </p><p>
+   The matrix tells us that we cannot connect from <code class="literal">node1</code> to <code class="literal">node3</code>,
+   and that (therefore) we don't know the state of any outbound
+   connection from <code class="literal">node3</code>.
+  </p><p>
+    In this case, the <a class="xref" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck"><span class="refentrytitle">ltcluster cluster crosscheck</span></a> command will produce a more
+    useful result.
+  </p></div><div class="refsect1" id="id-1.6.17.6"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster cluster matrix</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            The check completed successfully and all nodes are reachable.
+          </p></dd><dt><span class="term"><code class="option">ERR_BAD_SSH (12)</code></span></dt><dd><p>
+            One or more nodes could not be accessed via SSH.
+          </p></dd><dt><span class="term"><code class="option">ERR_NODE_STATUS (25)</code></span></dt><dd><p>
+            LightDB on one or more nodes could not be reached.
+          </p><div class="note"><h3 class="title">Note</h3><p>
+              This error code overrides <code class="option">ERR_BAD_SSH</code>.
+            </p></div></dd></dl></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-cluster-show.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-cluster-crosscheck.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster cluster show </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster cluster crosscheck</td></tr></table></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>13.2. ltclusterd daemon</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-basic-configuration.html" title="13.1. ltclusterd configuration" /><link rel="next" href="ltclusterd-connection-settings.html" title="13.3. ltclusterd connection settings" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">13.2. ltclusterd daemon</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-basic-configuration.html" title="13.1. ltclusterd configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Up</a></td><th width="60%" align="center">Chapter 13. ltclusterd setup and configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-connection-settings.html" title="13.3. ltclusterd connection settings">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-DAEMON"><div class="titlepage"><div><div><h2 class="title" style="clear: both">13.2. ltclusterd daemon</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-daemon.html#LTCLUSTERD-PID-FILE">13.2.1. ltclusterd's PID file</a></span></dt><dt><span class="sect2"><a href="ltclusterd-daemon.html#LTCLUSTERD-CONFIGURATION-DEBIAN-UBUNTU">13.2.2. ltclusterd daemon configuration on Debian/Ubuntu</a></span></dt></dl></div><a id="id-1.5.4.7.2" class="indexterm"></a><p>
+      If installed from a package, the <span class="productname">ltclusterd</span> can be started
+      via the operating system's service command, e.g. in <span class="application">systemd</span>
+      using <code class="command">systemctl</code>.
+    </p><p>
+      See appendix <a class="xref" href="appendix-packages.html" title="Appendix C. ltcluster package details">Package details</a> for details of service commands
+      for different distributions.
+    </p><p>
+      The commands <a class="link" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><code class="command">ltcluster daemon start</code></a> and
+      <a class="link" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><code class="command">ltcluster daemon stop</code></a> can be used
+      as convenience wrappers to start and stop <span class="productname">ltclusterd</span> on the local node.
+    </p><div class="important"><h3 class="title">Important</h3><p>
+        <a class="link" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><code class="command">ltcluster daemon start</code></a> and
+        <a class="link" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><code class="command">ltcluster daemon stop</code></a> require
+        that the appropriate start/stop commands are configured as
+        <code class="varname">ltclusterd_service_start_command</code> and <code class="varname">ltclusterd_service_stop_command</code>
+        in <code class="filename">ltcluster.conf</code>.
+      </p></div><p>
+      <span class="productname">ltclusterd</span> can be started manually like this:
+      </p><pre class="programlisting">
+        ltclusterd -f /etc/ltcluster.conf --pid-file /tmp/ltclusterd.pid</pre><p>
+      and stopped with <code class="command">kill `cat /tmp/ltclusterd.pid`</code>. Adjust paths as appropriate.
+    </p><div class="sect2" id="LTCLUSTERD-PID-FILE"><div class="titlepage"><div><div><h3 class="title">13.2.1. ltclusterd's PID file</h3></div></div></div><a id="id-1.5.4.7.8.2" class="indexterm"></a><a id="id-1.5.4.7.8.3" class="indexterm"></a><p>
+        <span class="productname">ltclusterd</span> will generate a PID file by default.
+      </p><div class="note"><h3 class="title">Note</h3><p>
+          This is a behaviour change from previous versions (earlier than 4.1), where
+          the PID file had to be explicitly specified with the command line
+          parameter <code class="option">--pid-file</code>.
+        </p></div><p>
+        The PID file can be specified in <code class="filename">ltcluster.conf</code> with the configuration
+        parameter <code class="varname">ltclusterd_pid_file</code>.
+      </p><p>
+        It can also be specified on the command line (as in previous versions) with
+        the command line parameter <code class="option">--pid-file</code>. Note this will override
+        any value set in <code class="filename">ltcluster.conf</code> with <code class="varname">ltclusterd_pid_file</code>.
+        <code class="option">--pid-file</code> may be deprecated in future releases.
+      </p><p>
+        If a PID file location was specified by the package maintainer, <span class="productname">ltclusterd</span>
+        will use that. This only applies if <span class="productname">ltcluster</span> was installed from a package and the package
+        maintainer has specified the PID file location.
+      </p><p>
+        If none of the above apply, <span class="productname">ltclusterd</span> will create a PID file
+        in the operating system's temporary directory (as setermined by the environment variable
+        <code class="varname">TMPDIR</code>, or if that is not set, will use <code class="filename">/tmp</code>).
+      </p><p>
+        To prevent a PID file being generated at all, provide the command line option
+        <code class="option">--no-pid-file</code>.
+      </p><p>
+        To see which PID file <span class="productname">ltclusterd</span> would use, execute <span class="productname">ltclusterd</span>
+        with the option <code class="option">--show-pid-file</code>. <span class="productname">ltclusterd</span>
+        will not start if this option is provided. Note that the value shown is the
+        file  <span class="productname">ltclusterd</span> would use next time it starts, and is
+        not necessarily the PID file currently in use.
+      </p></div><div class="sect2" id="LTCLUSTERD-CONFIGURATION-DEBIAN-UBUNTU"><div class="titlepage"><div><div><h3 class="title">13.2.2. ltclusterd daemon configuration on Debian/Ubuntu</h3></div></div></div><a id="id-1.5.4.7.9.2" class="indexterm"></a><a id="id-1.5.4.7.9.3" class="indexterm"></a><p>
+        If <span class="productname">ltcluster</span> was installed from Debian/Ubuntu packages, additional configuration
+        is required before <span class="productname">ltclusterd</span> is started as a daemon.
+      </p><p>
+        This is done via the file <code class="filename">/etc/default/ltclusterd</code>, which by default
+        looks like this:
+        </p><pre class="programlisting">
+# default settings for ltclusterd. This file is source by /bin/sh from
+# /etc/init.d/ltclusterd
+
+# disable ltclusterd by default so it won't get started upon installation
+# valid values: yes/no
+LTCLUSTERD_ENABLED=no
+
+# configuration file (required)
+#LTCLUSTERD_CONF="/path/to/ltcluster.conf"
+
+# additional options
+LTCLUSTERD_OPTS="--daemonize=false"
+
+# user to run ltclusterd as
+#LTCLUSTERD_USER=lightdb
+
+# ltclusterd binary
+#LTCLUSTERD_BIN=/usr/bin/ltclusterd
+
+# pid file
+#LTCLUSTERD_PIDFILE=/var/run/ltclusterd.pid</pre><p>
+      </p><p>
+        Set <code class="varname">LTCLUSTERD_ENABLED</code> to <code class="literal">yes</code>, and <code class="varname">LTCLUSTERD_CONF</code>
+        to the <code class="filename">ltcluster.conf</code> file you are using.
+      </p><div class="tip"><h3 class="title">Tip</h3><p>
+          See <a class="xref" href="packages-debian-ubuntu.html" title="C.2. Debian/Ubuntu Packages">Debian/Ubuntu packages</a> for details of the Debian/Ubuntu packages and
+          typical file locations (including <code class="filename">ltcluster.conf</code>).
+        </p></div><p>
+        From <span class="productname">ltclusterd</span> 4.1, ensure <code class="varname">LTCLUSTERD_OPTS</code> includes
+        <code class="option">--daemonize=false</code>, as daemonization is handled by the service command.
+      </p><p>
+        If using <span class="application">systemd</span>, you may need to execute <code class="command">systemctl daemon-reload</code>.
+        Also, if you attempted to start <span class="productname">ltclusterd</span> using <code class="command">systemctl start ltclusterd</code>,
+        you'll need to execute <code class="command">systemctl stop ltclusterd</code>. Because that's how <span class="application">systemd</span>
+        rolls.
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-basic-configuration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-connection-settings.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">13.1. ltclusterd configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 13.3. ltclusterd connection settings</td></tr></table></div></body></html>

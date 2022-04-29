@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster cluster show</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-node-service.html" title="ltcluster node service" /><link rel="next" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster cluster show</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-node-service.html" title="ltcluster node service">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-CLUSTER-SHOW"><div class="titlepage"></div><a id="id-1.6.16.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster cluster show</span></h2><p>ltcluster cluster show — display information about each registered node in the replication cluster</p></div><div class="refsect1" id="id-1.6.16.4"><h2>Description</h2><p>
+      Displays information about each registered node in the replication cluster. This
+      command polls each registered server and shows its role (<code class="literal">primary</code> /
+      <code class="literal">standby</code>) and status. It polls each server
+      directly and can be run on any node in the cluster; this is also useful when analyzing
+      connectivity from a particular node.
+    </p><p>
+	  For LightDB 9.6 and later, the output will also contain the node's current timeline ID.
+	</p><p>
+      Node availability is tested by connecting from the node where
+      <code class="command">ltcluster cluster show</code> is executed, and does not necessarily imply the node
+      is down. See <a class="xref" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix"><span class="refentrytitle">ltcluster cluster matrix</span></a> and <a class="xref" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck"><span class="refentrytitle">ltcluster cluster crosscheck</span></a> to get
+      better overviews of connections between nodes.
+    </p></div><div class="refsect1" id="id-1.6.16.5"><h2>Execution</h2><p>
+      This command requires either a valid <code class="filename">ltcluster.conf</code> file or a database
+      connection string to one of the registered nodes; no additional arguments are needed.
+    </p><p>
+      To show database connection errors when polling nodes, run the command in
+      <code class="literal">--verbose</code> mode.
+    </p></div><div class="refsect1" id="id-1.6.16.6"><h2>Example</h2><p>
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status    | Upstream | Location | Priority | Timeline | Connection string
+    ----+-------+---------+-----------+----------+----------+----------+----------+-----------------------------------------
+     1  | node1 | primary | * running |          | default  | 100      | 1        | host=db_node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby |   running | node1    | default  | 100      | 1        | host=db_node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running | node1    | default  | 100      | 1        | host=db_node3 dbname=ltcluster user=ltcluster
+     4  | node4 | standby |   running | node1    | default  | 100      | 1        | host=db_node4 dbname=ltcluster user=ltcluster
+     5  | node5 | witness | * running | node1    | default  | 0        | n/a      | host=db_node5 dbname=ltcluster user=ltcluster</pre><p>
+  </p></div><div class="refsect1" id="id-1.6.16.7"><h2>Notes</h2><p>
+      The column <code class="literal">Role</code> shows the expected server role according to the
+      <span class="productname">ltcluster</span> metadata.
+	</p><p>
+	  <code class="literal">Status</code> shows whether the server is running or unreachable.
+      If the node has an unexpected role not reflected in the <span class="productname">ltcluster</span> metadata, e.g. a node was manually
+      promoted to primary, this will be highlighted with an exclamation mark.
+	  If a connection to the node cannot be made, this will be highlighted with a question mark.
+	  Note that the node will only be shown as <code class="literal">? unreachable</code>
+	  if a connection is not possible at network level; if the LightDB instance on the
+	  node is pingable but not accepting connections, it will be shown as <code class="literal">? running</code>.
+	</p><p>
+	  In the following example, executed on <code class="literal">node3</code>, <code class="literal">node1</code> is not reachable
+	  at network level and assumed to be down; <code class="literal">node2</code> has been promoted to primary
+	  (but <code class="literal">node3</code> is not attached to it, and its metadata has not yet been updated);
+	  <code class="literal">node4</code> is running but rejecting connections (from <code class="literal">node3</code> at least).
+      </p><pre class="programlisting">
+     ID | Name  | Role    | Status               | Upstream | Location | Priority | Timeline | Connection string
+    ----+-------+---------+----------------------+----------+----------+----------+----------+----------------------------------------------------
+     1  | node1 | primary | ? unreachable        |          | default  | 100      |          | host=db_node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby | ! running as primary | ? node1  | default  | 100      | 2        | host=db_node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running            | ? node1  | default  | 100      | 1        | host=db_node3 dbname=ltcluster user=ltcluster
+     4  | node4 | standby | ? running            | ? node1  | default  | 100      |          | host=db_node4 dbname=ltcluster user=ltcluster
+
+    WARNING: following issues were detected
+      - unable to connect to node "node1" (ID: 1)
+      - node "node1" (ID: 1) is registered as an active primary but is unreachable
+      - node "node2" (ID: 2) is registered as standby but running as primary
+      - unable to connect to node "node2" (ID: 2)'s upstream node "node1" (ID: 1)
+      - unable to determine if node "node2" (ID: 2) is attached to its upstream node "node1" (ID: 1)
+      - unable to connect to node "node3" (ID: 3)'s upstream node "node1" (ID: 1)
+      - unable to determine if node "node3" (ID: 3) is attached to its upstream node "node1" (ID: 1)
+      - unable to connect to node "node4" (ID: 4)
+    HINT: execute with --verbose option to see connection error messages</pre><p>
+    </p><p>
+	  To diagnose connection issues, execute <code class="command">ltcluster cluster show</code>
+	  with the <code class="option">--verbose</code> option; this will display the error message
+	  for each failed connection attempt.
+	</p><div class="tip"><h3 class="title">Tip</h3><p>
+		Use <a class="xref" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix"><span class="refentrytitle">ltcluster cluster matrix</span></a> and <a class="xref" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck"><span class="refentrytitle">ltcluster cluster crosscheck</span></a>
+		to diagnose connection issues across the whole replication cluster.
+	  </p></div></div><div class="refsect1" id="id-1.6.16.8"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--csv</code></span></dt><dd><p>
+	    <code class="command">ltcluster cluster show</code> accepts an optional parameter <code class="literal">--csv</code>, which
+	    outputs the replication cluster's status in a simple CSV format, suitable for
+	    parsing by scripts, e.g.:
+	    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show --csv
+    1,-1,-1
+    2,0,0
+    3,0,1</pre><p>
+	  </p><p>
+	    The columns have following meanings:
+	    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+		  node ID
+		</li><li class="listitem" style="list-style-type: disc">
+            availability (0 = available, -1 = unavailable)
+		</li><li class="listitem" style="list-style-type: disc">
+            recovery state (0 = not in recovery, 1 = in recovery, -1 = unknown)
+		</li></ul></div><p>
+	  </p></dd><dt><span class="term"><code class="option">--compact</code></span></dt><dd><p>
+			Suppress display of the <code class="literal">conninfo</code> column.
+          </p></dd><dt><span class="term"><code class="option">--terse</code></span></dt><dd><p>
+			Suppress warnings about connection issues.
+          </p></dd><dt><span class="term"><code class="option">--verbose</code></span></dt><dd><p>
+			Display the full text of any database connection error messages
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.16.9"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster cluster show</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            No issues were detected.
+          </p></dd><dt><span class="term"><code class="option">ERR_BAD_CONFIG (1)</code></span></dt><dd><p>
+            An issue was encountered while attempting to retrieve
+            <span class="productname">ltcluster</span> metadata.
+          </p></dd><dt><span class="term"><code class="option">ERR_DB_CONN (6)</code></span></dt><dd><p>
+            <span class="productname">ltcluster</span> was unable to connect to the local LightDB instance.
+          </p></dd><dt><span class="term"><code class="option">ERR_NODE_STATUS (25)</code></span></dt><dd><p>
+            One or more issues were detected with the replication configuration,
+            e.g. a node was not in its expected state.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.16.10"><h2>See also</h2><p>
+     <a class="xref" href="ltcluster-node-status.html" title="ltcluster node status"><span class="refentrytitle">ltcluster node status</span></a>, <a class="xref" href="ltcluster-node-check.html" title="ltcluster node check"><span class="refentrytitle">ltcluster node check</span></a>, <a class="xref" href="ltcluster-service-status.html" title="ltcluster service status"><span class="refentrytitle">ltcluster service status</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-node-service.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-cluster-matrix.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster node service </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster cluster matrix</td></tr></table></div></body></html>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>1.3. Ltcluster user and metadata</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-components.html" title="1.2. Components" /><link rel="next" href="installation.html" title="Chapter 2. Installation" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">1.3. Ltcluster user and metadata</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-components.html" title="1.2. Components">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="overview.html" title="Chapter 1. ltcluster overview">Up</a></td><th width="60%" align="center">Chapter 1. ltcluster overview</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="installation.html" title="Chapter 2. Installation">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTER-USER-METADATA"><div class="titlepage"><div><div><h2 class="title" style="clear: both">1.3. Ltcluster user and metadata</h2></div></div></div><p>
+   In order to effectively manage a replication cluster, <span class="productname">ltcluster</span> needs to store
+   information about the servers in the cluster in a dedicated database schema.
+   This schema is automatically created by the <span class="productname">ltcluster</span> extension, which is installed
+   during the first step in initializing a <span class="productname">ltcluster</span>-administered cluster
+   (<code class="command"><a class="link" href="ltcluster-primary-register.html" title="ltcluster primary register">ltcluster primary register</a></code>)
+   and contains the following objects:
+   </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Tables</span></dt><dd><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">ltcluster.events</code>: records events of interest</li><li class="listitem"><code class="literal">ltcluster.nodes</code>: connection and status information for each server in the
+    replication cluster</li><li class="listitem"><code class="literal">ltcluster.monitoring_history</code>: historical standby monitoring information
+            written by <span class="productname">ltclusterd</span></li></ul></div><p>
+      </p></dd><dt><span class="term">Views</span></dt><dd><p>
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">ltcluster.show_nodes: based on the table <code class="literal">ltcluster.nodes</code>, additionally showing the
+           name of the server's upstream node</li><li class="listitem">ltcluster.replication_status: when <span class="productname">ltclusterd</span>'s monitoring is enabled, shows
+            current monitoring status for each standby.</li></ul></div><p>
+      </p></dd></dl></div><p>
+  </p><p>
+   The <span class="productname">ltcluster</span> metadata schema can be stored in an existing database or in its own
+   dedicated database. Note that the <span class="productname">ltcluster</span> metadata schema cannot reside on a database
+   server which is not part of the replication cluster managed by <span class="productname">ltcluster</span>.
+  </p><p>
+   A database user must be available for <span class="productname">ltcluster</span> to access this database and perform
+   necessary changes. This user does not need to be a superuser, however some operations
+   such as initial installation of the <span class="productname">ltcluster</span> extension will require a superuser
+   connection (this can be specified where required with the command line option
+   <code class="literal">--superuser</code>).
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-components.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="overview.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="installation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">1.2. Components </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 2. Installation</td></tr></table></div></body></html>

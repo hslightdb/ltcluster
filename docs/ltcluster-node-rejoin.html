@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster node rejoin</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-node-check.html" title="ltcluster node check" /><link rel="next" href="ltcluster-node-service.html" title="ltcluster node service" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster node rejoin</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-node-check.html" title="ltcluster node check">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-node-service.html" title="ltcluster node service">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-NODE-REJOIN"><div class="titlepage"></div><a id="id-1.6.14.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster node rejoin</span></h2><p>ltcluster node rejoin — rejoin a dormant (stopped) node to the replication cluster</p></div><div class="refsect1" id="id-1.6.14.4"><h2>Description</h2><p>
+      Enables a dormant (stopped) node to be rejoined to the replication cluster.
+    </p><p>
+      This can optionally use <span class="application">lt_rewind</span> to re-integrate
+      a node which has diverged from the rest of the cluster, typically a failed primary.
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        If the node is running and needs to be attached to the current primary, use
+        <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a>.
+      </p><p>
+        Note <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a> can only be used for standbys which have not diverged
+        from the rest of the cluster.
+      </p></div></div><div class="refsect1" id="id-1.6.14.5"><h2>Usage</h2><p>
+      </p><pre class="programlisting">
+      ltcluster node rejoin -d '$conninfo'</pre><p>
+
+      where <code class="literal">$conninfo</code> is the LightDB <code class="literal">conninfo</code> string of the
+      <span class="emphasis"><em>current</em></span> primary node (or that of any reachable node in the cluster, but
+      <span class="emphasis"><em>not</em></span> the local node). This is so that <span class="productname">ltcluster</span> can fetch up-to-date information
+      about the current state of the cluster.
+    </p><p>
+      <code class="filename">ltcluster.conf</code> for the stopped node *must* be supplied explicitly if not
+      otherwise available.
+    </p></div><div class="refsect1" id="id-1.6.14.6"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually execute the rejoin.
+          </p></dd><dt><span class="term"><code class="option">--force-rewind[=/path/to/lt_rewind]</code></span></dt><dd><p>
+            Execute <span class="application">lt_rewind</span>.
+          </p><p>
+            It is only necessary to provide the <span class="application">lt_rewind</span> path
+            if using LightDB 9.4, and <span class="application">lt_rewind</span>
+            is not installed in the LightDB <code class="filename">bin</code> directory.
+          </p></dd><dt><span class="term"><code class="option">--config-files</code></span></dt><dd><p>
+            comma-separated list of configuration files to retain after
+            executing <span class="application">lt_rewind</span>.
+          </p><p>
+            Currently <span class="application">lt_rewind</span> will overwrite
+            the local node's configuration files with the files from the source node,
+            so it's advisable to use this option to ensure they are kept.
+          </p></dd><dt><span class="term"><code class="option">--config-archive-dir</code></span></dt><dd><p>
+            Directory to temporarily store configuration files specified with
+            <code class="option">--config-files</code>; default: <code class="filename">/tmp</code>.
+          </p></dd><dt><span class="term"><code class="option">-W/--no-wait</code></span></dt><dd><p>
+            Don't wait for the node to rejoin cluster.
+          </p><p>
+            If this option is supplied, <span class="productname">ltcluster</span> will restart the node but
+            not wait for it to connect to the primary.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.14.7"><h2>Configuration file settings</h2><p>
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p class="simpara">
+           <code class="literal">node_rejoin_timeout</code>:
+		   the maximum length of time (in seconds) to wait for
+		   the node to reconnect to the replication cluster (defaults to
+		   the value set in <code class="literal">standby_reconnect_timeout</code>,
+		   60 seconds).
+		 </p><p class="simpara">
+           Note that <code class="literal">standby_reconnect_timeout</code> must be
+           set to a value equal to or greater than
+           <code class="literal">node_rejoin_timeout</code>.
+         </p></li></ul></div><p>
+	</p></div><div class="refsect1" id="LTCLUSTER-NODE-REJOIN-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">node_rejoin</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div><div class="refsect1" id="id-1.6.14.9"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster node rejoin</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            The node rejoin succeeded; or if <code class="option">--dry-run</code> was provided,
+            no issues were detected which would prevent the node rejoin.
+          </p></dd><dt><span class="term"><code class="option">ERR_BAD_CONFIG (1)</code></span></dt><dd><p>
+            A configuration issue was detected which prevented <span class="productname">ltcluster</span> from
+            continuing with the node rejoin.
+          </p></dd><dt><span class="term"><code class="option">ERR_NO_RESTART (4)</code></span></dt><dd><p>
+            The node could not be restarted.
+          </p></dd><dt><span class="term"><code class="option">ERR_REJOIN_FAIL (24)</code></span></dt><dd><p>
+            The node rejoin operation failed.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.14.10"><h2>Notes</h2><p>
+      Currently <code class="command">ltcluster node rejoin</code> can only be used to attach
+      a standby to the current primary, not another standby.
+    </p><p>
+      The node's LightDB instance  must have been shut down cleanly. If this was not the
+      case, it will need to be started up until it has reached a consistent recovery point,
+      then shut down cleanly.
+    </p><p>
+      In LightDB 13 and later, this will be done automatically
+      if the <code class="option">--force-rewind</code> is provided (even if an actual rewind
+      is not necessary).
+    </p><p>
+      With LightDB 12 and earlier, LightDB will need to
+      be started and shut down manually; see below for the best way to do this.
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        If <span class="application">LightDB</span> is started in single-user mode and
+        input is directed from <code class="filename">/dev/null/</code>, it will perform recovery
+        then immediately quit, and will then be in a state suitable for use by
+        <span class="application">lt_rewind</span>.
+        </p><pre class="programlisting">
+          rm -f /var/lib/pgsql/data/recovery.conf
+          lightdb --single -D /var/lib/pgsql/data/ &lt; /dev/null</pre><p>
+      </p><p>
+        Note that  <code class="filename">standby.signal</code> (LightDB 11 and earlier:
+        <code class="filename">recovery.conf</code>) <span class="emphasis"><em>must</em></span> be removed
+        from the data directory for LightDB to be able to start in single
+        user mode.
+      </p></div></div><div class="refsect1" id="LTCLUSTER-NODE-REJOIN-PG-REWIND"><h2>Using <code class="command">lt_rewind</code></h2><a id="id-1.6.14.11.2" class="indexterm"></a><p>
+      <code class="command">ltcluster node rejoin</code> can optionally use <code class="command">lt_rewind</code> to re-integrate a
+      node which has diverged from the rest of the cluster, typically a failed primary.
+      <code class="command">lt_rewind</code> is available in LightDB 9.5 and later as part of the core distribution,
+      and can be installed from external sources for LightDB 9.4.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        <code class="command">lt_rewind</code> <span class="emphasis"><em>requires</em></span> that either
+        <code class="varname">wal_log_hints</code> is enabled, or that
+        data checksums were enabled when the cluster was initialized. See the
+        <a class="ulink" href="www.hs.net/lightdb/docs/current/app-pgrewind.html" target="_top"><code class="command">lt_rewind</code> documentation</a> for details.
+      </p></div><p>
+      We strongly recommend familiarizing yourself with <code class="command">lt_rewind</code> before attempting
+      to use it with <span class="productname">ltcluster</span>, as while it is an extremely useful tool, it is <span class="emphasis"><em>not</em></span>
+      a "magic bullet" which can resolve all problematic replication situations.
+    </p><p>
+      A typical use-case for <code class="command">lt_rewind</code> is when a scenario like the following
+      is encountered:
+      </p><pre class="programlisting">
+    $ ltcluster node rejoin -f /etc/ltcluster.conf -d 'host=node3 dbname=ltcluster user=ltcluster' \
+        --force-rewind --config-files=postgresql.local.conf,postgresql.conf --verbose --dry-run
+    INFO: replication connection to the rejoin target node was successful
+    INFO: local and rejoin target system identifiers match
+    DETAIL: system identifier is 6652184002263212600
+    ERROR: this node cannot attach to rejoin target node 3
+    DETAIL: rejoin target server's timeline 2 forked off current database system timeline 1 before current recovery point 0/610D710
+    HINT: use --force-rewind to execute lt_rewind</pre><p>
+
+      Here, <code class="literal">node3</code> was promoted to a primary while the local node was
+      still attached to the previous primary; this can potentially happen during e.g. a
+      network split. <code class="command">lt_rewind</code> can re-sync the local node with <code class="literal">node3</code>,
+      removing the need for a full reclone.
+    </p><p>
+      To have <code class="command">ltcluster node rejoin</code> use <code class="command">lt_rewind</code>,
+      pass the command line option <code class="literal">--force-rewind</code>, which will tell <span class="productname">ltcluster</span>
+      to execute <code class="command">lt_rewind</code> to ensure the node can be rejoined successfully.
+    </p><div class="refsect2" id="LTCLUSTER-NODE-REJOIN-PG-REWIND-CONFIG-FILES"><h3><code class="command">lt_rewind</code> and configuration file retention</h3><a id="id-1.6.14.11.8.2" class="indexterm"></a><p>
+        Be aware that if <code class="command">lt_rewind</code> is executed and actually performs a
+        rewind operation, any configuration files in the LightDB data directory will be
+        overwritten with those from the source server.
+      </p><p>
+        To prevent this happening, provide a comma-separated list of files to retain
+        using the <code class="option">--config-file</code> command line option; the specified files
+        will be archived in a temporary directory (whose parent directory can be specified with
+        <code class="option">--config-archive-dir</code>, default: <code class="filename">/tmp</code>)
+        and restored once the rewind operation is complete.
+      </p></div><div class="refsect2" id="LTCLUSTER-NODE-REJOIN-PG-REWIND-EXAMPLE"><h3>Example using <code class="command">ltcluster node rejoin</code> and <code class="command">lt_rewind</code></h3><a id="id-1.6.14.11.9.2" class="indexterm"></a><p>
+        Example, first using <code class="option">--dry-run</code>, then actually executing the
+        <code class="literal">node rejoin command</code>.
+        </p><pre class="programlisting">
+    $ ltcluster node rejoin -f /etc/ltcluster.conf -d 'host=node3 dbname=ltcluster user=ltcluster' \
+        --config-files=postgresql.local.conf,postgresql.conf --verbose --force-rewind --dry-run
+    INFO: replication connection to the rejoin target node was successful
+    INFO: local and rejoin target system identifiers match
+    DETAIL: system identifier is 6652460429293670710
+    NOTICE: lt_rewind execution required for this node to attach to rejoin target node 3
+    DETAIL: rejoin target server's timeline 2 forked off current database system timeline 1 before current recovery point 0/610D710
+    INFO: prerequisites for using lt_rewind are met
+    INFO: file "postgresql.local.conf" would be copied to "/tmp/ltcluster-config-archive-node2/postgresql.local.conf"
+    INFO: file "postgresql.replication-setup.conf" would be copied to "/tmp/ltcluster-config-archive-node2/lightdb.replication-setup.conf"
+    INFO: lt_rewind would now be executed
+    DETAIL: lt_rewind command is:
+      lt_rewind -D '/var/lib/lightdb/data' --source-server='host=node3 dbname=ltcluster user=ltcluster'
+    INFO: prerequisites for executing NODE REJOIN are met</pre><p>
+
+        </p><div class="note"><h3 class="title">Note</h3><p>
+            If <code class="option">--force-rewind</code> is used with the <code class="option">--dry-run</code> option,
+            this checks the prerequisites for using <span class="application">lt_rewind</span>, but is
+            not an absolute guarantee that actually executing <span class="application">lt_rewind</span>
+            will succeed. See also section <a class="xref" href="ltcluster-node-rejoin.html#LTCLUSTER-NODE-REJOIN-CAVEATS" title="Caveats when using ltcluster node rejoin">Caveats</a> below.
+          </p></div><p>
+
+        </p><pre class="programlisting">
+    $ ltcluster node rejoin -f /etc/ltcluster.conf -d 'host=node3 dbname=ltcluster user=ltcluster' \
+        --config-files=postgresql.local.conf,postgresql.conf --verbose --force-rewind
+    NOTICE: lt_rewind execution required for this node to attach to rejoin target node 3
+    DETAIL: rejoin target server's timeline 2 forked off current database system timeline 1 before current recovery point 0/610D710
+    NOTICE: executing lt_rewind
+    DETAIL: lt_rewind command is "lt_rewind -D '/var/lib/lightdb/data' --source-server='host=node3 dbname=ltcluster user=ltcluster'"
+    NOTICE: 2 files copied to /var/lib/lightdb/data
+    NOTICE: setting node 2's upstream to node 3
+    NOTICE: starting server using "lt_ctl -l /var/log/lightdb/startup.log -w -D '/var/lib/pgsql/data' start"
+    NOTICE: NODE REJOIN successful
+    DETAIL: node 2 is now attached to node 3</pre><p>
+      </p></div></div><div class="refsect1" id="LTCLUSTER-NODE-REJOIN-CAVEATS"><h2>Caveats when using <code class="command">ltcluster node rejoin</code></h2><a id="id-1.6.14.12.2" class="indexterm"></a><p>
+     <code class="command">ltcluster node rejoin</code> attempts to determine whether it will succeed by
+     comparing the timelines and relative WAL positions of the local node (rejoin candidate) and primary
+     (rejoin target). This is particularly important if planning to use <span class="application">lt_rewind</span>,
+     which currently (as of LightDB 12) may appear to succeed (or indicate there is no action
+     needed) but potentially allow an impossible action, such as trying to rejoin a standby to a
+     primary which is behind the standby. <span class="productname">ltcluster</span> will prevent this situation from occurring.
+   </p><p>
+     Currently it is <span class="emphasis"><em>not</em></span> possible to detect a situation where the rejoin target
+     is a standby which has been "promoted" by removing <code class="filename">recovery.conf</code>
+     (LightDB 12 and later: <code class="filename">standby.signal</code>) and restarting it.
+     In this case there will be no information about the point the rejoin target diverged
+     from the current standby; the rejoin operation will fail and
+     the current standby's LightDB log will contain entries with the text
+     "<code class="literal">record with incorrect prev-link</code>".
+   </p><p>
+     In LightDB 9.5 and earlier, it is <span class="emphasis"><em>not</em></span> possible to use
+     <span class="application">lt_rewind</span> to attach to a target node with a lower
+     timeline than the local node.
+   </p><p>
+     We strongly recommend running <code class="command">ltcluster node rejoin</code> with the
+     <code class="option">--dry-run</code> option first. Additionally it might be a good idea
+     to execute the <span class="application">lt_rewind</span> command displayed by
+     <span class="productname">ltcluster</span> with the <span class="application">lt_rewind</span> <code class="option">--dry-run</code>
+     option. Note that <span class="application">lt_rewind</span> does not indicate that it
+     is running in <code class="option">--dry-run</code> mode.
+   </p><div class="warning"><h3 class="title">Warning</h3><p>
+       In all current LightDB versions (as of September 2020), <span class="application">lt_rewind</span>
+       contains a corner-case bug which affects standbys in a very specific situation.
+     </p><p>
+       This situation occurs when a standby was shut down <span class="emphasis"><em>before</em></span> its
+       primary node, and an attempt is made to attach this standby to another primary
+       in the same cluster (following a "split brain" situation where the standby
+       was connected to the wrong primary). In this case, <span class="productname">ltcluster</span> will correctly determine
+       that <span class="application">lt_rewind</span> should be executed, however
+       <span class="application">lt_rewind</span> incorrectly decides that no action is necessary.
+     </p><p>
+       In this situation, <span class="productname">ltcluster</span> will report something like:
+</p><pre class="programlisting">
+    NOTICE: lt_rewind execution required for this node to attach to rejoin target node 1
+    DETAIL: rejoin target server's timeline 3 forked off current database system timeline 2 before current recovery point 0/7019C10</pre><p>
+       but when executed, <span class="application">lt_rewind</span> will report:
+</p><pre class="programlisting">
+    lt_rewind: servers diverged at WAL location 0/7015540 on timeline 2
+    lt_rewind: no rewind required</pre><p>
+       and if an attempt is made to attach the standby to the new primary, LightDB logs on the standby
+       will contain errors like:
+</p><pre class="programlisting">
+    [2020-09-07 15:01:41 UTC]    LOG:  00000: replication terminated by primary server
+    [2020-09-07 15:01:41 UTC]    DETAIL:  End of WAL reached on timeline 2 at 0/7015540.
+    [2020-09-07 15:01:41 UTC]    LOG:  00000: new timeline 3 forked off current database system timeline 2 before current recovery point 0/7019C10</pre><p>
+     </p><p>
+       Currently it is not possible to resolve this situation using <span class="application">lt_rewind</span>.
+       A <a class="ulink" href="www.hs.net/lightdb/message-id/flat/CABvVfJU-LDWvoz4-Yow3Ay5LZYTuPD7eSjjE4kGyNZpXC6FrVQ@mail.gmail.com" target="_top">patch</a>
+       has been submitted and will hopefully be included in a forthcoming LightDB minor release.
+     </p><p>
+       As a workaround, start the primary server the standby was previously attached to,
+       and ensure the standby can be attached to it. If <span class="application">lt_rewind</span> was actually executed,
+       it will have copied in the <code class="filename">.history</code> file from the target primary server; this must
+       be removed. <code class="command">ltcluster node rejoin</code> can then be used to attach the standby to the original
+       primary. Ensure any changes pending on the primary have propogated to the standby. Then shut down the primary
+       server <span class="emphasis"><em>first</em></span>, before shutting down the standby. It should then be possible to
+       use <code class="command">ltcluster node rejoin</code> to attach the standby to the new primary.
+     </p></div></div><div class="refsect1" id="id-1.6.14.13"><h2>See also</h2><p>
+     <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-node-check.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-node-service.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster node check </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster node service</td></tr></table></div></body></html>

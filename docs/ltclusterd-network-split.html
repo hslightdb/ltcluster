@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.2. Handling network splits with ltclusterd</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-witness-server.html" title="12.1. Using a witness server" /><link rel="next" href="ltclusterd-primary-visibility-consensus.html" title="12.3. Primary visibility consensus" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.2. Handling network splits with ltclusterd</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-witness-server.html" title="12.1. Using a witness server">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-primary-visibility-consensus.html" title="12.3. Primary visibility consensus">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-NETWORK-SPLIT"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.2. Handling network splits with ltclusterd</h2></div></div></div><a id="id-1.5.3.5.2" class="indexterm"></a><a id="id-1.5.3.5.3" class="indexterm"></a><p>
+  A common pattern for replication cluster setups is to spread servers over
+  more than one datacentre. This can provide benefits such as geographically-
+  distributed read replicas and DR (disaster recovery capability). However
+  this also means there is a risk of disconnection at network level between
+  datacentre locations, which would result in a split-brain scenario if
+  servers in a secondary data centre were no longer able to see the primary
+  in the main data centre and promoted a standby among themselves.
+ </p><p>
+  <span class="productname">ltcluster</span> enables provision of "<a class="xref" href="ltcluster-concepts.html#WITNESS-SERVER">witness server</a>" to
+  artificially create a quorum of servers in a particular location, ensuring
+  that nodes in another location will not elect a new primary if they
+  are unable to see the majority of nodes. However this approach does not
+  scale well, particularly with more complex replication setups, e.g.
+  where the majority of nodes are located outside of the primary datacentre.
+  It also means the <code class="literal">witness</code> node needs to be managed as an
+  extra LightDB instance outside of the main replication cluster, which
+  adds administrative and programming complexity.
+ </p><p>
+  <code class="literal">ltcluster4</code> introduces the concept of <code class="literal">location</code>:
+  each node is associated with an arbitrary location string (default is
+  <code class="literal">default</code>); this is set in <code class="filename">ltcluster.conf</code>, e.g.:
+  </p><pre class="programlisting">
+    node_id=1
+    node_name=node1
+    conninfo='host=node1 user=ltcluster dbname=ltcluster connect_timeout=2'
+    data_directory='/var/lib/lightdb/data'
+    location='dc1'</pre><p>
+ </p><p>
+  In a failover situation, <span class="productname">ltclusterd</span> will check if any servers in the
+  same location as the current primary node are visible.  If not, <span class="productname">ltclusterd</span>
+  will assume a network interruption and not promote any node in any
+  other location (it will however enter <a class="link" href="ltclusterd-degraded-monitoring.html" title="14.3. &quot;degraded monitoring&quot; mode">degraded monitoring</a>
+  mode until a primary becomes visible).
+ </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-witness-server.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-primary-visibility-consensus.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">12.1. Using a witness server </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 12.3. Primary visibility consensus</td></tr></table></div></body></html>

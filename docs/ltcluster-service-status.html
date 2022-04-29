@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster service status</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup" /><link rel="next" href="ltcluster-service-pause.html" title="ltcluster service pause" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster service status</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-cluster-cleanup.html" title="ltcluster cluster cleanup">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-service-pause.html" title="ltcluster service pause">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-SERVICE-STATUS"><div class="titlepage"></div><a id="id-1.6.21.1" class="indexterm"></a><a id="id-1.6.21.2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster service status</span></h2><p>ltcluster service status — display information about the status of <span class="productname">ltclusterd</span> on each node in the cluster</p></div><div class="refsect1" id="id-1.6.21.5"><h2>Description</h2><p>
+      This command provides an overview over all active nodes in the cluster and the state
+      of each node's <span class="productname">ltclusterd</span> instance. It can be used to check
+      the result of <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a> and <a class="xref" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><span class="refentrytitle">ltcluster service unpause</span></a>
+      operations.
+    </p></div><div class="refsect1" id="id-1.6.21.6"><h2>Prerequisites</h2><p>
+      LightDB should be accessible on all nodes (using the <code class="varname">conninfo</code> string shown by
+      <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>)
+      from the node where <code class="command">ltcluster service status</code> is executed.
+    </p></div><div class="refsect1" id="id-1.6.21.7"><h2>Execution</h2><p>
+      <code class="command">ltcluster service status</code> can be executed on any active node in the
+      replication cluster. A valid <code class="filename">ltcluster.conf</code> file is required.
+    </p><p>
+      If a node is not accessible, or LightDB itself is not running on the node,
+      <span class="productname">ltcluster</span> will not be able to determine the status of that node's <span class="productname">ltclusterd</span> instance,
+      and "<code class="literal">n/a</code>" will be displayed in the node's <code class="literal">ltclusterd</code>
+      column.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        After restarting LightDB on any node, the <span class="productname">ltclusterd</span> instance
+        will take a second or two before it is able to update its status. Until then,
+        <span class="productname">ltclusterd</span> will be shown as not running.
+      </p></div></div><div class="refsect1" id="id-1.6.21.8"><h2>Examples</h2><p>
+      <span class="productname">ltclusterd</span> running normally on all nodes:
+    </p><pre class="programlisting">$ ltcluster -f /etc/ltcluster.conf service status
+ ID | Name  | Role    | Status    | Upstream | ltclusterd | PID   | Paused? | Upstream last seen
+----+-------+---------+-----------+----------+---------+-------+---------+--------------------
+ 1  | node1 | primary | * running |          | running | 96563 | no      | n/a
+ 2  | node2 | standby |   running | node1    | running | 96572 | no      | 1 second(s) ago
+ 3  | node3 | standby |   running | node1    | running | 96584 | no      | 0 second(s) ago</pre><p>
+    </p><p>
+      <span class="productname">ltclusterd</span> paused on all nodes (using <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a>):
+    </p><pre class="programlisting">$ ltcluster -f /etc/ltcluster.conf service status
+ ID | Name  | Role    | Status    | Upstream | ltclusterd | PID   | Paused? | Upstream last seen
+----+-------+---------+-----------+----------+---------+-------+---------+--------------------
+ 1  | node1 | primary | * running |          | running | 96563 | yes     | n/a
+ 2  | node2 | standby |   running | node1    | running | 96572 | yes     | 1 second(s) ago
+ 3  | node3 | standby |   running | node1    | running | 96584 | yes     | 0 second(s) ago</pre><p>
+    </p><p>
+      <span class="productname">ltclusterd</span> not running on one node:
+    </p><pre class="programlisting">$ ltcluster -f /etc/ltcluster.conf service status
+ ID | Name  | Role    | Status    | Upstream | ltclusterd     | PID   | Paused? | Upstream last seen
+----+-------+---------+-----------+----------+-------------+-------+---------+--------------------
+ 1  | node1 | primary | * running |          | running     | 96563 | yes     | n/a
+ 2  | node2 | standby |   running | node1    | not running | n/a   | n/a     | n/a
+ 3  | node3 | standby |   running | node1    | running     | 96584 | yes     | 0 second(s) ago</pre><p>
+    </p></div><div class="refsect1" id="id-1.6.21.9"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--csv</code></span></dt><dd><p>
+            <code class="command">ltcluster service status</code> accepts an optional parameter <code class="literal">--csv</code>, which
+            outputs the replication cluster's status in a simple CSV format, suitable for
+            parsing by scripts, e.g.:
+            </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf service status --csv
+    1,node1,primary,1,1,5722,1,100,-1,default
+    2,node2,standby,1,0,-1,1,100,1,default
+    3,node3,standby,1,1,5779,1,100,1,default</pre><p>
+          </p><p>
+            The columns have following meanings:
+            </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+                  node ID
+                </li><li class="listitem" style="list-style-type: disc">
+                  node name
+                </li><li class="listitem" style="list-style-type: disc">
+                  node type (primary or standby)
+                </li><li class="listitem" style="list-style-type: disc">
+                  LightDB server running (1 = running, 0 = not running)
+                </li><li class="listitem" style="list-style-type: disc">
+                  <span class="productname">ltclusterd</span> running (1 = running, 0 = not running, -1 = unknown)
+                </li><li class="listitem" style="list-style-type: disc">
+                  <span class="productname">ltclusterd</span> PID (-1 if not running or status unknown)
+                </li><li class="listitem" style="list-style-type: disc">
+                  <span class="productname">ltclusterd</span> paused (1 = paused, 0 = not paused, -1 = unknown)
+                </li><li class="listitem" style="list-style-type: disc">
+                  <span class="productname">ltclusterd</span> node priority
+                </li><li class="listitem" style="list-style-type: disc">
+                  interval in seconds since the node's upstream was last seen (this will be -1 if the value could not be retrieved, or the node is primary)
+                </li><li class="listitem" style="list-style-type: disc">
+                  node location
+                </li></ul></div><p>
+          </p></dd><dt><span class="term"><code class="option">--detail</code></span></dt><dd><p>
+            Display additional information (<code class="literal">location</code>, <code class="literal">priority</code>)
+	    about the <span class="productname">ltcluster</span> configuration.
+          </p></dd><dt><span class="term"><code class="option">--verbose</code></span></dt><dd><p>
+            Display the full text of any database connection error messages.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.21.10"><h2>See also</h2><p>
+      <a class="xref" href="ltcluster-service-pause.html" title="ltcluster service pause"><span class="refentrytitle">ltcluster service pause</span></a>,
+      <a class="xref" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><span class="refentrytitle">ltcluster service unpause</span></a>,
+      <a class="xref" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><span class="refentrytitle">ltcluster cluster show</span></a>,
+      <a class="xref" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pausing the ltclusterd service</a>,
+      <a class="xref" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><span class="refentrytitle">ltcluster daemon start</span></a>,
+      <a class="xref" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><span class="refentrytitle">ltcluster daemon stop</span></a>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-cluster-cleanup.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-service-pause.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster cluster cleanup </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster service pause</td></tr></table></div></body></html>

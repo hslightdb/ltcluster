@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>2.3. Installing ltcluster from source</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="installation-packages.html" title="2.2. Installing ltcluster from packages" /><link rel="next" href="quickstart.html" title="Chapter 3. Quick-start guide" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">2.3. Installing <span xmlns="http://www.w3.org/1999/xhtml" class="productname">ltcluster</span> from source</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="installation-packages.html" title="2.2. Installing ltcluster from packages">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="installation.html" title="Chapter 2. Installation">Up</a></td><th width="60%" align="center">Chapter 2. Installation</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="quickstart.html" title="Chapter 3. Quick-start guide">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="INSTALLATION-SOURCE"><div class="titlepage"><div><div><h2 class="title" style="clear: both">2.3. Installing <span class="productname">ltcluster</span> from source</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="installation-source.html#INSTALLATION-SOURCE-PREREQS">2.3.1. Prerequisites for installing from source</a></span></dt><dt><span class="sect2"><a href="installation-source.html#INSTALLATION-GET-SOURCE">2.3.2. Getting <span class="productname">ltcluster</span> source code</a></span></dt><dt><span class="sect2"><a href="installation-source.html#INSTALLATION-LTCLUSTER-SOURCE">2.3.3. Installation of <span class="productname">ltcluster</span> from source</a></span></dt><dt><span class="sect2"><a href="installation-source.html#INSTALLATION-BUILD-LTCLUSTER-DOCS">2.3.4. Building <span class="productname">ltcluster</span> documentation</a></span></dt></dl></div><a id="id-1.3.3.9.2" class="indexterm"></a><div class="sect2" id="INSTALLATION-SOURCE-PREREQS"><div class="titlepage"><div><div><h3 class="title">2.3.1. Prerequisites for installing from source</h3></div></div></div><p>
+   To install <span class="productname">ltcluster</span> the prerequisites for compiling
+   <span class="productname">LightDB</span> must be installed. These are described in <span class="productname">LightDB</span>'s
+   documentation
+   on <a class="ulink" href="https://www.hs.net/lightdb/docs/current/install-requirements.html" target="_top">build requirements</a>
+   and <a class="ulink" href="https://www.hs.net/lightdb/docs/current/docguide-toolsets.html" target="_top">build requirements for documentation</a>.
+  </p><p>
+   Most mainstream Linux distributions and other UNIX variants provide simple
+   ways to install the prerequisites from packages.
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
+      <code class="literal">Debian</code> and <code class="literal">Ubuntu</code>: First
+      add the <a class="ulink" href="https://apt.postgresql.org/" target="_top">apt.postgresql.org</a>
+      repository to your <code class="filename">sources.list</code> if you
+      have not already done so, and ensure the source repository is enabled.
+     </p><div class="tip"><h3 class="title">Tip</h3><p>
+         If not configured, the source repository can be added by including
+         a <code class="literal">deb-src</code> line as a copy of the existing <code class="literal">deb</code>
+         line in the repository file, which is usually
+         <code class="filename">/etc/apt/sources.list.d/pgdg.list</code>, e.g.:
+         </p><pre class="programlisting">
+deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
+deb-src https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main</pre><p>
+       </p></div><p>
+      Then install the prerequisites for
+      building LightDB with e.g.:
+      </p><pre class="programlisting">
+       sudo apt-get update
+       sudo apt-get build-dep lightdb-9.6</pre><p>
+      </p><div class="important"><h3 class="title">Important</h3><p>
+         Select the appropriate LightDB version for your target ltcluster version.
+       </p></div><div class="note"><h3 class="title">Note</h3><p>
+       If using <code class="command">apt-get build-dep</code> is not possible, the
+       following packages may need to be installed manually:
+
+         </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="literal">flex</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libedit-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libkrb5-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libpam0g-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libreadline-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libselinux1-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libssl-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libxml2-dev</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libxslt1-dev</code></li></ul></div><p>
+       </p></div></li><li class="listitem" style="list-style-type: disc"><p>
+      <code class="literal">RHEL or CentOS 6.x or 7.x</code>: install the appropriate repository RPM
+      for your system from <a class="ulink" href="https://yum.postgresql.org/repopackages.php" target="_top">
+      yum.postgresql.org</a>. Then install the prerequisites for building
+      LightDB with:
+      </p><pre class="programlisting">
+       sudo yum check-update
+       sudo yum groupinstall "Development Tools"
+       sudo yum install yum-utils openjade docbook-dtds docbook-style-dsssl docbook-style-xsl
+       sudo yum-builddep postgresql96</pre><p>
+     </p><div class="important"><h3 class="title">Important</h3><p>
+         Select the appropriate LightDB version for your target ltcluster version.
+       </p></div><div class="note"><h3 class="title">Note</h3><p>
+         If using <code class="command">yum-builddep</code> is not possible, the
+         following packages may need to be installed manually:
+
+         </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="literal">flex</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libselinux-devel</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libxml2-devel</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">libxslt-devel</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">openssl-devel</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">pam-devel</code></li><li class="listitem" style="list-style-type: disc"><code class="literal">readline-devel</code></li></ul></div><p>
+       </p></div><div class="tip"><h3 class="title">Tip</h3><p>
+         If building against LightDB 11 or later configured with the <code class="option">--with-llvm</code> option
+         (this is the case with the PGDG-provided packages) you'll also need to install the
+         <code class="literal">llvm-toolset-7-clang</code> package. This is available via the
+         <a class="ulink" href="https://wiki.centos.org/AdditionalResources/Repositories/SCL" target="_top">Software Collections (SCL) Repository</a>.
+       </p></div></li></ul></div><p>
+  </p></div><div class="sect2" id="INSTALLATION-GET-SOURCE"><div class="titlepage"><div><div><h3 class="title">2.3.2. Getting <span class="productname">ltcluster</span> source code</h3></div></div></div><p>
+   There are two ways to get the <span class="productname">ltcluster</span> source code: with git, or by downloading tarballs of released versions.
+  </p><div class="sect3" id="id-1.3.3.9.4.3"><div class="titlepage"><div><div><h4 class="title">2.3.2.1. Using <span class="application">git</span> to get the <span class="productname">ltcluster</span> sources</h4></div></div></div><p>
+    Use <span class="application"><a class="ulink" href="https://git-scm.com" target="_top">git</a></span> if you expect
+    to update often, you want to keep track of development or if you want to contribute
+    changes to <span class="productname">ltcluster</span>. There is no reason <span class="emphasis"><em>not</em></span> to use <span class="application">git</span>
+    if you're familiar with it.
+   </p><p>
+    The source for <span class="productname">ltcluster</span> is maintained at
+    <a class="ulink" href="https://github.com/hslightdb/ltcluster" target="_top">https://github.com/hslightdb/ltcluster</a>.
+   </p><p>
+    There are also tags for each <a class="ulink" href="https://github.com/hslightdb/ltcluster/releases" target="_top"><span class="productname">ltcluster</span> release</a>, e.g.
+    <code class="literal"><a class="ulink" href="https://github.com/hslightdb/ltcluster/releases/tag/v4.4.0" target="_top">v4.4.0</a></code>.
+   </p><p>
+    Clone the source code using <span class="application">git</span>:
+    </p><pre class="programlisting">
+     git clone https://github.com/hslightdb/ltcluster</pre><p>
+   </p><p>
+    For more information on using <span class="application">git</span> see
+    <a class="ulink" href="https://git-scm.com/" target="_top">git-scm.com</a>.
+   </p></div><div class="sect3" id="id-1.3.3.9.4.4"><div class="titlepage"><div><div><h4 class="title">2.3.2.2. Downloading release source tarballs</h4></div></div></div><p>
+    Official release source code is uploaded as tarballs to the
+    <span class="productname">ltcluster</span> website along with a tarball checksum and a matching GnuPG
+    signature. See
+    <a class="ulink" href="http://ltcluster.org/" target="_top">http://ltcluster.org/</a>
+    for the download information.
+   </p><p>
+    After you unpack the source code archives using <code class="command">tar xf</code>
+    the installation process is the same as if you were installing from a git
+    clone.
+   </p></div></div><div class="sect2" id="INSTALLATION-LTCLUSTER-SOURCE"><div class="titlepage"><div><div><h3 class="title">2.3.3. Installation of <span class="productname">ltcluster</span> from source</h3></div></div></div><p>
+   To installing <span class="productname">ltcluster</span> from source, simply execute:
+
+   </p><pre class="programlisting">
+    ./configure &amp;&amp; make install</pre><p>
+
+   Ensure <code class="command">postgresql.confconfig</code> for the target LightDB version is in
+   <code class="varname">$PATH</code>.
+  </p></div><div class="sect2" id="INSTALLATION-BUILD-LTCLUSTER-DOCS"><div class="titlepage"><div><div><h3 class="title">2.3.4. Building <span class="productname">ltcluster</span> documentation</h3></div></div></div><p>
+    The <span class="productname">ltcluster</span> documentation is (like the main LightDB project)
+    written in DocBook XML format. To build it locally as HTML, you'll need to
+    install the required packages as described in the
+    <a class="ulink" href="https://www.hs.net/lightdb/docs/current/docguide-toolsets.html" target="_top">LightDB documentation</a>.
+   </p><p>
+	 The minimum LightDB version for building the <span class="productname">ltcluster</span> documentation is
+	 LightDB 9.5.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+       In <span class="productname">ltcluster</span> 4.3 and earlier, the documentation can only be built against
+       LightDB 9.6 or earlier.
+     </p></div><p>
+     To build the documentation as HTML, execute:
+   </p><pre class="programlisting">
+    ./configure &amp;&amp; make doc</pre><p>
+   </p><p>
+     The generated HTML files will be placed in the <code class="filename">doc/html</code>
+     subdirectory of your source tree.
+   </p><p>
+     To build the documentation as a single HTML file, after configuring and building
+     the main <span class="productname">ltcluster</span> source as described above, execute:
+   </p><pre class="programlisting">
+     ./configure &amp;&amp; make doc-ltcluster.html</pre><p>
+   </p><p>
+     To build the documentation as a PDF file, after configuring and building
+     the main <span class="productname">ltcluster</span> source as described above, execute:
+   </p><pre class="programlisting">
+     ./configure &amp;&amp; make doc-ltcluster-A4.pdf</pre><p>
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="installation-packages.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="installation.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="quickstart.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">2.2. Installing <span class="productname">ltcluster</span> from packages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 3. Quick-start guide</td></tr></table></div></body></html>

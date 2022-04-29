@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster node service</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin" /><link rel="next" href="ltcluster-cluster-show.html" title="ltcluster cluster show" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster node service</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-cluster-show.html" title="ltcluster cluster show">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-NODE-SERVICE"><div class="titlepage"></div><a id="id-1.6.15.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster node service</span></h2><p>ltcluster node service — show or execute the system service command to stop/start/restart/reload/promote a node</p></div><div class="refsect1" id="id-1.6.15.4"><h2>Description</h2><p>
+      Shows or executes the system service command to stop/start/restart/reload a node.
+    </p><p>
+      This command is mainly meant for internal <span class="productname">ltcluster</span> usage, but is useful for
+      confirming the command configuration.
+    </p></div><div class="refsect1" id="id-1.6.15.5"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Log the steps which would be taken, including displaying the command which would be executed.
+          </p></dd><dt><span class="term"><code class="option">--action</code></span></dt><dd><p>
+            The action to perform. One of <code class="literal">start</code>, <code class="literal">stop</code>,
+            <code class="literal">restart</code>, <code class="literal">reload</code> or <code class="literal">promote</code>.
+          </p><p>
+            If the parameter <code class="option">--list-actions</code> is provided together with
+            <code class="option">--action</code>, the command which would be executed will be printed.
+          </p></dd><dt><span class="term"><code class="option">--list-actions</code></span></dt><dd><p>
+            List all configured commands.
+          </p><p>
+            If the parameter <code class="option">--action</code> is provided together with
+            <code class="option">--list-actions</code>, the command which would be executed for that
+            particular action will be printed.
+          </p></dd><dt><span class="term"><code class="option">--checkpoint</code></span></dt><dd><p>
+            Issue a <code class="command">CHECKPOINT</code> before stopping or restarting the node.
+          </p><p>
+            Note that a superuser connection is required to be able to execute the
+             <code class="command">CHECKPOINT</code> command.
+          </p></dd><dt><span class="term"><code class="option">-S</code>/<code class="option">--superuser</code></span></dt><dd><p>
+           Connect as the named superuser instead of the normal <span class="productname">ltcluster</span> user.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.15.6"><h2>Exit codes</h2><p>
+      One of the following exit codes will be emitted by <code class="command">ltcluster node service</code>:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">SUCCESS (0)</code></span></dt><dd><p>
+            No issues were detected.
+          </p></dd><dt><span class="term"><code class="option">ERR_LOCAL_COMMAND (5)</code></span></dt><dd><p>
+            Execution of the system service command failed.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.15.7"><h2>Examples</h2><p>
+      See what action would be taken for a restart:
+      </p><pre class="programlisting">
+[lightdb@node1 ~]$ ltcluster -f /etc/ltcluster/12/ltcluster.conf node service --action=restart --checkpoint --dry-run
+INFO: a CHECKPOINT would be issued here
+INFO: would execute server command "sudo service lightdb-12 restart"</pre><p>
+    </p><p>
+      Restart the LightDB instance:
+      </p><pre class="programlisting">
+[lightdb@node1 ~]$ ltcluster -f /etc/ltcluster/12/ltcluster.conf node service --action=restart --checkpoint
+NOTICE: issuing CHECKPOINT
+DETAIL: executing server command "sudo service lightdb-12 restart"
+Redirecting to /bin/systemctl restart lightdb-12.service</pre><p>
+    </p><p>
+      List all commands:
+      </p><pre class="programlisting">
+[lightdb@node1 ~]$ ltcluster -f /etc/ltcluster/12/ltcluster.conf node service --list-actions
+Following commands would be executed for each action:
+
+    start: "sudo service lightdb-12 start"
+     stop: "sudo service lightdb-12 stop"
+  restart: "sudo service lightdb-12 restart"
+   reload: "sudo service lightdb-12 reload"
+  promote: "/usr/pgsql-12/bin/lt_ctl  -w -D '/var/lib/pgsql/12/data' promote"</pre><p>
+    </p><p>
+      List a single command:
+      </p><pre class="programlisting">
+[lightdb@node1 ~]$ ltcluster -f /etc/ltcluster/12/ltcluster.conf node service --list-actions --action=promote
+/usr/pgsql-12/bin/lt_ctl  -w -D '/var/lib/pgsql/12/data' promote      </pre><p>
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-node-rejoin.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-cluster-show.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster node rejoin </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster cluster show</td></tr></table></div></body></html>

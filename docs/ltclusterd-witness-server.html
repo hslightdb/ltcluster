@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.1. Using a witness server</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd" /><link rel="next" href="ltclusterd-network-split.html" title="12.2. Handling network splits with ltclusterd" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.1. Using a witness server</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-network-split.html" title="12.2. Handling network splits with ltclusterd">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-WITNESS-SERVER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.1. Using a witness server</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-witness-server.html#CREATING-WITNESS-SERVER">12.1.1. Creating a witness server</a></span></dt></dl></div><a id="id-1.5.3.4.2" class="indexterm"></a><a id="id-1.5.3.4.3" class="indexterm"></a><p>
+   A <a class="xref" href="ltcluster-concepts.html#WITNESS-SERVER">witness server</a> is a normal LightDB instance which
+   is not part of the streaming replication cluster; its purpose is, if a
+   failover situation occurs, to provide proof that it is the primary server
+   itself which is unavailable, rather than e.g. a network split between
+   different physical locations.
+ </p><p>
+   A typical use case for a witness server is a two-node streaming replication
+   setup, where the primary and standby are in different locations (data centres).
+   By creating a witness server in the same location (data centre) as the primary,
+   if the primary becomes unavailable it's possible for the standby to decide whether
+   it can promote itself without risking a "split brain" scenario: if it can't see either the
+   witness or the primary server, it's likely there's a network-level interruption
+   and it should not promote itself. If it can see the witness but not the primary,
+   this proves there is no network interruption and the primary itself is unavailable,
+   and it can therefore promote itself (and ideally take action to fence the
+   former primary).
+ </p><div class="note"><h3 class="title">Note</h3><p>
+     <span class="emphasis"><em>Never</em></span> install a witness server on the same physical host
+     as another node in the replication cluster managed by <span class="productname">ltcluster</span> - it's essential
+     the witness is not affected in any way by failure of another node.
+   </p></div><p>
+   For more complex replication scenarios, e.g. with multiple datacentres, it may
+   be preferable to use location-based failover, which ensures that only nodes
+   in the same location as the primary will ever be promotion candidates;
+   see <a class="xref" href="ltclusterd-network-split.html" title="12.2. Handling network splits with ltclusterd">Handling network splits with ltclusterd</a> for more details.
+ </p><div class="note"><h3 class="title">Note</h3><p>
+     A witness server will only be useful if <span class="productname">ltclusterd</span>
+     is in use.
+   </p></div><div class="sect2" id="CREATING-WITNESS-SERVER"><div class="titlepage"><div><div><h3 class="title">12.1.1. Creating a witness server</h3></div></div></div><p>
+   To create a witness server, set up a normal LightDB instance on a server
+   in the same physical location as the cluster's primary server.
+ </p><p>
+   This instance should <span class="emphasis"><em>not</em></span> be on the same physical host as the primary server,
+   as otherwise if the primary server fails due to hardware issues, the witness
+   server will be lost too.
+ </p><div class="note"><h3 class="title">Note</h3><p>
+     <span class="productname">ltcluster</span> 3.3 and earlier provided a <code class="command">ltcluster create witness</code>
+     command, which would automatically create a LightDB instance. However
+     this often resulted in an unsatisfactory, hard-to-customise instance.
+   </p></div><p>
+   The witness server should be configured in the same way as a normal
+   <span class="productname">ltcluster</span> node; see section <a class="xref" href="configuration.html" title="Chapter 4. ltcluster configuration">Configuration</a>.
+ </p><p>
+   Register the witness server with <a class="xref" href="ltcluster-witness-register.html" title="ltcluster witness register"><span class="refentrytitle">ltcluster witness register</span></a>.
+   This will create the <span class="productname">ltcluster</span> extension on the witness server, and make
+   a copy of the <span class="productname">ltcluster</span> metadata.
+ </p><div class="note"><h3 class="title">Note</h3><p>
+    As the witness server is not part of the replication cluster, further
+    changes to the <span class="productname">ltcluster</span> metadata will be synchronised by
+    <span class="productname">ltclusterd</span>.
+   </p></div><p>
+   Once the witness server has been configured, <span class="productname">ltclusterd</span>
+   should be started.
+ </p><p>
+  To unregister a witness server, use <a class="xref" href="ltcluster-witness-unregister.html" title="ltcluster witness unregister">ltcluster witness unregister</a>.
+ </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-automatic-failover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-network-split.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 12. Automatic failover with ltclusterd </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 12.2. Handling network splits with ltclusterd</td></tr></table></div></body></html>

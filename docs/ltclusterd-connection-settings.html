@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>13.3. ltclusterd connection settings</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-daemon.html" title="13.2. ltclusterd daemon" /><link rel="next" href="ltclusterd-log-rotation.html" title="13.4. ltclusterd log rotation" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">13.3. ltclusterd connection settings</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-daemon.html" title="13.2. ltclusterd daemon">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Up</a></td><th width="60%" align="center">Chapter 13. ltclusterd setup and configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-log-rotation.html" title="13.4. ltclusterd log rotation">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-CONNECTION-SETTINGS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">13.3. ltclusterd connection settings</h2></div></div></div><p>
+  In addition to the <span class="productname">ltcluster</span> configuration settings, parameters in the
+  <code class="varname">conninfo</code> string influence how <span class="productname">ltcluster</span> makes a network connection to
+  LightDB. In particular, if another server in the replication cluster
+  is unreachable at network level, system network settings will influence
+  the length of time it takes to determine that the connection is not possible.
+ </p><p>
+  In particular explicitly setting a parameter for <code class="literal">connect_timeout</code>
+  should be considered; the effective minimum value of <code class="literal">2</code>
+  (seconds) will ensure that a connection failure at network level is reported
+  as soon as possible, otherwise depending on the system settings (e.g.
+  <code class="varname">tcp_syn_retries</code> in Linux) a delay of a minute or more
+  is possible.
+ </p><p>
+  For further details on <code class="varname">conninfo</code> network connection
+  parameters, see the
+  <a class="ulink" href="https://www.hs.net/lightdb/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS" target="_top">LightDB documentation</a>.
+ </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-daemon.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-log-rotation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">13.2. ltclusterd daemon </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 13.4. ltclusterd log rotation</td></tr></table></div></body></html>

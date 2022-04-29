@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>14.1. Pausing the ltclusterd service</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation" /><link rel="next" href="ltclusterd-wal-replay-pause.html" title="14.2. ltclusterd and paused WAL replay" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">14.1. Pausing the ltclusterd service</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-operation.html" title="Chapter 14. ltclusterd operation">Up</a></td><th width="60%" align="center">Chapter 14. ltclusterd operation</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-wal-replay-pause.html" title="14.2. ltclusterd and paused WAL replay">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-PAUSING"><div class="titlepage"><div><div><h2 class="title" style="clear: both">14.1. Pausing the ltclusterd service</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-pausing.html#LTCLUSTERD-PAUSING-PREREQUISITES">14.1.1. Prerequisites for pausing <span class="productname">ltclusterd</span></a></span></dt><dt><span class="sect2"><a href="ltclusterd-pausing.html#LTCLUSTERD-PAUSING-EXECUTION">14.1.2. Pausing/unpausing <span class="productname">ltclusterd</span></a></span></dt><dt><span class="sect2"><a href="ltclusterd-pausing.html#LTCLUSTERD-PAUSING-DETAILS">14.1.3. Details on the <span class="productname">ltclusterd</span> pausing mechanism</a></span></dt></dl></div><a id="id-1.5.5.3.2" class="indexterm"></a><a id="id-1.5.5.3.3" class="indexterm"></a><p>
+    In normal operation, <span class="productname">ltclusterd</span> monitors the state of the
+    LightDB node it is running on, and will take appropriate action if problems
+    are detected, e.g. (if so configured) promote the node to primary, if the existing
+    primary has been determined as failed.
+  </p><p>
+    However, <span class="productname">ltclusterd</span> is unable to distinguish between
+    planned outages (such as performing a <a class="link" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">switchover</a>
+    or installing LightDB maintenance released), and an actual server outage. In versions prior to
+    <span class="productname">ltcluster</span> 4.2 it was necessary to stop <span class="productname">ltclusterd</span> on all nodes (or at least
+    on all nodes where <span class="productname">ltclusterd</span> is
+    <a class="link" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">configured for automatic failover</a>)
+    to prevent <span class="productname">ltclusterd</span> from making unintentional changes to the
+    replication cluster.
+  </p><p>
+    From <a class="link" href="release-4.2.html" title="A.7. Release 4.2"><span class="productname">ltcluster</span> 4.2</a>, <span class="productname">ltclusterd</span>
+    can now be "paused", i.e. instructed not to take any action such as performing a failover.
+    This can be done from any node in the cluster, removing the need to stop/restart
+    each <span class="productname">ltclusterd</span> individually.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      For major LightDB upgrades, e.g. from LightDB 11 to LightDB 12,
+      <span class="productname">ltclusterd</span> should be shut down completely and only started up
+      once the <span class="productname">ltcluster</span> packages for the new LightDB major version have been installed.
+    </p></div><div class="sect2" id="LTCLUSTERD-PAUSING-PREREQUISITES"><div class="titlepage"><div><div><h3 class="title">14.1.1. Prerequisites for pausing <span class="productname">ltclusterd</span></h3></div></div></div><p>
+      In order to be able to pause/unpause <span class="productname">ltclusterd</span>, following
+      prerequisites must be met:
+      </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><a class="link" href="release-4.2.html" title="A.7. Release 4.2"><span class="productname">ltcluster</span> 4.2</a> or later must be installed on all nodes.</li><li class="listitem" style="list-style-type: disc">The same major <span class="productname">ltcluster</span> version (e.g. 4.2) must be installed on all nodes (and preferably the same minor version).</li><li class="listitem" style="list-style-type: disc">
+            LightDB on all nodes must be accessible from the node where the
+            <code class="literal">pause</code>/<code class="literal">unpause</code> operation is executed, using the
+            <code class="varname">conninfo</code> string shown by <a class="link" href="ltcluster-cluster-show.html" title="ltcluster cluster show"><code class="command">ltcluster cluster show</code></a>.
+          </li></ul></div><p>
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        These conditions are required for normal <span class="productname">ltcluster</span> operation in any case.
+      </p></div></div><div class="sect2" id="LTCLUSTERD-PAUSING-EXECUTION"><div class="titlepage"><div><div><h3 class="title">14.1.2. Pausing/unpausing <span class="productname">ltclusterd</span></h3></div></div></div><p>
+      To pause <span class="productname">ltclusterd</span>, execute <a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause"><code class="command">ltcluster service pause</code></a>
+      (<span class="productname">ltcluster</span> 4.2 - 4.4: <a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause"><code class="command">ltcluster daemon pause</code></a>),
+      e.g.:
+   </p><pre class="programlisting">
+$ ltcluster -f /etc/ltcluster.conf service pause
+NOTICE: node 1 (node1) paused
+NOTICE: node 2 (node2) paused
+NOTICE: node 3 (node3) paused</pre><p>
+    </p><p>
+      The state of <span class="productname">ltclusterd</span> on each node can be checked with
+      <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster service status</code></a>
+      (<span class="productname">ltcluster</span> 4.2 - 4.4: <a class="link" href="ltcluster-service-status.html" title="ltcluster service status"><code class="command">ltcluster daemon status</code></a>),
+      e.g.:
+    </p><pre class="programlisting">$ ltcluster -f /etc/ltcluster.conf service status
+ ID | Name  | Role    | Status  | ltclusterd | PID  | Paused?
+----+-------+---------+---------+---------+------+---------
+ 1  | node1 | primary | running | running | 7851 | yes
+ 2  | node2 | standby | running | running | 7889 | yes
+ 3  | node3 | standby | running | running | 7918 | yes</pre><p>
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If executing a switchover with <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a>,
+	<span class="productname">ltcluster</span> will automatically pause/unpause the <span class="productname">ltclusterd</span> service as part of the switchover process.
+      </p></div><p>
+      If the primary (in this example, <code class="literal">node1</code>) is stopped, <span class="productname">ltclusterd</span>
+      running on one of the standbys (here: <code class="literal">node2</code>) will react like this:
+      </p><pre class="programlisting">
+[2019-08-28 12:22:21] [WARNING] unable to connect to upstream node "node1" (node ID: 1)
+[2019-08-28 12:22:21] [INFO] checking state of node 1, 1 of 5 attempts
+[2019-08-28 12:22:21] [INFO] sleeping 1 seconds until next reconnection attempt
+...
+[2019-08-28 12:22:24] [INFO] sleeping 1 seconds until next reconnection attempt
+[2019-08-28 12:22:25] [INFO] checking state of node 1, 5 of 5 attempts
+[2019-08-28 12:22:25] [WARNING] unable to reconnect to node 1 after 5 attempts
+[2019-08-28 12:22:25] [NOTICE] node is paused
+[2019-08-28 12:22:33] [INFO] node "node2" (ID: 2) monitoring upstream node "node1" (node ID: 1) in degraded state
+[2019-08-28 12:22:33] [DETAIL] ltclusterd paused by administrator
+[2019-08-28 12:22:33] [HINT] execute "ltcluster service unpause" to resume normal failover mode</pre><p>
+    </p><p>
+      If the primary becomes available again (e.g. following a software upgrade), <span class="productname">ltclusterd</span>
+      will automatically reconnect, e.g.:
+      </p><pre class="programlisting">
+[2019-08-28 12:25:41] [NOTICE] reconnected to upstream node "node1" (ID: 1) after 8 seconds, resuming monitoring</pre><p>
+    </p><p>
+      To unpause the <span class="productname">ltclusterd</span> service, execute
+      <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster service unpause</code></a>
+      ((<span class="productname">ltcluster</span> 4.2 - 4.4: <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster daemon unpause</code></a>),
+      e.g.:
+   </p><pre class="programlisting">
+$ ltcluster -f /etc/ltcluster.conf service unpause
+NOTICE: node 1 (node1) unpaused
+NOTICE: node 2 (node2) unpaused
+NOTICE: node 3 (node3) unpaused</pre><p>
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If the previous primary is no longer accessible when <span class="productname">ltclusterd</span>
+        is unpaused, no failover action will be taken. Instead, a new primary must be manually promoted using
+        <a class="link" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><code class="command">ltcluster standby promote</code></a>,
+	and any standbys attached to the new primary with
+	<a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>.
+      </p><p>
+        This is to prevent execution of <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster service unpause</code></a>
+        resulting in the automatic promotion of a new primary, which may be a problem particularly
+        in larger clusters, where <span class="productname">ltclusterd</span> could select a different promotion
+        candidate to the one intended by the administrator.
+      </p></div></div><div class="sect2" id="LTCLUSTERD-PAUSING-DETAILS"><div class="titlepage"><div><div><h3 class="title">14.1.3. Details on the <span class="productname">ltclusterd</span> pausing mechanism</h3></div></div></div><p>
+      The pause state of each node will be stored over a LightDB restart.
+    </p><p>
+      <a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause"><code class="command">ltcluster service pause</code></a> and
+      <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster service unpause</code></a> can be
+      executed even if <span class="productname">ltclusterd</span> is not running; in this case,
+      <span class="productname">ltclusterd</span> will start up in whichever pause state has been set.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+	    <a class="link" href="ltcluster-service-pause.html" title="ltcluster service pause"><code class="command">ltcluster service pause</code></a> and
+	    <a class="link" href="ltcluster-service-unpause.html" title="ltcluster service unpause"><code class="command">ltcluster service unpause</code></a>
+	    <span class="emphasis"><em>do not</em></span> start/stop <span class="productname">ltclusterd</span>.
+      </p><p>
+        The commands <a class="link" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><code class="command">ltcluster daemon start</code></a>
+        and <a class="link" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><code class="command">ltcluster daemon stop</code></a>
+        (<a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-SERVICE-CONFIGURATION" title="13.1.5. ltclusterd service configuration">if correctly configured</a>) can be used to start/stop
+        <span class="productname">ltclusterd</span> on individual nodes.
+      </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-operation.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-operation.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-wal-replay-pause.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 14. ltclusterd operation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 14.2. ltclusterd and paused WAL replay</td></tr></table></div></body></html>

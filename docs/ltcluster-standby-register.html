@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster standby register</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-standby-clone.html" title="ltcluster standby clone" /><link rel="next" href="ltcluster-standby-unregister.html" title="ltcluster standby unregister" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster standby register</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-standby-clone.html" title="ltcluster standby clone">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-standby-unregister.html" title="ltcluster standby unregister">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-STANDBY-REGISTER"><div class="titlepage"></div><a id="id-1.6.5.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster standby register</span></h2><p>ltcluster standby register — add a standby's information to the <span class="productname">ltcluster</span> metadata</p></div><div class="refsect1" id="id-1.6.5.4"><h2>Description</h2><p>
+      <code class="command">ltcluster standby register</code> adds a standby's information to
+      the <span class="productname">ltcluster</span> metadata. This command needs to be executed to enable
+      promote/follow operations and to allow <span class="productname">ltclusterd</span> to work with the node.
+      An existing standby can be registered using this command. Execute with the
+      <code class="literal">--dry-run</code> option to check what would happen without actually registering the
+      standby.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If providing the configuration file location with <code class="literal">-f/--config-file</code>,
+        avoid using a relative path, as <span class="productname">ltcluster</span> stores the configuration file location
+        in the ltcluster metadata for use when <span class="productname">ltcluster</span> is executed remotely (e.g. during
+        <a class="xref" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><span class="refentrytitle">ltcluster standby switchover</span></a>). <span class="productname">ltcluster</span> will attempt to convert the
+          a relative path into an absolute one, but this may not be the same as the path you
+          would explicitly provide (e.g. <code class="filename">./ltcluster.conf</code> might be converted
+          to <code class="filename">/path/to/./ltcluster.conf</code>, whereas you'd normally write
+          <code class="filename">/path/to/ltcluster.conf</code>).
+      </p></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-REGISTER-WAIT-START"><h2>Waiting for the the standby to start</h2><p>
+     By default, <span class="productname">ltcluster</span> will wait 30 seconds for the standby to become available before
+     aborting with a connection error. This is useful when setting up a standby from a script,
+     as the standby may not have fully started up by the time <code class="command">ltcluster standby register</code>
+     is executed.
+   </p><p>
+     To change the timeout, pass the desired value with the <code class="literal">--wait-start</code> option.
+     A value of <code class="literal">0</code> will disable the timeout.
+   </p><p>
+     The timeout will be ignored if <code class="literal">-F/--force</code> was provided.
+   </p></div><div class="refsect1" id="LTCLUSTER-STANDBY-REGISTER-WAIT-SYNC"><h2>Waiting for the registration to propagate to the standby</h2><p>
+     Depending on your environment and workload, it may take some time for the standby's node record
+     to propagate from the primary to the standby. Some actions (such as starting
+     <span class="productname">ltclusterd</span>) require that the standby's node record
+     is present and up-to-date to function correctly.
+   </p><p>
+    By providing the option <code class="option">--wait-sync</code> to the
+    <code class="command">ltcluster standby register</code> command, <span class="productname">ltcluster</span> will wait
+    until the record is synchronised before exiting. An optional timeout (in
+    seconds) can be added to this option (e.g. <code class="option">--wait-sync=60</code>).
+   </p></div><div class="refsect1" id="LTCLUSTER-STANDBY-REGISTER-INACTIVE-NODE"><h2>Registering an inactive node</h2><p>
+    Under some circumstances you may wish to register a standby which is not
+    yet running; this can be the case when using provisioning tools to create
+    a complex replication cluster, or if the node was not cloned by <span class="productname">ltcluster</span>.
+   </p><p>
+    In this case, by using the <code class="option">-F/--force</code>
+    option and providing the connection parameters to the primary server,
+    the standby can be registered even if it has not yet been started.
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+       Connection parameters can either be provided either as a <code class="literal">conninfo</code> string
+       (e.g. <code class="option">-d 'host=node1 user=ltcluster'</code> or as individual connection parameters
+        (<code class="option">-h/--host</code>, <code class="option">-d/--dbname</code>,
+       <code class="option">-U/--user</code>, <code class="option">-p/--port</code> etc.).
+     </p></div><p>
+    Similarly, with cascading replication it may be necessary to register
+    a standby whose upstream node has not yet been registered - in this case,
+    using <code class="option">-F/--force</code> will result in the creation of an inactive placeholder
+    record for the upstream node, which will however later need to be registered
+    with the <code class="option">-F/--force</code> option too.
+   </p><p>
+    When used with <code class="command">ltcluster standby register</code>, care should be taken that use of the
+    <code class="option">-F/--force</code> option does not result in an incorrectly configured cluster.
+   </p></div><div class="refsect1" id="LTCLUSTER-STANDBY-REGISTER-NODE-CLONED-OTHER-SOURCE"><h2>Registering a node not cloned by ltcluster</h2><p>
+      If you've cloned a standby using another method (e.g. <span class="application">barman</span>'s
+     <code class="command"><a class="ulink" href="https://docs.pgbarman.org/#recover" target="_top">barman recover</a></code>
+     command), register the node as detailed in section
+     <a class="xref" href="ltcluster-standby-register.html#LTCLUSTER-STANDBY-REGISTER-INACTIVE-NODE" title="Registering an inactive node">Registering an inactive node</a> then execute
+     <a class="link" href="ltcluster-standby-clone.html#LTCLUSTER-STANDBY-CREATE-RECOVERY-CONF" title="Using a standby cloned by another method">ltcluster standby clone --replication-conf-only</a>
+     to generate the appropriate replication configuration.
+    </p></div><div class="refsect1" id="id-1.6.5.9"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+            Check prerequisites but don't actually register the standby.
+          </p></dd><dt><span class="term"><code class="option">-F</code>/<code class="option">--force</code></span></dt><dd><p>
+            Overwrite an existing node record
+          </p></dd><dt><span class="term"><code class="option">--upstream-node-id</code></span></dt><dd><p>
+            ID of the upstream node to replicate from (optional)
+          </p></dd><dt><span class="term"><code class="option">--wait-start</code></span></dt><dd><p>
+            wait for the standby to start (timeout in seconds, default 30 seconds)
+          </p></dd><dt><span class="term"><code class="option">--wait-sync</code></span></dt><dd><p>
+            wait for the node record to synchronise to the standby (optional timeout in seconds)
+          </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-REGISTER-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">standby_register</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a>
+      will be generated immediately after the node record is updated on the primary.
+    </p><p>
+      If the <code class="option">--wait-sync</code> option is provided, a <code class="literal">standby_register_sync</code>
+      event notification  will be generated immediately after the node record has synchronised to the
+      standby.
+    </p><p>
+      If provided, <span class="productname">ltcluster</span> will substitute the placeholders <code class="literal">%p</code> with the node ID of the
+      primary node, <code class="literal">%c</code> with its <code class="literal">conninfo</code> string, and
+      <code class="literal">%a</code> with its node name.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-standby-clone.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-standby-unregister.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster standby clone </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster standby unregister</td></tr></table></div></body></html>

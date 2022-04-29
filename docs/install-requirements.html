@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>2.1. Requirements for installing ltcluster</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="installation.html" title="Chapter 2. Installation" /><link rel="next" href="installation-packages.html" title="2.2. Installing ltcluster from packages" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">2.1. Requirements for installing ltcluster</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="installation.html" title="Chapter 2. Installation">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="installation.html" title="Chapter 2. Installation">Up</a></td><th width="60%" align="center">Chapter 2. Installation</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="installation-packages.html" title="2.2. Installing ltcluster from packages">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="INSTALL-REQUIREMENTS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">2.1. Requirements for installing ltcluster</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="install-requirements.html#INSTALL-COMPATIBILITY-MATRIX">2.1.1. <span class="productname">ltcluster</span> compatibility matrix</a></span></dt><dt><span class="sect2"><a href="install-requirements.html#INSTALL-LIGHTDB-93-94">2.1.2. LightDB 9.4 support</a></span></dt></dl></div><a id="id-1.3.3.7.2" class="indexterm"></a><p>
+    ltcluster is developed and tested on Linux and OS X, but should work on any
+    UNIX-like system supported by LightDB itself. There is no support for
+    Microsoft Windows.
+  </p><p>
+   <span class="productname">ltcluster</span> 5.2.1 is compatible with all LightDB versions from 9.4. See
+   section <a class="link" href="install-requirements.html#INSTALL-COMPATIBILITY-MATRIX" title="2.1.1. ltcluster compatibility matrix"><span class="productname">ltcluster</span> compatibility matrix</a>
+   for an overview of version compatibility.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+    If upgrading from <span class="productname">ltcluster</span> 3.x, please see the section <a class="xref" href="upgrading-from-ltcluster-3.html" title="10.3. Upgrading from ltcluster 3.x">Upgrading from ltcluster 3.x</a>.
+   </p></div><p>
+   All servers in the replication cluster must be running the same major version of
+   LightDB, and we recommend that they also run the same minor version.
+  </p><p>
+   <span class="productname">ltcluster</span> must be installed on each server in the replication cluster.
+   If installing ltcluster from packages, the package version must match the LightDB
+   version. If installing from source, <span class="productname">ltcluster</span> must be compiled against the same
+   major version.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+     The same "major" <span class="productname">ltcluster</span> version (e.g. <code class="literal">5.2.1.x</code>) <span class="emphasis"><em>must</em></span>
+     be installed on all node in the replication cluster. We strongly recommend keeping all
+     nodes on the same (preferably latest) "minor" <span class="productname">ltcluster</span> version to minimize the risk
+     of incompatibilities.
+   </p><p>
+     If different "major" <span class="productname">ltcluster</span> versions (e.g. 4.1.x and 5.2.1.x)
+     are installed on different nodes, in the best case <span class="productname">ltcluster</span> (in particular <span class="productname">ltclusterd</span>)
+     will not run. In the worst case, you will end up with a broken cluster.
+   </p></div><p>
+   A dedicated system user for <span class="productname">ltcluster</span> is <span class="emphasis"><em>not</em></span> required; as many <span class="productname">ltcluster</span> and
+   <span class="productname">ltclusterd</span> actions require direct access to the LightDB data directory,
+   these commands should be executed by the <code class="literal">lightdb</code> user.
+  </p><p>
+    See also <a class="link" href="configuration-prerequisites.html" title="4.1. Prerequisites for configuration">Prerequisites for configuration</a>
+    for information on networking requirements.
+  </p><div class="tip"><h3 class="title">Tip</h3><p>
+    We recommend using a session multiplexer utility such as <code class="command">screen</code> or
+    <code class="command">tmux</code> when performing long-running actions (such as cloning a database)
+    on a remote server - this will ensure the <span class="productname">ltcluster</span> action won't be prematurely
+    terminated if your <code class="command">ssh</code> session to the server is interrupted or closed.
+    </p></div><div class="sect2" id="INSTALL-COMPATIBILITY-MATRIX"><div class="titlepage"><div><div><h3 class="title">2.1.1. <span class="productname">ltcluster</span> compatibility matrix</h3></div></div></div><a id="id-1.3.3.7.12.2" class="indexterm"></a><a id="id-1.3.3.7.12.3" class="indexterm"></a><p>
+      The following table provides an overview of which <span class="productname">ltcluster</span> version supports
+      which LightDB version.
+    </p><div class="table" id="LTCLUSTER-COMPATIBILITY-MATRIX"><p class="title"><strong>Table 2.1. <span class="productname">ltcluster</span> compatibility matrix</strong></p><div class="table-contents"><table class="table" summary="ltcluster compatibility matrix" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>
+              <span class="productname">ltcluster</span> version
+            </th><th>
+              Supported?
+            </th><th>
+              Latest release
+            </th><th>
+              Supported LightDB versions
+            </th></tr></thead><tbody><tr><td>
+              <span class="productname">ltcluster</span> 5.2
+            </td><td>
+              YES
+            </td><td>
+              <a class="link" href="release-5.2.1.html#RELEASE-CURRENT">5.2.1</a> (2020-12-07)
+            </td><td>
+              9.4, 9.5, 9.6, 10, 11, 12, 13
+            </td></tr><tr><td>
+              <span class="productname">ltcluster</span> 5.1
+            </td><td>
+              NO
+            </td><td>
+              <a class="link" href="release-5.1.0.html" title="A.3. Release 5.1.0">5.1.0</a> (2020-04-13)
+            </td><td>
+              9.3, 9.4, 9.5, 9.6, 10, 11, 12
+            </td></tr><tr><td>
+              <span class="productname">ltcluster</span> 5.0
+            </td><td>
+              NO
+            </td><td>
+              <a class="link" href="release-5.0.html" title="A.4. Release 5.0">5.0</a> (2019-10-15)
+            </td><td>
+              9.3, 9.4, 9.5, 9.6, 10, 11, 12
+            </td></tr><tr><td>
+              <span class="productname">ltcluster</span> 4.x
+            </td><td>
+              NO
+            </td><td>
+              <a class="link" href="release-4.4.html" title="A.5. Release 4.4">4.4</a> (2019-06-27)
+            </td><td>
+              9.3, 9.4, 9.5, 9.6, 10, 11
+            </td></tr><tr><td>
+              <span class="productname">ltcluster</span> 3.x
+            </td><td>
+              NO
+            </td><td>
+              <a class="ulink" href="www.hs.net/lightdb/ltcluster/release-notes-3.3.2.html" target="_top">3.3.2</a> (2017-05-30)
+            </td><td>
+              9.3, 9.4, 9.5, 9.6
+            </td></tr><tr><td>
+              <span class="productname">ltcluster</span> 2.x
+            </td><td>
+              NO
+            </td><td>
+              <a class="ulink" href="www.hs.net/lightdb/ltcluster/release-notes-2.0.3.html" target="_top">2.0.3</a> (2015-04-16)
+            </td><td>
+              9.0, 9.1, 9.2, 9.3, 9.4
+            </td></tr></tbody></table></div></div><br class="table-break" /><div class="important"><h3 class="title">Important</h3><p>
+        The <span class="productname">ltcluster</span> 2.x and 3.x series are no longer maintained or supported.
+        We strongly recommend  upgrading to the latest <span class="productname">ltcluster</span> version.
+      </p><p>
+        Following the release of <span class="productname">ltcluster</span> 5.0, there will be no further releases of
+        the <span class="productname">ltcluster</span> 4.x series. Note that <span class="productname">ltcluster</span> 5.x is an incremental development
+        of the 4.x series and <span class="productname">ltcluster</span> 4.x users should upgrade to this as soon as possible.
+      </p></div></div><div class="sect2" id="INSTALL-LIGHTDB-93-94"><div class="titlepage"><div><div><h3 class="title">2.1.2. LightDB 9.4 support</h3></div></div></div><a id="id-1.3.3.7.13.2" class="indexterm"></a><p>
+      Note that some <span class="productname">ltcluster</span> functionality is not available in LightDB 9.4:
+    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
+          In LightDB 9.4, <code class="command">postgresql.confrewind</code> is not part of the core
+          distribution. <code class="command">postgresql.confrewind</code> will need to be compiled separately to be able
+          to use any <span class="productname">ltcluster</span> functionality which takes advantage of it.
+        </p></li></ul></div><div class="warning"><h3 class="title">Warning</h3><p>
+        LightDB 9.3 has reached the end of its community support period (final release was
+        <a class="ulink" href="https://www.hs.net/lightdb/docs/9.3/release-9-3-25.html" target="_top">9.3.25</a>
+        in November 2018) and will no longer be updated with security or bugfixes.
+      </p><p>
+        Beginning with <span class="productname">ltcluster</span> 5.2, <span class="productname">ltcluster</span> no longer supports LightDB 9.3.
+      </p><p>
+        LightDB 9.4 has reached the end of its community support period (final release was
+        <a class="ulink" href="https://www.hs.net/lightdb/docs/9.4/release-9-4-26.html" target="_top">9.4.26</a>
+        in February 2020) and will no longer be updated with security or bugfixes.
+      </p><p>
+        We recommend that users of these versions migrate to a supported LightDB version
+        as soon as possible.
+      </p><p>
+        For further details, see the  <a class="ulink" href="https://www.hs.net/lightdb/support/versioning/" target="_top">LightDB Versioning Policy</a>.
+      </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="installation.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="installation.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="installation-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 2. Installation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 2.2. Installing <span class="productname">ltcluster</span> from packages</td></tr></table></div></body></html>

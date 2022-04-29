@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.7. Monitoring standby disconnections on the primary node</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication" /><link rel="next" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.7. Monitoring standby disconnections on the primary node</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.7. Monitoring standby disconnections on the primary node</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS">12.7.1. Standby disconnections monitoring process and criteria</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE">12.7.2. Standby disconnections monitoring process example</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS">12.7.3. Standby disconnections monitoring caveats</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION">12.7.4. Standby disconnections monitoring process configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS">12.7.5. Standby disconnections monitoring process event notifications</a></span></dt></dl></div><a id="id-1.5.3.10.2" class="indexterm"></a><a id="id-1.5.3.10.3" class="indexterm"></a><div class="note"><h3 class="title">Note</h3><p>
+      This functionality is available in <a class="link" href="release-4.4.html" title="A.5. Release 4.4"><span class="productname">ltcluster</span> 4.4</a> and later.
+    </p></div><p>
+    When running on the primary node, <span class="productname">ltclusterd</span> can
+    monitor connections and in particular disconnections by its attached
+    child nodes (standbys, and if in use, the witness server), and optionally
+    execute a custom command if certain criteria are met (such as the number of
+    attached nodes falling to zero following a failover to a new primary); this
+    command can be used for example to "fence" the node and ensure it
+    is isolated from any applications attempting to access the replication cluster.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+	  Currently <span class="productname">ltclusterd</span> can only detect disconnections
+	  of streaming replication standbys and cannot determine whether a standby
+	  has disconnected and fallen back to archive recovery.
+	</p><p>
+	  See section <a class="link" href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS" title="12.7.3. Standby disconnections monitoring caveats">caveats</a> below.
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS"><div class="titlepage"><div><div><h3 class="title">12.7.1. Standby disconnections monitoring process and criteria</h3></div></div></div><p>
+	  <span class="productname">ltclusterd</span> monitors attached child nodes and decides
+	  whether to invoke the user-defined command based on the following process
+	  and criteria:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+          Every few seconds (defined by the configuration parameter <code class="varname">child_nodes_check_interval</code>;
+          default: <code class="literal">5</code> seconds, a value of <code class="literal">0</code> disables this altogether), <span class="productname">ltclusterd</span> queries
+          the <code class="literal">pg_stat_replication</code> system view and compares
+          the nodes present there against the list of nodes registered with <span class="productname">ltcluster</span> which
+          should be attached to the primary.
+        </p><p>
+          If a witness server is in use, <span class="productname">ltclusterd</span> connects to it and checks which upstream node
+          it is following.
+        </p></li><li class="listitem"><p>
+          If a child node (standby) is no longer present in <code class="literal">pg_stat_replication</code>,
+          <span class="productname">ltclusterd</span> notes the time it detected the node's absence, and additionally generates a
+          <code class="literal">child_node_disconnect</code> event.
+        </p><p>
+          If a witness server is in use, and it is no longer following the primary, or not
+          reachable at all, <span class="productname">ltclusterd</span> notes the time it detected the node's absence, and additionally generates a
+          <code class="literal">child_node_disconnect</code> event.
+        </p></li><li class="listitem"><p>
+          If a child node (standby) which was absent from <code class="literal">pg_stat_replication</code> reappears,
+          <span class="productname">ltclusterd</span> clears the time it detected the node's absence, and additionally generates a
+          <code class="literal">child_node_reconnect</code> event.
+        </p><p>
+          If a witness server is in use, which was previously not reachable or not following the
+          primary node, has become reachable and is following the primary node,  <span class="productname">ltclusterd</span> clears the
+          time it detected the node's absence, and additionally generates a
+          <code class="literal">child_node_reconnect</code> event.
+        </p></li><li class="listitem"><p>
+          If an entirely new child node (standby or witness) is detected, <span class="productname">ltclusterd</span> adds it to its internal list
+          and additionally generates a <code class="literal">child_node_new_connect</code> event.
+        </p></li><li class="listitem"><p>
+          If the <code class="varname">child_nodes_disconnect_command</code> parameter is set in
+          <code class="filename">ltcluster.conf</code>, <span class="productname">ltclusterd</span> will then loop through all child nodes.
+          If it determines that insufficient child nodes are connected, and a
+          minimum of <code class="varname">child_nodes_disconnect_timeout</code> seconds (default: <code class="literal">30</code>)
+          has elapsed since  the last node became disconnected, <span class="productname">ltclusterd</span> will then execute the
+          <code class="varname">child_nodes_disconnect_command</code> script.
+        </p><p>
+          By default, the <code class="varname">child_nodes_disconnect_command</code> will only be executed
+          if all child nodes are disconnected. If <code class="varname">child_nodes_connected_min_count</code>
+          is set, the <code class="varname">child_nodes_disconnect_command</code> script will be triggered
+          if the number of connected child nodes falls below the specified value (e.g.
+          if set to <code class="literal">2</code>, the script will be triggered if only one child node
+          is connected). Alternatively, if <code class="varname">child_nodes_disconnect_min_count</code>
+          and more than that number of child nodes disconnects, the script will be triggered.
+        </p><div class="note"><h3 class="title">Note</h3><p>
+            By default, a witness node, if in use, will <span class="emphasis"><em>not</em></span> be counted as a
+            child node for the purposes of determining whether to execute
+            <code class="varname">child_nodes_disconnect_command</code>.
+          </p><p>
+            To enable the witness node to be counted as a child node, set
+            <code class="varname">child_nodes_connected_include_witness</code> in <code class="filename">ltcluster.conf</code>
+            to <code class="literal">true</code>
+            (and <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-RELOADING-CONFIGURATION" title="13.1.7. Applying configuration changes to ltclusterd">reload the configuration</a> if <span class="productname">ltclusterd</span>
+            is running).
+          </p></div></li><li class="listitem"><p>
+          Note that child nodes which are not attached when <span class="productname">ltclusterd</span>
+          starts will <span class="emphasis"><em>not</em></span> be considered as missing, as <span class="productname">ltclusterd</span>
+          cannot know why they are not attached.
+        </p></li></ul></div><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE"><div class="titlepage"><div><div><h3 class="title">12.7.2. Standby disconnections monitoring process example</h3></div></div></div><p>
+	  This example shows typical <span class="productname">ltclusterd</span> log output from a three-node cluster
+	  (primary and two child nodes), with <code class="varname">child_nodes_connected_min_count</code>
+	  set to <code class="literal">2</code>.
+	</p><p>
+	  <span class="productname">ltclusterd</span> on the primary has started up, while two child
+	  nodes are being provisioned:
+	  </p><pre class="programlisting">
+[2019-04-24 15:25:33] [INFO] monitoring primary node "node1" (ID: 1) in normal state
+[2019-04-24 15:25:35] [NOTICE] new node "node2" (ID: 2) has connected
+[2019-04-24 15:25:35] [NOTICE] 1 (of 1) child nodes are connected, but at least 2 child nodes required
+[2019-04-24 15:25:35] [INFO] no child nodes have detached since ltclusterd startup
+(...)
+[2019-04-24 15:25:44] [NOTICE] new node "node3" (ID: 3) has connected
+[2019-04-24 15:25:46] [INFO] monitoring primary node "node1" (ID: 1) in normal state
+(...)</pre><p>
+	</p><p>
+	  One of the child nodes has disconnected; <span class="productname">ltclusterd</span>
+	  is now waiting <code class="varname">child_nodes_disconnect_timeout</code> seconds
+	  before executing <code class="varname">child_nodes_disconnect_command</code>:
+	  </p><pre class="programlisting">
+[2019-04-24 15:28:11] [INFO] monitoring primary node "node1" (ID: 1) in normal state
+[2019-04-24 15:28:17] [INFO] monitoring primary node "node1" (ID: 1) in normal state
+[2019-04-24 15:28:19] [NOTICE] node "node3" (ID: 3) has disconnected
+[2019-04-24 15:28:19] [NOTICE] 1 (of 2) child nodes are connected, but at least 2 child nodes required
+[2019-04-24 15:28:19] [INFO] most recently detached child node was 3 (ca. 0 seconds ago), not triggering "child_nodes_disconnect_command"
+[2019-04-24 15:28:19] [DETAIL] "child_nodes_disconnect_timeout" set To 30 seconds
+(...)</pre><p>
+	</p><p>
+	  <code class="varname">child_nodes_disconnect_command</code> is executed once:
+	  </p><pre class="programlisting">
+[2019-04-24 15:28:49] [INFO] most recently detached child node was 3 (ca. 30 seconds ago), triggering "child_nodes_disconnect_command"
+[2019-04-24 15:28:49] [INFO] "child_nodes_disconnect_command" is:
+	"/usr/bin/fence-all-the-things.sh"
+[2019-04-24 15:28:51] [NOTICE] 1 (of 2) child nodes are connected, but at least 2 child nodes required
+[2019-04-24 15:28:51] [INFO] "child_nodes_disconnect_command" was previously executed, taking no action</pre><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS"><div class="titlepage"><div><div><h3 class="title">12.7.3. Standby disconnections monitoring caveats</h3></div></div></div><p>
+	  The follwing caveats should be considered if you are intending to use this functionality.
+	</p><p>
+	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
+			If a child node is configured to use archive recovery, it's possible that
+			the child node will disconnect from the primary node and fall back to
+			archive recovery. In this case <span class="productname">ltclusterd</span>
+			will nevertheless register a node disconnection.
+		  </p></li><li class="listitem" style="list-style-type: disc"><p>
+			<span class="productname">ltcluster</span> relies on <code class="varname">application_name</code> in the child node's
+			<code class="varname">primary_conninfo</code> string to be the same as the node name
+			defined in the node's <code class="filename">ltcluster.conf</code> file. Furthermore,
+			this <code class="varname">application_name</code> must be unique across the replication
+			cluster.
+          </p><p>
+			If a custom <code class="varname">application_name</code> is used, or the
+			<code class="varname">application_name</code> is not unique across the replication
+			cluster, <span class="productname">ltcluster</span> will not be able to reliably monitor child node connections.
+		  </p></li></ul></div><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">12.7.4. Standby disconnections monitoring process configuration</h3></div></div></div><p>
+	  The following parameters, set in <code class="filename">ltcluster.conf</code>,
+	  control how child node disconnection monitoring operates.
+	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">child_nodes_check_interval</code></span></dt><dd><a id="id-1.5.3.10.10.3.1.2.1" class="indexterm"></a><p>
+			Interval (in seconds) after which <span class="productname">ltclusterd</span> queries the
+			<code class="literal">pg_stat_replication</code> system view and compares the nodes present
+			there against the list of nodes registered with ltcluster which should be attached to the primary.
+		  </p><p>
+			Default is <code class="literal">5</code> seconds, a value of <code class="literal">0</code> disables this check
+			altogether.
+		  </p></dd><dt><span class="term"><code class="varname">child_nodes_disconnect_command</code></span></dt><dd><a id="id-1.5.3.10.10.3.2.2.1" class="indexterm"></a><p>
+			User-definable script to be executed when <span class="productname">ltclusterd</span>
+			determines that an insufficient number of child nodes are connected. By default
+			the script is executed when no child nodes are executed, but the execution
+			threshold can be modified by setting one of <code class="varname">child_nodes_connected_min_count</code>
+			or<code class="varname">child_nodes_disconnect_min_count</code> (see below).
+		  </p><p>
+			The <code class="varname">child_nodes_disconnect_command</code> script can be
+			any user-defined script or program. It <span class="emphasis"><em>must</em></span> be able
+			to be executed by the system user under which the LightDB server itself
+			runs (usually <code class="literal">lightdb</code>).
+		  </p><div class="note"><h3 class="title">Note</h3><p>
+			  If <code class="varname">child_nodes_disconnect_command</code> is not set, no action
+			  will be taken.
+			</p></div><p>
+			If specified, the following format placeholder will be substituted when
+			executing <code class="varname">child_nodes_disconnect_command</code>:
+		  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">%p</code></span></dt><dd><p>
+				   ID of the node executing the <code class="varname">child_nodes_disconnect_command</code> script.
+				 </p></dd></dl></div><p>
+			The <code class="varname">child_nodes_disconnect_command</code> script will only be executed once
+			while the criteria for its execution are met. If the criteria for its execution are no longer
+			met (i.e. some child nodes have reconnected), it will be executed again if
+			the criteria for its execution are met again.
+          </p><p>
+			The <code class="varname">child_nodes_disconnect_command</code> script will not be executed if
+			<span class="productname">ltclusterd</span> is <a class="link" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">paused</a>.
+          </p></dd><dt><span class="term"><code class="varname">child_nodes_disconnect_timeout</code></span></dt><dd><a id="id-1.5.3.10.10.3.3.2.1" class="indexterm"></a><p>
+			If <span class="productname">ltclusterd</span> determines that an insufficient number of
+			child nodes are connected, it will wait for the specified number of seconds
+			to execute the <code class="varname">child_nodes_disconnect_command</code>.
+		  </p><p>
+			Default: <code class="literal">30</code> seconds.
+		  </p></dd><dt><span class="term"><code class="varname">child_nodes_connected_min_count</code></span></dt><dd><a id="id-1.5.3.10.10.3.4.2.1" class="indexterm"></a><p>
+			If the number of child nodes connected falls below the number specified in
+			this parameter, the <code class="varname">child_nodes_disconnect_command</code> script
+			will be executed.
+		  </p><p>
+			For example, if <code class="varname">child_nodes_connected_min_count</code> is set
+			to <code class="literal">2</code>, the <code class="varname">child_nodes_disconnect_command</code>
+			script will be executed if one or no child nodes are connected.
+		  </p><p>
+			Note that <code class="varname">child_nodes_connected_min_count</code> overrides any value
+			set in <code class="varname">child_nodes_disconnect_min_count</code>.
+		  </p><p>
+			If neither of <code class="varname">child_nodes_connected_min_count</code> or
+			<code class="varname">child_nodes_disconnect_min_count</code> are set,
+			the <code class="varname">child_nodes_disconnect_command</code> script
+			will be executed when no child nodes are connected.
+		  </p><p>
+            A witness node, if in use, will not be counted as a child node unless
+            <code class="varname">child_nodes_connected_include_witness</code> is set to <code class="literal">true</code>.
+          </p></dd><dt><span class="term"><code class="varname">child_nodes_disconnect_min_count</code></span></dt><dd><a id="id-1.5.3.10.10.3.5.2.1" class="indexterm"></a><p>
+			If the number of disconnected child nodes exceeds the number specified in
+			this parameter, the <code class="varname">child_nodes_disconnect_command</code> script
+			will be executed.
+		  </p><p>
+			For example, if <code class="varname">child_nodes_disconnect_min_count</code> is set
+			to <code class="literal">2</code>, the <code class="varname">child_nodes_disconnect_command</code>
+			script will be executed if more than two child nodes are disconnected.
+		  </p><p>
+			Note that any value set in <code class="varname">child_nodes_disconnect_min_count</code>
+			will be overriden by <code class="varname">child_nodes_connected_min_count</code>.
+		  </p><p>
+			If neither of <code class="varname">child_nodes_connected_min_count</code> or
+			<code class="varname">child_nodes_disconnect_min_count</code> are set,
+			the <code class="varname">child_nodes_disconnect_command</code> script
+			will be executed when no child nodes are connected.
+		  </p><p>
+            A witness node, if in use, will not be counted as a child node unless
+            <code class="varname">child_nodes_connected_include_witness</code> is set to <code class="literal">true</code>.
+          </p></dd><dt><span class="term"><code class="varname">child_nodes_connected_include_witness</code></span></dt><dd><a id="id-1.5.3.10.10.3.6.2.1" class="indexterm"></a><p>
+            Whether to count the witness node (if in use) as a child node when
+            determining whether to execute <code class="varname">child_nodes_disconnect_command</code>.
+          </p><p>
+            Default to <code class="literal">false</code>.
+          </p></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS"><div class="titlepage"><div><div><h3 class="title">12.7.5. Standby disconnections monitoring process event notifications</h3></div></div></div><p>
+	  The following <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notifications</a> may be generated:
+	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">child_node_disconnect</code></span></dt><dd><a id="id-1.5.3.10.11.3.1.2.1" class="indexterm"></a><p>
+			This event is generated after <span class="productname">ltclusterd</span>
+			detects that a child node is no longer streaming from the primary node.
+          </p><p>
+			Example:
+			</p><pre class="programlisting">
+$ ltcluster cluster event --event=child_node_disconnect
+ Node ID | Name  | Event                 | OK | Timestamp           | Details
+---------+-------+-----------------------+----+---------------------+--------------------------------------------
+ 1       | node1 | child_node_disconnect | t  | 2019-04-24 12:41:36 | node "node3" (ID: 3) has disconnected</pre><p>
+		  </p></dd><dt><span class="term"><code class="varname">child_node_reconnect</code></span></dt><dd><a id="id-1.5.3.10.11.3.2.2.1" class="indexterm"></a><p>
+			This event is generated after <span class="productname">ltclusterd</span>
+			detects that a child node has resumed streaming from the primary node.
+          </p><p>
+			Example:
+			</p><pre class="programlisting">
+$ ltcluster cluster event --event=child_node_reconnect
+ Node ID | Name  | Event                | OK | Timestamp           | Details
+---------+-------+----------------------+----+---------------------+------------------------------------------------------------
+ 1       | node1 | child_node_reconnect | t  | 2019-04-24 12:42:19 | node "node3" (ID: 3) has reconnected after 42 seconds</pre><p>
+		  </p></dd><dt><span class="term"><code class="varname">child_node_new_connect</code></span></dt><dd><a id="id-1.5.3.10.11.3.3.2.1" class="indexterm"></a><p>
+			This event is generated after <span class="productname">ltclusterd</span>
+			detects that a new child node has been registered with <span class="productname">ltcluster</span> and has
+			connected to the primary.
+          </p><p>
+			Example:
+			</p><pre class="programlisting">
+$ ltcluster cluster event --event=child_node_new_connect
+ Node ID | Name  | Event                  | OK | Timestamp           | Details
+---------+-------+------------------------+----+---------------------+---------------------------------------------
+ 1       | node1 | child_node_new_connect | t  | 2019-04-24 12:41:30 | new node "node3" (ID: 3) has connected</pre><p>
+		  </p></dd><dt><span class="term"><code class="varname">child_nodes_disconnect_command</code></span></dt><dd><a id="id-1.5.3.10.11.3.4.2.1" class="indexterm"></a><p>
+			This event is generated after <span class="productname">ltclusterd</span> detects
+			that sufficient child nodes have been disconnected for a sufficient amount
+			of time to trigger execution of the <code class="varname">child_nodes_disconnect_command</code>.
+          </p><p>
+			Example:
+			</p><pre class="programlisting">
+$ ltcluster cluster event --event=child_nodes_disconnect_command
+ Node ID | Name  | Event                          | OK | Timestamp           | Details
+---------+-------+--------------------------------+----+---------------------+--------------------------------------------------------
+ 1       | node1 | child_nodes_disconnect_command | t  | 2019-04-24 13:08:17 | "child_nodes_disconnect_command" successfully executed</pre><p>
+		  </p></dd></dl></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cascading-replication.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">12.6. ltclusterd and cascading replication </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 13. ltclusterd setup and configuration</td></tr></table></div></body></html>

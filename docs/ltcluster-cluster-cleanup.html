@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>ltcluster cluster cleanup</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltcluster-cluster-event.html" title="ltcluster cluster event" /><link rel="next" href="ltcluster-service-status.html" title="ltcluster service status" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">ltcluster cluster cleanup</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltcluster-cluster-event.html" title="ltcluster cluster event">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltcluster-command-reference.html" title="Part IV. ltcluster command reference">Up</a></td><th width="60%" align="center">Part IV. ltcluster command reference</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltcluster-service-status.html" title="ltcluster service status">Next</a></td></tr></table><hr></hr></div><div class="refentry" id="LTCLUSTER-CLUSTER-CLEANUP"><div class="titlepage"></div><a id="id-1.6.20.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ltcluster cluster cleanup</span></h2><p>ltcluster cluster cleanup — purge monitoring history</p></div><div class="refsect1" id="id-1.6.20.4"><h2>Description</h2><p>
+      Purges monitoring history from the <code class="literal">ltcluster.monitoring_history</code> table to
+      prevent excessive table growth.
+    </p><p>
+      By default <span class="emphasis"><em>all</em></span> data will be removed; Use the <code class="option">-k/--keep-history</code>
+      option to specify the number of days of monitoring history to retain.
+    </p><p>
+      This command can be executed manually or as a cronjob.
+    </p></div><div class="refsect1" id="id-1.6.20.5"><h2>Usage</h2><p>
+      This command requires a valid <code class="filename">ltcluster.conf</code> file for the node on which it is
+      executed; no additional arguments are required.
+    </p></div><div class="refsect1" id="id-1.6.20.6"><h2>Notes</h2><p>
+      Monitoring history will only be written if <span class="productname">ltclusterd</span> is active, and
+      <code class="varname">monitoring_history</code> is set to <code class="literal">true</code> in
+      <code class="filename">ltcluster.conf</code>.
+    </p></div><div class="refsect1" id="LTCLUSTER-CLUSTER-CLEANUP-EVENTS"><h2>Event notifications</h2><p>
+      A <code class="literal">cluster_cleanup</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+    </p></div><div class="refsect1" id="id-1.6.20.8"><h2>Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--node-id</code></span></dt><dd><p>
+            Only delete monitoring records for the specified node.
+          </p></dd></dl></div></div><div class="refsect1" id="id-1.6.20.9"><h2>See also</h2><p>
+      For more details see the sections <a class="xref" href="ltclusterd-monitoring.html" title="14.4. Storing monitoring data">Storing monitoring data</a> and
+      <a class="xref" href="ltclusterd-basic-configuration.html#LTCLUSTERD-MONITORING-CONFIGURATION" title="13.1.6. Monitoring configuration">ltclusterd monitoring configuration</a>.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltcluster-cluster-event.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltcluster-command-reference.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltcluster-service-status.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">ltcluster cluster event </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> ltcluster service status</td></tr></table></div></body></html>
