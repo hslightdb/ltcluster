@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.4. Advanced cloning options</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cloning-cascading.html" title="5.3. Cloning and cascading replication" /><link rel="next" href="promoting-standby.html" title="Chapter 6. Promoting a standby server with ltcluster" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.4. Advanced cloning options</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cloning-cascading.html" title="5.3. Cloning and cascading replication">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">Up</a></td><th width="60%" align="center">Chapter 5. Cloning standbys</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="promoting-standby.html" title="Chapter 6. Promoting a standby server with ltcluster">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CLONING-ADVANCED"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.4. Advanced cloning options</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="cloning-advanced.html#CLONING-ADVANCED-PG-BASEBACKUP-OPTIONS">5.4.1. pg_basebackup options when cloning a standby</a></span></dt><dt><span class="sect2"><a href="cloning-advanced.html#CLONING-ADVANCED-MANAGING-PASSWORDS">5.4.2. Managing passwords</a></span></dt><dt><span class="sect2"><a href="cloning-advanced.html#CLONING-ADVANCED-REPLICATION-USER">5.4.3. Separate replication user</a></span></dt><dt><span class="sect2"><a href="cloning-advanced.html#CLONING-ADVANCED-TABLESPACE-MAPPING">5.4.4. Tablespace mapping</a></span></dt></dl></div><a id="id-1.4.3.5.2" class="indexterm"></a><div class="sect2" id="CLONING-ADVANCED-PG-BASEBACKUP-OPTIONS"><div class="titlepage"><div><div><h3 class="title">5.4.1. pg_basebackup options when cloning a standby</h3></div></div></div><p>
+      As <span class="productname">ltcluster</span> uses <code class="command">pg_basebackup</code> to clone a standby, it's possible to
+      provide additional parameters for <code class="command">pg_basebackup</code> to customise the
+      cloning process.
+    </p><p>
+     By default, <code class="command">pg_basebackup</code> performs a checkpoint before beginning the backup
+     process. However, a normal checkpoint may take some time to complete;
+     a fast checkpoint can be forced with <code class="command"><a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a></code>'s
+     <code class="literal">-c/--fast-checkpoint</code> option.
+     Note that this may impact performance of the server being cloned from (typically the primary)
+     so should be used with care.
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        If <span class="application">Barman</span> is set up for the cluster, it's possible to
+        clone the standby directly from Barman, without any impact on the server the standby
+        is being cloned from. For more details see <a class="xref" href="cloning-from-barman.html" title="5.1. Cloning a standby from Barman">Cloning from Barman</a>.
+      </p></div><p>
+      Other options can be passed to <code class="command">pg_basebackup</code> by including them
+      in the <code class="filename">ltcluster.conf</code> setting <code class="varname">pg_basebackup_options</code>.
+    </p><p>
+      Not that by default, <span class="productname">ltcluster</span> executes <code class="command">pg_basebackup</code> with <code class="option">-X/--wal-method</code>
+      (LightDB 9.6 and earlier: <code class="option">-X/--xlog-method</code>) set to <code class="literal">stream</code>.
+      From LightDB 9.6, if replication slots are in use, it will also create a replication slot before
+      running the base backup, and execute <code class="command">pg_basebackup</code> with the
+      <code class="option">-S/--slot</code> option set to the name of the previously created replication slot.
+    </p><p>
+      These parameters can set by the user in <code class="varname">pg_basebackup_options</code>, in which case they
+      will override the <span class="productname">ltcluster</span> default values. However normally there's no reason to do this.
+    </p><p>
+      If using a separate directory to store WAL files, provide the option <code class="literal">--waldir</code>
+      (<code class="literal">--xlogdir</code> in LightDB 9.6 and earlier) with the absolute path to the
+      WAL directory. Any WALs generated during the cloning process will be copied here, and
+      a symlink will automatically be created from the main data directory.
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        The <code class="literal">--waldir</code> (<code class="literal">--xlogdir</code>) option,
+        if present in <code class="varname">pg_basebackup_options</code>, will be honoured by <span class="productname">ltcluster</span>
+        when cloning from Barman (<span class="productname">ltcluster</span> 5.2 and later).
+      </p></div><p>
+     See the <a class="ulink" href="https://www.lightdb.org/docs/current/app-pgbasebackup.html" target="_top">LightDB pg_basebackup documentation</a>
+     for more details of available options.
+    </p></div><div class="sect2" id="CLONING-ADVANCED-MANAGING-PASSWORDS"><div class="titlepage"><div><div><h3 class="title">5.4.2. Managing passwords</h3></div></div></div><a id="id-1.4.3.5.4.2" class="indexterm"></a><p>
+     If replication connections to a standby's upstream server are password-protected,
+     the standby must be able to provide the password so it can begin streaming replication.
+    </p><p>
+     The recommended way to do this is to store the password in the <code class="literal">lightdb</code> system
+     user's <code class="filename">~/.pgpass</code> file.  For more information on using the password file, see
+     the documentation section <a class="xref" href="configuration-password-management.html#CONFIGURATION-PASSWORD-FILE" title="4.8.2. Using a password file">password file</a>.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        If using a <code class="filename">pgpass</code> file, an entry for the replication user (by default the
+        user who connects to the <code class="literal">ltcluster</code> database) <span class="emphasis"><em>must</em></span>
+        be provided, with database name set to <code class="literal">replication</code>, e.g.:
+        </p><pre class="programlisting">
+          node1:5432:replication:ltcluster:12345</pre><p>
+      </p></div><p>
+     If, for whatever reason, you wish to include the password in <code class="filename">recovery.conf</code>,
+     set <code class="varname">use_primary_conninfo_password</code> to <code class="literal">true</code> in
+     <code class="filename">ltcluster.conf</code>. This will read a password set in <code class="varname">PGPASSWORD</code>
+     (but not <code class="filename">~/.pgpass</code>) and place it into the <code class="varname">primary_conninfo</code>
+     string in <code class="filename">recovery.conf</code>. Note that <code class="varname">PGPASSWORD</code>
+     will need to be set during any action which causes <code class="filename">recovery.conf</code> to be
+     rewritten, e.g. <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a>.
+    </p></div><div class="sect2" id="CLONING-ADVANCED-REPLICATION-USER"><div class="titlepage"><div><div><h3 class="title">5.4.3. Separate replication user</h3></div></div></div><p>
+     In some circumstances it might be desirable to create a dedicated replication-only
+     user (in addition to the user who manages the <span class="productname">ltcluster</span> metadata). In this case,
+     the replication user should be set in <code class="filename">ltcluster.conf</code> via the parameter
+     <code class="varname">replication_user</code>; <span class="productname">ltcluster</span> will use this value when making
+     replication connections and generating <code class="filename">recovery.conf</code>. This
+     value will also be stored in the parameter <code class="literal">ltcluster.nodes</code>
+     table for each node; it no longer needs to be explicitly specified when
+     cloning a node or executing <a class="xref" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><span class="refentrytitle">ltcluster standby follow</span></a>.
+    </p></div><div class="sect2" id="CLONING-ADVANCED-TABLESPACE-MAPPING"><div class="titlepage"><div><div><h3 class="title">5.4.4. Tablespace mapping</h3></div></div></div><a id="id-1.4.3.5.6.2" class="indexterm"></a><p>
+      <span class="productname">ltcluster</span> provides a <code class="option">tablespace_mapping</code> configuration
+      file option, which will makes it possible to map the tablespace on the source node to
+      a different location on the local node.
+    </p><p>
+      To use this, add <code class="option">tablespace_mapping</code> to <code class="filename">ltcluster.conf</code>
+      like this:
+</p><pre class="programlisting">
+  tablespace_mapping='/var/lib/pgsql/tblspc1=/data/pgsql/tblspc1'
+</pre><p>
+    </p><p>
+      where the left-hand value represents the tablespace on the source node,
+      and the right-hand value represents  the tablespace on the standby to be cloned.
+    </p><p>
+      This parameter can be provided multiple times.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cloning-cascading.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="cloning-standbys.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="promoting-standby.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.3. Cloning and cascading replication </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 6. Promoting a standby server with ltcluster</td></tr></table></div></body></html>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.1. Cloning a standby from Barman</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cloning-standbys.html" title="Chapter 5. Cloning standbys" /><link rel="next" href="cloning-replication-slots.html" title="5.2. Cloning and replication slots" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.1. Cloning a standby from Barman</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">Up</a></td><th width="60%" align="center">Chapter 5. Cloning standbys</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="cloning-replication-slots.html" title="5.2. Cloning and replication slots">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CLONING-FROM-BARMAN"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.1. Cloning a standby from Barman</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="cloning-from-barman.html#CLONING-FROM-BARMAN-PREREQUISITES">5.1.1. Prerequisites for cloning from Barman</a></span></dt><dt><span class="sect2"><a href="cloning-from-barman.html#CLONING-FROM-BARMAN-RESTORE-COMMAND">5.1.2. Using Barman as a WAL file source</a></span></dt></dl></div><a id="id-1.4.3.2.2" class="indexterm"></a><a id="id-1.4.3.2.3" class="indexterm"></a><p>
+    <a class="xref" href="ltcluster-standby-clone.html" title="ltcluster standby clone"><span class="refentrytitle">ltcluster standby clone</span></a> can use
+    <a class="ulink" href="https://www.hs.net/lightdb/" target="_top">Hundsun LightDB</a>'s
+    <a class="ulink" href="https://www.pgbarman.org/" target="_top">Barman</a> application
+    to clone a standby (and also as a fallback source for WAL files).
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+     Barman (aka PgBarman) should be considered as an integral part of any
+     LightDB replication cluster. For more details see:
+     <a class="ulink" href="https://www.pgbarman.org/" target="_top">https://www.pgbarman.org/</a>.
+    </p></div><p>
+    Barman support provides the following advantages:
+    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
+       the primary node does not need to perform a new backup every time a
+       new standby is cloned
+      </p></li><li class="listitem" style="list-style-type: disc"><p>
+       a standby node can be disconnected for longer periods without losing
+       the ability to catch up, and without causing accumulation of WAL
+       files on the primary node
+      </p></li><li class="listitem" style="list-style-type: disc"><p>
+       WAL management on the primary becomes much easier as there's no need
+       to use replication slots, and <code class="varname">wal_keep_segments</code>
+       (LightDB 13 and later: <code class="varname">wal_keep_size</code>)
+       does not need to be set.
+     </p></li></ul></div><p>
+   </p><div class="note"><h3 class="title">Note</h3><p>
+      Currently <span class="productname">ltcluster</span>'s support for cloning from Barman is implemented by using
+      <span class="productname">rsync</span> to clone from the Barman server.
+    </p><p>
+      It is therefore not able to make use of Barman's parallel restore facility, which
+      is executed on the Barman server and clones to the target server.
+    </p><p>
+      Barman's parallel restore facility can be used by executing it manually on
+      the Barman server and configuring replication on the resulting cloned
+      standby using
+      <code class="command"><a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone --replication-conf-only</a></code>.
+    </p></div><div class="sect2" id="CLONING-FROM-BARMAN-PREREQUISITES"><div class="titlepage"><div><div><h3 class="title">5.1.1. Prerequisites for cloning from Barman</h3></div></div></div><p>
+    In order to enable Barman support for <code class="command">ltcluster standby clone</code>, following
+    prerequisites must be met:
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
+        the Barman catalogue must include at least one valid backup for this server;
+      </p></li><li class="listitem" style="list-style-type: disc"><p>
+        the <code class="varname">barman_host</code> setting in <code class="filename">ltcluster.conf</code> is set to the SSH
+        hostname of the Barman server;
+      </p></li><li class="listitem" style="list-style-type: disc"><p>
+        the <code class="varname">barman_server</code> setting in <code class="filename">ltcluster.conf</code> is the same as the
+        server configured in Barman.
+      </p></li></ul></div><p>
+   </p><p>
+     For example, assuming Barman is located on the host "<code class="literal">barmansrv</code>"
+     under the "<code class="literal">barman</code>" user account,
+     <code class="filename">ltcluster.conf</code> should contain the following entries:
+    </p><pre class="programlisting">
+    barman_host='barman@barmansrv'
+    barman_server='pg'</pre><p>
+   </p><p>
+     Here <code class="literal">pg</code> corresponds to a section in Barman's configuration file for a specific
+     server backup configuration, which would look something like:
+     </p><pre class="programlisting">
+[pg]
+description = "Main cluster"
+...
+     </pre><p>
+   </p><p>
+     More details on Barman configuration can be found in the
+     <a class="ulink" href="https://docs.pgbarman.org/" target="_top">Barman documentation</a>'s
+     <a class="ulink" href="https://docs.pgbarman.org/#configuration" target="_top">configuration section</a>.
+   </p><div class="note"><h3 class="title">Note</h3><p>
+     To use a non-default Barman configuration file on the Barman server,
+     specify this in <code class="filename">ltcluster.conf</code> with <code class="filename">barman_config</code>:
+     </p><pre class="programlisting">
+      barman_config='/path/to/barman.conf'</pre><p>
+    </p></div><p>
+     We also recommend configuring the <code class="varname">restore_command</code> setting in <code class="filename">ltcluster.conf</code>
+     to use the <code class="command">barman-wal-restore</code> script
+     (see section <a class="xref" href="cloning-from-barman.html#CLONING-FROM-BARMAN-RESTORE-COMMAND" title="5.1.2. Using Barman as a WAL file source">Using Barman as a WAL file source</a> below).
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+      If you have a non-default SSH configuration on the Barman
+      server, e.g. using a port other than 22, then you can set those
+      parameters in a dedicated Host section in <code class="filename">~/.ssh/config</code>
+      corresponding to the value of <code class="varname">barman_host</code> in
+      <code class="filename">ltcluster.conf</code>. See the <code class="literal">Host</code>
+      section in <code class="command">man 5 ssh_config</code> for more details.
+    </p></div><p>
+     If you wish to place WAL files in a location outside the main
+     LightDB data directory, set <code class="option">--waldir</code>
+     (LightDB 9.6 and earlier: <code class="option">--xlogdir</code>) in
+     <code class="option">postgresql.confbasebackup_options</code> to the target directory
+     (must be an absolute filepath). <span class="productname">ltcluster</span> will create and
+     symlink to this directory in exactly the same way
+     <span class="application">postgresql.confbasebackup</span> would.
+   </p><p>
+    It's now possible to clone a standby from Barman, e.g.:
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf -h node1 -U ltcluster -d ltcluster standby clone
+    NOTICE: destination directory "/var/lib/lightdb/data" provided
+    INFO: connecting to Barman server to verify backup for "test_cluster"
+    INFO: checking and correcting permissions on existing directory "/var/lib/lightdb/data"
+    INFO: creating directory "/var/lib/lightdb/data/ltcluster"...
+    INFO: connecting to Barman server to fetch server parameters
+    INFO: connecting to source node
+    DETAIL: current installation size is 30 MB
+    NOTICE: retrieving backup from Barman...
+    (...)
+    NOTICE: standby clone (from Barman) complete
+    NOTICE: you can now start your LightDB server
+    HINT: for example: postgresql.confctl -D /var/lib/lightdb/data start</pre><p>
+   </p><div class="note"><h3 class="title">Note</h3><p>
+     Barman support is automatically enabled if <code class="varname">barman_server</code>
+     is set. Normally it is good practice to use Barman, for instance
+     when fetching a base backup while cloning a standby; in any case,
+     Barman mode can be disabled using the <code class="literal">--without-barman</code>
+     command line option.
+    </p></div></div><div class="sect2" id="CLONING-FROM-BARMAN-RESTORE-COMMAND"><div class="titlepage"><div><div><h3 class="title">5.1.2. Using Barman as a WAL file source</h3></div></div></div><a id="id-1.4.3.2.9.2" class="indexterm"></a><p>
+    As a fallback in case streaming replication is interrupted, LightDB can optionally
+    retrieve WAL files from an archive, such as that provided by Barman. This is done by
+    setting <code class="varname">restore_command</code> in <code class="filename">recovery.conf</code> to
+    a valid shell command which can retrieve a specified WAL file from the archive.
+   </p><p>
+     <code class="command">barman-wal-restore</code> is a Python script provided as part of the <code class="literal">barman-cli</code>
+     package (Barman 2.0 ~ 2.7) or as part of the core Barman distribution (Barman 2.8 and later).
+   </p><p>
+    To use <code class="command">barman-wal-restore</code> with <span class="productname">ltcluster</span>,
+    assuming Barman is located on the host "<code class="literal">barmansrv</code>"
+    under the "<code class="literal">barman</code>" user account,
+    and that <code class="command">barman-wal-restore</code> is located as an executable at
+    <code class="filename">/usr/bin/barman-wal-restore</code>,
+    <code class="filename">ltcluster.conf</code> should include the following lines:
+    </p><pre class="programlisting">
+    barman_host='barman@barmansrv'
+    barman_server='pg'
+    restore_command='/usr/bin/barman-wal-restore barmansrv pg %f %p'</pre><p>
+   </p><div class="note"><h3 class="title">Note</h3><p>
+      <code class="command">barman-wal-restore</code> supports command line switches to
+      control parallelism (<code class="literal">--parallel=N</code>) and compression
+      (<code class="literal">--bzip2</code>, <code class="literal">--gzip</code>).
+    </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cloning-standbys.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="cloning-standbys.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="cloning-replication-slots.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 5. Cloning standbys </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.2. Cloning and replication slots</td></tr></table></div></body></html>

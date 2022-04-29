@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.2. Cloning and replication slots</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cloning-from-barman.html" title="5.1. Cloning a standby from Barman" /><link rel="next" href="cloning-cascading.html" title="5.3. Cloning and cascading replication" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.2. Cloning and replication slots</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cloning-from-barman.html" title="5.1. Cloning a standby from Barman">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">Up</a></td><th width="60%" align="center">Chapter 5. Cloning standbys</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="cloning-cascading.html" title="5.3. Cloning and cascading replication">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CLONING-REPLICATION-SLOTS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.2. Cloning and replication slots</h2></div></div></div><a id="id-1.4.3.3.2" class="indexterm"></a><a id="id-1.4.3.3.3" class="indexterm"></a><p>
+    Replication slots were introduced with LightDB 9.4 and are designed to ensure
+    that any standby connected to the primary using a replication slot will always
+    be able to retrieve the required WAL files. This removes the need to manually
+    manage WAL file retention by estimating the number of WAL files that need to
+    be maintained on the primary using <code class="varname">wal_keep_segments</code>
+    (LightDB 13 and later: <code class="varname">wal_keep_size</code>).
+    Do however be aware that if a standby is disconnected, WAL will continue to
+    accumulate on the primary until either the standby reconnects or the replication
+    slot is dropped.
+   </p><p>
+     To enable <span class="productname">ltcluster</span> to use replication slots, set the boolean parameter
+     <code class="varname">use_replication_slots</code> in <code class="filename">ltcluster.conf</code>:
+     </p><pre class="programlisting">
+       use_replication_slots=true</pre><p>
+   </p><p>
+    Replication slots must be enabled in <code class="filename">postgresql.conf</code> by
+    setting the parameter <code class="varname">max_replication_slots</code> to at least the
+    number of expected standbys (changes to this parameter require a server restart).
+   </p><p>
+    When cloning a standby, <span class="productname">ltcluster</span> will automatically generate an appropriate
+    slot name, which is stored in the <code class="literal">ltcluster.nodes</code> table, and create the slot
+    on the upstream node:
+     </p><pre class="programlisting">
+    ltcluster=# SELECT node_id, upstream_node_id, active, node_name, type, priority, slot_name
+               FROM ltcluster.nodes ORDER BY node_id;
+     node_id | upstream_node_id | active | node_name |  type   | priority |   slot_name
+    ---------+------------------+--------+-----------+---------+----------+---------------
+           1 |                  | t      | node1     | primary |      100 | ltcluster_slot_1
+           2 |                1 | t      | node2     | standby |      100 | ltcluster_slot_2
+           3 |                1 | t      | node3     | standby |      100 | ltcluster_slot_3
+     (3 rows)</pre><p>
+
+    </p><pre class="programlisting">
+    ltcluster=# SELECT slot_name, slot_type, active, active_pid FROM pg_replication_slots ;
+       slot_name   | slot_type | active | active_pid
+    ---------------+-----------+--------+------------
+     ltcluster_slot_2 | physical  | t      |      23658
+     ltcluster_slot_3 | physical  | t      |      23687
+    (2 rows)</pre><p>
+   </p><p>
+    Note that a slot name will be created by default for the primary but not
+    actually used unless the primary is converted to a standby using e.g.
+    <code class="command">ltcluster standby switchover</code>.
+   </p><p>
+    Further information on replication slots in the LightDB documentation:
+    <a class="ulink" href="https://www.lightdb.org/docs/current/interactive/warm-standby.html#STREAMING-REPLICATION-SLOTS" target="_top">https://www.lightdb.org/docs/current/interactive/warm-standby.html#STREAMING-REPLICATION-SLOTS</a>
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+     While replication slots can be useful for streaming replication, it's
+     recommended to monitor for inactive slots as these will cause WAL files to
+     build up indefinitely, possibly leading to server failure.
+    </p><p>
+     As an alternative we recommend using Hundsun LightDB's <a class="ulink" href="https://www.pgbarman.org/" target="_top">Barman</a>,
+     which offloads WAL management to a separate server, removing the requirement to use a replication
+     slot for each individual standby to reserve WAL. See section <a class="xref" href="cloning-from-barman.html" title="5.1. Cloning a standby from Barman">Cloning from Barman</a>
+     for more details on using <span class="productname">ltcluster</span> together with Barman.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cloning-from-barman.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="cloning-standbys.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="cloning-cascading.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.1. Cloning a standby from Barman </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.3. Cloning and cascading replication</td></tr></table></div></body></html>

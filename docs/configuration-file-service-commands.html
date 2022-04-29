@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>4.6. Service command settings</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="configuration-file-log-settings.html" title="4.5. Log settings" /><link rel="next" href="configuration-permissions.html" title="4.7. ltcluster database user permissions" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">4.6. Service command settings</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="configuration-file-log-settings.html" title="4.5. Log settings">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="configuration.html" title="Chapter 4. ltcluster configuration">Up</a></td><th width="60%" align="center">Chapter 4. ltcluster configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="configuration-permissions.html" title="4.7. ltcluster database user permissions">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CONFIGURATION-FILE-SERVICE-COMMANDS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">4.6. Service command settings</h2></div></div></div><a id="id-1.4.2.7.2" class="indexterm"></a><a id="id-1.4.2.7.3" class="indexterm"></a><p>
+    In some circumstances, <span class="productname">ltcluster</span> (and <span class="productname">ltclusterd</span>) need to
+    be able to stop, start or restart LightDB. <span class="productname">ltcluster</span> commands which need to do this
+    include <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>,
+    <a class="link" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><code class="command">ltcluster standby switchover</code></a> and
+    <a class="link" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><code class="command">ltcluster node rejoin</code></a>.
+  </p><p>
+    By default, <span class="productname">ltcluster</span> will use LightDB's <code class="command">lt_ctl</code> utility to control the LightDB
+    server. However this can lead to various problems, particularly when LightDB has been
+    installed from packages, and especially so if <span class="application">systemd</span> is in use.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      If using <span class="application">systemd</span>, ensure you have <code class="varname">RemoveIPC</code> set to <code class="literal">off</code>.
+      See the <a class="ulink" href="https://wiki.postgresql.org/wiki/Systemd" target="_top">systemd</a>
+      entry in the <a class="ulink" href="https://wiki.postgresql.org/wiki/Main_Page" target="_top">LightDB wiki</a> for details.
+    </p></div><p>
+    With this in mind, we recommend to <span class="emphasis"><em>always</em></span> configure <span class="productname">ltcluster</span> to use the
+    available system service commands.
+  </p><p>
+    To do this, specify the appropriate command for each action
+    in <code class="filename">ltcluster.conf</code> using the following configuration
+    parameters:
+    </p><pre class="programlisting">
+    service_start_command
+    service_stop_command
+    service_restart_command
+    service_reload_command</pre><p>
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      <span class="productname">ltcluster</span> will not apply <code class="option">pg_bindir</code> when executing any of these commands;
+      these can be user-defined scripts so must always be specified with the full path.
+    </p></div><div class="note"><h3 class="title">Note</h3><p>
+      It's also possible to specify a <code class="varname">service_promote_command</code>.
+      This is intended for systems which provide a package-level promote command,
+      such as Debian's <span class="application">pg_ctlcluster</span>, to promote the
+      LightDB from standby to primary.
+    </p><p>
+      If your packaging system does not provide such a command, it can be left empty,
+      and <span class="productname">ltcluster</span> will generate the appropriate `lt_ctl ... promote` command.
+    </p><p>
+      Do not confuse this with <code class="varname">promote_command</code>, which is used
+      by <span class="productname">ltclusterd</span> to execute <a class="xref" href="ltcluster-standby-promote.html" title="ltcluster standby promote"><span class="refentrytitle">ltcluster standby promote</span></a>.
+    </p></div><p>
+    To confirm which command <span class="productname">ltcluster</span> will execute for each action, use
+    <code class="command"><a class="link" href="ltcluster-node-service.html" title="ltcluster node service">ltcluster node service --list-actions --action=...</a></code>, e.g.:
+    </p><pre class="programlisting">
+      ltcluster -f /etc/ltcluster.conf node service --list-actions --action=stop
+      ltcluster -f /etc/ltcluster.conf node service --list-actions --action=start
+      ltcluster -f /etc/ltcluster.conf node service --list-actions --action=restart
+      ltcluster -f /etc/ltcluster.conf node service --list-actions --action=reload</pre><p>
+  </p><p>
+     These commands will be executed by the system user which <span class="productname">ltcluster</span> runs as (usually <code class="literal">lightdb</code>)
+     and will probably require passwordless sudo access to be able to execute the command.
+  </p><p>
+    For example, using <span class="application">systemd</span> on CentOS 7, the service commands can be
+    set as follows:
+    </p><pre class="programlisting">
+      service_start_command   = 'sudo systemctl start lightdb-9.6'
+      service_stop_command    = 'sudo systemctl stop lightdb-9.6'
+      service_restart_command = 'sudo systemctl restart lightdb-9.6'
+      service_reload_command  = 'sudo systemctl reload lightdb-9.6'</pre><p>
+    and <code class="filename">/etc/sudoers</code> should be set as follows:
+    </p><pre class="programlisting">
+      Defaults:lightdb !requiretty
+      lightdb ALL = NOPASSWD: /usr/bin/systemctl stop lightdb-9.6, \
+        /usr/bin/systemctl start lightdb-9.6, \
+        /usr/bin/systemctl restart lightdb-9.6, \
+        /usr/bin/systemctl reload lightdb-9.6</pre><p>
+  </p><div class="important"><h3 class="title">Important</h3><a id="id-1.4.2.7.14.1" class="indexterm"></a><p>
+      Debian/Ubuntu users: instead of calling <code class="command">sudo systemctl</code> directly, use
+      <code class="command">sudo pg_ctlcluster</code>, e.g.:
+    </p><pre class="programlisting">
+      service_start_command   = 'sudo pg_ctlcluster 9.6 main start'
+      service_stop_command    = 'sudo pg_ctlcluster 9.6 main stop'
+      service_restart_command = 'sudo pg_ctlcluster 9.6 main restart'
+      service_reload_command  = 'sudo pg_ctlcluster 9.6 main reload'</pre><p>
+      and set <code class="filename">/etc/sudoers</code> accordingly.
+    </p><p>
+      While <code class="command">pg_ctlcluster</code> will work when executed as user <code class="literal">lightdb</code>,
+      it's strongly recommended to use <code class="command">sudo pg_ctlcluster</code> on <span class="application">systemd</span>
+      systems, to ensure <span class="application">systemd</span> has a correct picture of
+      the LightDB application state.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="configuration-file-log-settings.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="configuration-permissions.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.5. Log settings </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.7. ltcluster database user permissions</td></tr></table></div></body></html>

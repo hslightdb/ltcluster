@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.3. Cloning and cascading replication</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cloning-replication-slots.html" title="5.2. Cloning and replication slots" /><link rel="next" href="cloning-advanced.html" title="5.4. Advanced cloning options" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.3. Cloning and cascading replication</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cloning-replication-slots.html" title="5.2. Cloning and replication slots">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="cloning-standbys.html" title="Chapter 5. Cloning standbys">Up</a></td><th width="60%" align="center">Chapter 5. Cloning standbys</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="cloning-advanced.html" title="5.4. Advanced cloning options">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CLONING-CASCADING"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.3. Cloning and cascading replication</h2></div></div></div><a id="id-1.4.3.4.2" class="indexterm"></a><p>
+    Cascading replication, introduced with LightDB 9.2, enables a standby server
+    to replicate from another standby server rather than directly from the primary,
+    meaning replication changes "cascade" down through a hierarchy of servers. This
+    can be used to reduce load on the primary and minimize bandwith usage between
+    sites. For more details, see the
+    <a class="ulink" href="https://www.lightdb.org/docs/current/warm-standby.html#CASCADING-REPLICATION" target="_top">
+    LightDB cascading replication documentation</a>.
+   </p><p>
+    <span class="productname">ltcluster</span> supports cascading replication. When cloning a standby,
+    set the command-line parameter <code class="literal">--upstream-node-id</code> to the
+    <code class="varname">node_id</code> of the server the standby should connect to, and
+    <span class="productname">ltcluster</span> will create <code class="filename">recovery.conf</code> to point to it. Note
+    that if <code class="literal">--upstream-node-id</code> is not explicitly provided,
+    <span class="productname">ltcluster</span> will set the standby's <code class="filename">recovery.conf</code> to
+    point to the primary node.
+   </p><p>
+    To demonstrate cascading replication, first ensure you have a primary and standby
+    set up as shown in the <a class="xref" href="quickstart.html" title="Chapter 3. Quick-start guide">Quick-start guide</a>.
+    Then create an additional standby server with <code class="filename">ltcluster.conf</code> looking
+    like this:
+    </p><pre class="programlisting">
+    node_id=3
+    node_name=node3
+    conninfo='host=node3 user=ltcluster dbname=ltcluster'
+    data_directory='/var/lib/lightdb/data'</pre><p>
+   </p><p>
+    Clone this standby (using the connection parameters for the existing standby),
+    ensuring <code class="literal">--upstream-node-id</code> is provide with the <code class="varname">node_id</code>
+    of the previously created standby (if following the example, this will be <code class="literal">2</code>):
+    </p><pre class="programlisting">
+    $ ltcluster -h node2 -U ltcluster -d ltcluster -f /etc/ltcluster.conf standby clone --upstream-node-id=2
+    NOTICE: using configuration file "/etc/ltcluster.conf"
+    NOTICE: destination directory "/var/lib/lightdb/data" provided
+    INFO: connecting to upstream node
+    INFO: connected to source node, checking its state
+    NOTICE: checking for available walsenders on upstream node (2 required)
+    INFO: sufficient walsenders available on upstream node (2 required)
+    INFO: successfully connected to source node
+    DETAIL: current installation size is 29 MB
+    INFO: creating directory "/var/lib/lightdb/data"...
+    NOTICE: starting backup (using postgresql.confbasebackup)...
+    HINT: this may take some time; consider using the -c/--fast-checkpoint option
+    INFO: executing: 'pg_basebackup -l "ltcluster base backup" -D /var/lib/lightdb/data -h node2 -U ltcluster -X stream '
+    NOTICE: standby clone (using pg_basebackup) complete
+    NOTICE: you can now start your LightDB server
+    HINT: for example: lt_ctl -D /var/lib/lightdb/data start</pre><p>
+
+    then register it (note that <code class="literal">--upstream-node-id</code> must be provided here
+    too):
+    </p><pre class="programlisting">
+     $ ltcluster -f /etc/ltcluster.conf standby register --upstream-node-id=2
+     NOTICE: standby node "node2" (ID: 2) successfully registered
+    </pre><p>
+   </p><p>
+    After starting the standby, the cluster will look like this, showing that <code class="literal">node3</code>
+    is attached to <code class="literal">node2</code>, not the primary (<code class="literal">node1</code>).
+    </p><pre class="programlisting">
+    $ ltcluster -f /etc/ltcluster.conf cluster show
+     ID | Name  | Role    | Status    | Upstream | Location | Connection string
+    ----+-------+---------+-----------+----------+----------+--------------------------------------
+     1  | node1 | primary | * running |          | default  | host=node1 dbname=ltcluster user=ltcluster
+     2  | node2 | standby |   running | node1    | default  | host=node2 dbname=ltcluster user=ltcluster
+     3  | node3 | standby |   running | node2    | default  | host=node3 dbname=ltcluster user=ltcluster
+    </pre><p>
+   </p><div class="tip"><h3 class="title">Tip</h3><p>
+     Under some circumstances when setting up a cascading replication
+     cluster, you may wish to clone a downstream standby whose upstream node
+     does not yet exist. In this case you can clone from the primary (or
+     another upstream node); provide the parameter <code class="literal">--upstream-conninfo</code>
+     to explictly set the upstream's <code class="varname">primary_conninfo</code> string
+     in <code class="filename">recovery.conf</code>.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cloning-replication-slots.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="cloning-standbys.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="cloning-advanced.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.2. Cloning and replication slots </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.4. Advanced cloning options</td></tr></table></div></body></html>

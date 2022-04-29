@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>4.1. Prerequisites for configuration</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="configuration.html" title="Chapter 4. ltcluster configuration" /><link rel="next" href="configuration-file.html" title="4.2. Configuration file" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">4.1. Prerequisites for configuration</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="configuration.html" title="Chapter 4. ltcluster configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="configuration.html" title="Chapter 4. ltcluster configuration">Up</a></td><th width="60%" align="center">Chapter 4. ltcluster configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="configuration-file.html" title="4.2. Configuration file">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CONFIGURATION-PREREQUISITES"><div class="titlepage"><div><div><h2 class="title" style="clear: both">4.1. Prerequisites for configuration</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="configuration-prerequisites.html#CONFIGURATION-LIGHTDB">4.1.1. LightDB configuration for <span class="productname">ltcluster</span></a></span></dt></dl></div><a id="id-1.4.2.2.2" class="indexterm"></a><a id="id-1.4.2.2.3" class="indexterm"></a><p>
+     Following software must be installed on both servers:
+     </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><span class="application">LightDB</span></li><li class="listitem" style="list-style-type: disc">
+        <span class="application">ltcluster</span>
+       </li></ul></div><p>
+    </p><p>
+      At network level, connections between the LightDB port (default: <code class="literal">5432</code>)
+      must be possible between all nodes.
+    </p><p>
+      Passwordless <code class="command">SSH</code> connectivity between all servers in the replication cluster
+      is not required, but is necessary in the following cases:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">if you need <span class="productname">ltcluster</span> to copy configuration files from outside the LightDB
+            data directory (as is the case with e.g. <a class="link" href="packages-debian-ubuntu.html" title="C.2. Debian/Ubuntu Packages">Debian packages</a>);
+            in this case <code class="command">rsync</code> must also be installed on all servers.
+          </li><li class="listitem">to perform <a class="link" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">switchover operations</a></li><li class="listitem">
+            when executing <code class="command"><a class="link" href="ltcluster-cluster-matrix.html" title="ltcluster cluster matrix">ltcluster cluster matrix</a></code>
+            and <code class="command"><a class="link" href="ltcluster-cluster-crosscheck.html" title="ltcluster cluster crosscheck">ltcluster cluster crosscheck</a></code>
+          </li></ul></div><p>
+    </p><div class="tip"><h3 class="title">Tip</h3><p>
+        Consider setting <code class="varname">ConnectTimeout</code> to a low value in your SSH configuration.
+        This will make it faster to detect any SSH connection errors.
+      </p></div><div class="sect2" id="CONFIGURATION-LIGHTDB"><div class="titlepage"><div><div><h3 class="title">4.1.1. LightDB configuration for <span class="productname">ltcluster</span></h3></div></div></div><a id="id-1.4.2.2.8.2" class="indexterm"></a><a id="id-1.4.2.2.8.3" class="indexterm"></a><p>
+      The following LightDB configuration parameters may need to be changed in order
+      for <span class="productname">ltcluster</span> (and replication itself) to function correctly.
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">hot_standby</code></span></dt><dd><a id="id-1.4.2.2.8.5.1.2.1" class="indexterm"></a><p>
+            <code class="option">hot_standby</code> must always be set to <code class="literal">on</code>, as <span class="productname">ltcluster</span> needs
+            to be able to connect to each server it manages.
+          </p><p>
+            Note that <code class="option">hot_standby</code> defaults to <code class="literal">on</code> from LightDB 10
+            and later; in LightDB 9.6 and earlier, the default was <code class="literal">off</code>.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-HOT-STANDBY" target="_top">hot_standby</a>.
+          </p></dd><dt><span class="term"><code class="option">wal_level</code></span></dt><dd><a id="id-1.4.2.2.8.5.2.2.1" class="indexterm"></a><p>
+            <code class="option">wal_level</code> must be one of <code class="option">replica</code> or <code class="option">logical</code>
+            (LightDB 9.5 and earlier: one of <code class="option">hot_standby</code> or <code class="option">logical</code>).
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-WAL-LEVEL" target="_top">wal_level</a>.
+          </p></dd><dt><span class="term"><code class="option">max_wal_senders</code></span></dt><dd><a id="id-1.4.2.2.8.5.3.2.1" class="indexterm"></a><p>
+            <code class="option">max_wal_senders</code> must be set to a value of <code class="literal">2</code> or greater.
+            In general you will need one WAL sender for each standby which will attach to the LightDB
+            instance; additionally <span class="productname">ltcluster</span> will require two free WAL senders in order to clone further
+            standbys.
+          </p><p>
+            <code class="option">max_wal_senders</code> should be set to an appropriate value on all LightDB
+            instances in the replication cluster which may potentially become a primary server or
+            (in cascading replication) the upstream server of a standby.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-MAX-WAL-SENDERS" target="_top">max_wal_senders</a>.
+          </p><div class="note"><h3 class="title">Note</h3><p>
+              From <span class="productname">LightDB 12</span>, <code class="option">max_wal_senders</code>
+              <span class="emphasis"><em>must</em></span> be set to the same or a higher value as the primary node
+              (at the time the node was cloned), otherwise the standby will refuse
+              to start (unless <code class="option">hot_standby</code> is set to <code class="literal">off</code>, which
+              will prevent the node from accepting queries).
+            </p></div></dd><dt><span class="term"><code class="option">max_replication_slots</code></span></dt><dd><a id="id-1.4.2.2.8.5.4.2.1" class="indexterm"></a><p>
+            If you are intending to use replication slots, <code class="option">max_replication_slots</code>
+            must be set to a non-zero value.
+          </p><p>
+            <code class="option">max_replication_slots</code> should be set to an appropriate value on all LightDB
+            instances in the replication cluster which may potentially become a primary server or
+            (in cascading replication) the upstream server of a standby.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-MAX-REPLICATION-SLOTS" target="_top">max_replication_slots</a>.
+          </p></dd><dt><span class="term"><code class="option">wal_log_hints</code></span></dt><dd><a id="id-1.4.2.2.8.5.5.2.1" class="indexterm"></a><p>If you are intending to use <span class="application">postgresql.confrewind</span>,
+            and the cluster was not initialised using data checksums, you may want to consider enabling
+            <code class="option">wal_log_hints</code>.
+          </p><p>
+            For more details see <a class="xref" href="ltcluster-node-rejoin.html#LTCLUSTER-NODE-REJOIN-PG-REWIND" title="Using lt_rewind">Using lt_rewind</a>.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-WAL-LOG-HINTS" target="_top">wal_log_hints</a>.
+          </p></dd><dt><span class="term"><code class="option">archive_mode</code></span></dt><dd><a id="id-1.4.2.2.8.5.6.2.1" class="indexterm"></a><p>
+            We suggest setting <code class="option">archive_mode</code> to <code class="literal">on</code> (and
+            <code class="option">archive_command</code> to <code class="literal">/bin/true</code>; see below)
+            even if you are currently not planning to use WAL file archiving.
+          </p><p>
+            This will make it simpler to set up WAL file archiving if it is ever required,
+            as changes to <code class="option">archive_mode</code> require a full LightDB server
+            restart, while <code class="option">archive_command</code> changes can be applied via a normal
+            configuration reload.
+          </p><p>
+            However, <span class="productname">ltcluster</span> itself does not require WAL file archiving.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-ARCHIVE-MODE" target="_top">archive_mode</a>.
+          </p></dd><dt><span class="term"><code class="option">archive_command</code></span></dt><dd><a id="id-1.4.2.2.8.5.7.2.1" class="indexterm"></a><p>
+            If you have set  <code class="option">archive_mode</code> to <code class="literal">on</code> but are not currently planning
+            to use WAL file archiving, set <code class="option">archive_command</code> to a command which does nothing but returns
+            <code class="literal">true</code>, such as <code class="command">/bin/true</code>. See above for details.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-wal.html#GUC-ARCHIVE-COMMAND" target="_top">archive_command</a>.
+          </p></dd><dt><span class="term"><code class="option">wal_keep_segments</code> / <code class="option">wal_keep_size</code></span></dt><dd><a id="id-1.4.2.2.8.5.8.2.1" class="indexterm"></a><a id="id-1.4.2.2.8.5.8.2.2" class="indexterm"></a><p>
+            Normally there is no need to set <code class="option">wal_keep_segments</code>
+            (LightDB 13 and later: <code class="varname">wal_keep_size</code>; default: <code class="literal">0</code>),
+            as it is <span class="emphasis"><em>not</em></span> a reliable way of ensuring that all required WAL
+            segments are available to standbys. Replication slots and/or an archiving solution
+            such as Barman are recommended to ensure standbys have a reliable
+            source of WAL segments at all times.
+          </p><p>
+            The only reason ever to set  <code class="option">wal_keep_segments</code> / <code class="option">wal_keep_size</code>
+            is you have you have configured <code class="option">pg_basebackup_options</code>
+            in <code class="filename">ltcluster.conf</code> to include the setting <code class="literal">--wal-method=fetch</code>
+            (LightDB 9.6 and earlier: <code class="literal">--xlog-method=fetch</code>)
+            <span class="emphasis"><em>and</em></span> you have <span class="emphasis"><em>not</em></span> set <code class="option">restore_command</code>
+            in <code class="filename">ltcluster.conf</code> to fetch WAL files from a reliable source such as Barman,
+            in which case you'll need to set <code class="option">wal_keep_segments</code>
+            to a sufficiently high number to ensure that all WAL files required by the standby
+            are retained. However we do not recommend WAL retention in this way.
+          </p><p>
+            LightDB documentation: <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-replication.html#GUC-WAL-KEEP-SEGMENTS" target="_top">wal_keep_segments</a>.
+            
+          </p></dd></dl></div><p>
+      See also the <a class="link" href="quickstart-lightdb-configuration.html" title="3.2. LightDB configuration">LightDB configuration</a> section in the
+      <a class="link" href="quickstart.html" title="Chapter 3. Quick-start guide">Quick-start guide</a>.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="configuration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="configuration-file.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 4. ltcluster configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.2. Configuration file</td></tr></table></div></body></html>

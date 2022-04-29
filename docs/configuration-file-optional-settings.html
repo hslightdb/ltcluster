@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>4.4. Optional configuration file settings</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="configuration-file-settings.html" title="4.3. Required configuration file settings" /><link rel="next" href="configuration-file-log-settings.html" title="4.5. Log settings" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">4.4. Optional configuration file settings</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="configuration-file-settings.html" title="4.3. Required configuration file settings">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="configuration.html" title="Chapter 4. ltcluster configuration">Up</a></td><th width="60%" align="center">Chapter 4. ltcluster configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="configuration-file-log-settings.html" title="4.5. Log settings">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CONFIGURATION-FILE-OPTIONAL-SETTINGS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">4.4. Optional configuration file settings</h2></div></div></div><a id="id-1.4.2.5.2" class="indexterm"></a><div class="variablelist"><dl class="variablelist"><dt id="LTCLUSTER-CONF-CONFIG-DIRECTORY"><span class="term"><code class="varname">config_directory</code> (<code class="type">string</code>)
+        <a id="id-1.4.2.5.3.1.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          If LightDB configuration files are located outside the data
+	  directory, specify the directory where the main
+	  <code class="filename">postgresql.conf</code> file is located.
+        </p><p>
+          This enables explicit provision of an external configuration file
+          directory, which if set will be passed to <code class="command">lt_ctl</code> as the
+          <code class="option">-D</code> parameter. Otherwise <code class="command">lt_ctl</code> will
+          default to using the data directory, which will cause some operations
+          to fail if the configuration files are not present there.
+        </p><div class="note"><h3 class="title">Note</h3><p>
+           This is implemented primarily for feature completeness and for
+           development/testing purposes. Users who have installed <span class="productname">ltcluster</span> from
+           a package should <span class="emphasis"><em>not</em></span> rely on  to stop/start/restart LightDB,
+           instead they should set the appropriate <code class="option">service_..._command</code>
+           for their operating system. For more details see
+           <a class="xref" href="configuration-file-service-commands.html" title="4.6. Service command settings">service command settings</a>.
+          </p></div></dd><dt id="LTCLUSTER-CONF-REPLICATION-USER"><span class="term"><code class="varname">replication_user</code> (<code class="type">string</code>)
+        <a id="id-1.4.2.5.3.2.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          LightDB user to make replication connections with.
+          If not set defaults, to the user defined in <a class="xref" href="configuration-file-settings.html#LTCLUSTER-CONF-CONNINFO">conninfo</a>.
+        </p></dd><dt id="LTCLUSTER-CONF-REPLICATION-TYPE"><span class="term"><code class="varname">replication_type</code> (<code class="type">string</code>)
+        <a id="id-1.4.2.5.3.3.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          Must be <code class="literal">physical</code> (the default).
+        </p></dd><dt id="LTCLUSTER-CONF-LOCATION"><span class="term"><code class="varname">location</code> (<code class="type">string</code>)
+        <a id="id-1.4.2.5.3.4.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          An arbitrary string defining the location of the node; this
+	  is used during failover to check visibility of the
+	  current primary node.
+        </p><p>
+          For more details see <a class="xref" href="ltclusterd-network-split.html" title="12.2. Handling network splits with ltclusterd">Handling network splits with ltclusterd</a>.
+        </p></dd><dt id="LTCLUSTER-CONF-USE-REPLICATION-SLOTS"><span class="term"><code class="varname">use_replication_slots</code> (<code class="type">boolean</code>)
+        <a id="id-1.4.2.5.3.5.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          Whether to use physical replication slots.
+        </p><div class="note"><h3 class="title">Note</h3><p>
+	    When using replication slots,
+	    <code class="varname">max_replication_slots</code> should be configured for
+	    at least the number of standbys which will connect
+	    to the primary.
+          </p></div></dd><dt id="LTCLUSTER-CONF-SSH-OPTIONS"><span class="term"><code class="varname">ssh_options</code> (<code class="type">string</code>)
+        <a id="id-1.4.2.5.3.6.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+          Options to append to the <code class="command">ssh</code> command when executed
+          by <span class="productname">ltcluster</span>.
+        </p><p>
+          We recommend adding <code class="literal">-q</code> to suppress any superfluous
+          SSH chatter such as login banners, and also an explicit
+          <code class="option">ConnectTimeout</code> value,
+          e.g.:
+</p><pre class="programlisting">
+ssh_options='-q -o ConnectTimeout=10'</pre><p>
+        </p></dd></dl></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="configuration-file-settings.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="configuration-file-log-settings.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.3. Required configuration file settings </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.5. Log settings</td></tr></table></div></body></html>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>B.2. ltcluster</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="faq-general.html" title="B.1. General" /><link rel="next" href="faq-ltclusterd.html" title="B.3. ltclusterd" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">B.2. <code xmlns="http://www.w3.org/1999/xhtml" class="command">ltcluster</code></th></tr><tr><td width="10%" align="left"><a accesskey="p" href="faq-general.html" title="B.1. General">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-faq.html" title="Appendix B. FAQ (Frequently Asked Questions)">Up</a></td><th width="60%" align="center">Appendix B. FAQ (Frequently Asked Questions)</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="faq-ltclusterd.html" title="B.3. ltclusterd">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="FAQ-LTCLUSTER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">B.2. <code class="command">ltcluster</code></h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-REGISTER-EXISTING-NODE">B.2.1. Can I register an existing LightDB server with ltcluster?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-CLONE-OTHER-SOURCE">B.2.2. Can I use a standby not cloned by <span class="productname">ltcluster</span> as a <span class="productname">ltcluster</span> node?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-RECOVERY-CONF">B.2.3. What does <span class="productname">ltcluster</span> write in <code class="filename">recovery.conf</code>, and what options can be set there?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-FAILED-PRIMARY-STANDBY">B.2.4. How can a failed primary be re-added as a standby?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-CHECK-CONFIGURATION">B.2.5. Is there an easy way to check my primary server is correctly configured for use with <span class="productname">ltcluster</span>?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-CLONE-SKIP-CONFIG-FILES">B.2.6. When cloning a standby, how can I get <span class="productname">ltcluster</span> to copy
+        <code class="filename">postgresql.conf</code> and <code class="filename">pg_hba.conf</code> from the LightDB configuration
+        directory in <code class="filename">/etc</code>?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-SHARED-PRELOAD-LIBARIES-NO-LTCLUSTERD">B.2.7. Do I need to include <code class="literal">shared_preload_libraries = 'ltcluster'</code>
+        in <code class="filename">postgresql.conf</code> if I'm not using <span class="productname">ltclusterd</span>?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-PERMISSIONS">B.2.8. I've provided replication permission for the <code class="literal">ltcluster</code> user in <code class="filename">pg_hba.conf</code>
+        but <code class="command">ltcluster</code>/<span class="productname">ltclusterd</span> complains it can't connect to the server... Why?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-CLONE-PROVIDE-PRIMARY-CONNINFO">B.2.9. When cloning a standby, why do I need to provide the connection parameters
+        for the primary server on the command line, not in the configuration file?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-CLONE-WALDIR-XLOGDIR">B.2.10. When cloning a standby, how do I ensure the WAL files are placed in a custom directory?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-EVENTS-NO-FKEY">B.2.11. Why is there no foreign key on the <code class="literal">node_id</code> column in the <code class="literal">ltcluster.events</code>
+        table?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-RECOVERY-CONF-QUOTED-VALUES">B.2.12. Why are some values in <code class="filename">recovery.conf</code> surrounded by pairs of single quotes?</a></span></dt><dt><span class="sect2"><a href="faq-ltcluster.html#FAQ-LTCLUSTER-EXCLUDE-METADATA-FROM-DUMP">B.2.13. How can I exclude <span class="productname">ltcluster</span> metadata from <span class="application">lt_dump</span> output?</a></span></dt></dl></div><div class="sect2" id="FAQ-REGISTER-EXISTING-NODE"><div class="titlepage"><div><div><h3 class="title">B.2.1. Can I register an existing LightDB server with ltcluster?</h3></div></div></div><p>
+        Yes, any existing LightDB server which is part of the same replication
+        cluster can be registered with <span class="productname">ltcluster</span>. There's no requirement for a
+        standby to have been cloned using <span class="productname">ltcluster</span>.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CLONE-OTHER-SOURCE"><div class="titlepage"><div><div><h3 class="title">B.2.2. Can I use a standby not cloned by <span class="productname">ltcluster</span> as a <span class="productname">ltcluster</span> node?</h3></div></div></div><p>
+        For a standby which has been manually cloned or recovered from an external
+        backup manager such as Barman, the command
+        <code class="command"><a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone --replication-conf-only</a></code>
+        can be used to create the correct <code class="filename">recovery.conf</code> file for
+        use with <span class="productname">ltcluster</span> (and will create a replication slot if required). Once this has been done,
+        <a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">register the node</a> as usual.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-RECOVERY-CONF"><div class="titlepage"><div><div><h3 class="title">B.2.3. What does <span class="productname">ltcluster</span> write in <code class="filename">recovery.conf</code>, and what options can be set there?</h3></div></div></div><p>
+        See section <a class="link" href="ltcluster-standby-clone.html#LTCLUSTER-STANDBY-CLONE-RECOVERY-CONF" title="Customising replication configuration">Customising recovery.conf</a>.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-FAILED-PRIMARY-STANDBY"><div class="titlepage"><div><div><h3 class="title">B.2.4. How can a failed primary be re-added as a standby?</h3></div></div></div><p>
+        This is a two-stage process. First, the failed primary's data directory
+        must be re-synced with the current primary; secondly the failed primary
+        needs to be re-registered as a standby.
+      </p><p>
+        It's possible to use <code class="command">lt_rewind</code> to re-synchronise the existing data
+        directory, which will usually be much
+        faster than re-cloning the server. However <code class="command">lt_rewind</code> can only
+        be used if LightDB either has <code class="varname">wal_log_hints</code> enabled, or
+        data checksums were enabled when the cluster was initialized.
+      </p><p>
+        Note that <code class="command">lt_rewind</code> is available as part of the core LightDB
+        distribution from LightDB 9.5, and as a third-party utility for LightDB 9.3 and 9.4.
+      </p><p>
+        <span class="productname">ltcluster</span> provides the command <code class="command">ltcluster node rejoin</code> which can
+        optionally execute <code class="command">lt_rewind</code>; see the <a class="xref" href="ltcluster-node-rejoin.html" title="ltcluster node rejoin"><span class="refentrytitle">ltcluster node rejoin</span></a>
+        documentation for details, in particular the section <a class="xref" href="ltcluster-node-rejoin.html#LTCLUSTER-NODE-REJOIN-PG-REWIND" title="Using lt_rewind">Using lt_rewind</a>.
+      </p><p>
+        If <code class="command">lt_rewind</code> cannot be used, then the data directory will need
+        to be re-cloned from scratch.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CHECK-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">B.2.5. Is there an easy way to check my primary server is correctly configured for use with <span class="productname">ltcluster</span>?</h3></div></div></div><p>
+        Execute <code class="command"><a class="link" href="ltcluster-standby-clone.html" title="ltcluster standby clone">ltcluster standby clone</a></code>
+        with the <code class="literal">--dry-run</code> option; this will report any configuration problems
+        which need to be rectified.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CLONE-SKIP-CONFIG-FILES"><div class="titlepage"><div><div><h3 class="title">B.2.6. When cloning a standby, how can I get <span class="productname">ltcluster</span> to copy
+        <code class="filename">postgresql.conf</code> and <code class="filename">pg_hba.conf</code> from the LightDB configuration
+        directory in <code class="filename">/etc</code>?</h3></div></div></div><p>
+        Use the command line option <code class="literal">--copy-external-config-files</code>. For more details
+        see <a class="xref" href="ltcluster-standby-clone.html#LTCLUSTER-STANDBY-CLONE-CONFIG-FILE-COPYING" title="Handling configuration files">Copying configuration files</a>.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-SHARED-PRELOAD-LIBARIES-NO-LTCLUSTERD"><div class="titlepage"><div><div><h3 class="title">B.2.7. Do I need to include <code class="literal">shared_preload_libraries = 'ltcluster'</code>
+        in <code class="filename">postgresql.conf</code> if I'm not using <span class="productname">ltclusterd</span>?</h3></div></div></div><p>
+        No, the <code class="literal">ltcluster</code> shared library is only needed when running <span class="productname">ltclusterd</span>.
+        If you later decide to run <span class="productname">ltclusterd</span>, you just need to add
+        <code class="literal">shared_preload_libraries = 'ltcluster'</code> and restart LightDB.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-PERMISSIONS"><div class="titlepage"><div><div><h3 class="title">B.2.8. I've provided replication permission for the <code class="literal">ltcluster</code> user in <code class="filename">pg_hba.conf</code>
+        but <code class="command">ltcluster</code>/<span class="productname">ltclusterd</span> complains it can't connect to the server... Why?</h3></div></div></div><p>
+        <code class="command">ltcluster</code> and <span class="productname">ltclusterd</span> need to be able to connect to the ltcluster database
+        with a normal connection to query metadata. The <code class="literal">replication</code> connection
+        permission is for LightDB's streaming replication (and doesn't  necessarily need to be the <code class="literal">ltcluster</code> user).
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CLONE-PROVIDE-PRIMARY-CONNINFO"><div class="titlepage"><div><div><h3 class="title">B.2.9. When cloning a standby, why do I need to provide the connection parameters
+        for the primary server on the command line, not in the configuration file?</h3></div></div></div><p>
+        Cloning a standby is a one-time action; the role of the server being cloned
+        from could change, so fixing it in the configuration file would create
+        confusion. If <span class="productname">ltcluster</span> needs to establish a connection to the primary
+        server, it can retrieve this from the <code class="literal">ltcluster.nodes</code> table on the local
+        node, and if necessary scan the replication cluster until it locates the active primary.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CLONE-WALDIR-XLOGDIR"><div class="titlepage"><div><div><h3 class="title">B.2.10. When cloning a standby, how do I ensure the WAL files are placed in a custom directory?</h3></div></div></div><p>
+        Provide the option <code class="literal">--waldir</code>  (<code class="literal">--xlogdir</code> in LightDB 9.6
+        and earlier) with the absolute path to the WAL directory in <code class="varname">pg_basebackup_options</code>.
+        For more details see <a class="xref" href="cloning-advanced.html#CLONING-ADVANCED-PG-BASEBACKUP-OPTIONS" title="5.4.1. pg_basebackup options when cloning a standby">pg_basebackup options when cloning a standby</a>.
+      </p><p>
+        In <span class="productname">ltcluster</span> 5.2 and later, this setting will also be honoured when cloning from Barman.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-EVENTS-NO-FKEY"><div class="titlepage"><div><div><h3 class="title">B.2.11. Why is there no foreign key on the <code class="literal">node_id</code> column in the <code class="literal">ltcluster.events</code>
+        table?</h3></div></div></div><p>
+        Under some circumstances event notifications can be generated for servers
+        which have not yet been registered; it's also useful to retain a record
+        of events which includes servers removed from the replication cluster
+        which no longer have an entry in the <code class="literal">ltcluster.nodes</code> table.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-RECOVERY-CONF-QUOTED-VALUES"><div class="titlepage"><div><div><h3 class="title">B.2.12. Why are some values in <code class="filename">recovery.conf</code> surrounded by pairs of single quotes?</h3></div></div></div><p>
+        This is to ensure that user-supplied values which are written as parameter values in <code class="filename">recovery.conf</code>
+        are escaped correctly and do not cause errors when <code class="filename">recovery.conf</code> is parsed.
+      </p><p>
+        The escaping is performed by an internal LightDB routine, which leaves strings consisting
+        of digits and alphabetical characters only as-is, but wraps everything else in pairs of single quotes,
+        even if the string does not contain any characters which need escaping.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-EXCLUDE-METADATA-FROM-DUMP"><div class="titlepage"><div><div><h3 class="title">B.2.13. How can I exclude <span class="productname">ltcluster</span> metadata from <span class="application">lt_dump</span> output?</h3></div></div></div><p>
+        Beginning with <span class="productname">ltcluster</span> 5.2, the metadata tables associated with the <span class="productname">ltcluster</span> extension
+        (<code class="literal">ltcluster.nodes</code>, <code class="literal">ltcluster.events</code> and <code class="literal">ltcluster.monitoring_history</code>)
+        have been marked as dumpable as they contain configuration and user-generated data.
+      </p><p>
+        To exclude these from <span class="application">lt_dump</span> output, add the flag <code class="option">--exclude-schema=ltcluster</code>.
+      </p><p>
+        To exclude individual <span class="productname">ltcluster</span> metadata tables from <span class="application">lt_dump</span> output, add the flag
+        e.g. <code class="option">--exclude-table=ltcluster.monitoring_history</code>. This flag can be provided multiple times
+        to exclude individual tables,
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="faq-general.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-faq.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="faq-ltclusterd.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">B.1. General </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> B.3. <span class="productname">ltclusterd</span></td></tr></table></div></body></html>

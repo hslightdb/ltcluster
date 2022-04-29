@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>B.3. ltclusterd</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="faq-ltcluster.html" title="B.2. ltcluster" /><link rel="next" href="appendix-packages.html" title="Appendix C. ltcluster package details" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">B.3. <span xmlns="http://www.w3.org/1999/xhtml" class="productname">ltclusterd</span></th></tr><tr><td width="10%" align="left"><a accesskey="p" href="faq-ltcluster.html" title="B.2. ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-faq.html" title="Appendix B. FAQ (Frequently Asked Questions)">Up</a></td><th width="60%" align="center">Appendix B. FAQ (Frequently Asked Questions)</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="appendix-packages.html" title="Appendix C. ltcluster package details">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="FAQ-LTCLUSTERD"><div class="titlepage"><div><div><h2 class="title" style="clear: both">B.3. <span class="productname">ltclusterd</span></h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-PREVENT-PROMOTION">B.3.1. How can I prevent a node from ever being promoted to primary?</a></span></dt><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-DELAYED-STANDBY">B.3.2. Does <span class="productname">ltclusterd</span> support delayed standbys?</a></span></dt><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-LOGFILE-ROTATE">B.3.3. How can I get <span class="productname">ltclusterd</span> to rotate its logfile?</a></span></dt><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-RECLONED-NO-START">B.3.4. I've recloned a failed primary as a standby, but <span class="productname">ltclusterd</span> refuses to start?</a></span></dt><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-PG-BINDIR">B.3.5. 
+        <span class="productname">ltclusterd</span> ignores pg_bindir when executing <code class="varname">promote_command</code> or <code class="varname">follow_command</code>
+      </a></span></dt><dt><span class="sect2"><a href="faq-ltclusterd.html#FAQ-LTCLUSTERD-STARTUP-NO-UPSTREAM">B.3.6. 
+        <span class="productname">ltclusterd</span> aborts startup with the error "<code class="literal">upstream node must be running before ltclusterd can start</code>"
+      </a></span></dt></dl></div><div class="sect2" id="FAQ-LTCLUSTERD-PREVENT-PROMOTION"><div class="titlepage"><div><div><h3 class="title">B.3.1. How can I prevent a node from ever being promoted to primary?</h3></div></div></div><p>
+        In <code class="filename">ltcluster.conf</code>, set its priority to a value of <code class="literal">0</code>; apply the changed setting with
+        <code class="command"><a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register --force</a></code>.
+      </p><p>
+        Additionally, if <code class="varname">failover</code> is set to <code class="literal">manual</code>, the node will never
+        be considered as a promotion candidate.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTERD-DELAYED-STANDBY"><div class="titlepage"><div><div><h3 class="title">B.3.2. Does <span class="productname">ltclusterd</span> support delayed standbys?</h3></div></div></div><p>
+        <span class="productname">ltclusterd</span> can monitor delayed standbys - those set up with
+        <code class="varname">recovery_min_apply_delay</code> set to a non-zero value
+        in <code class="filename">recovery.conf</code> - but as it's not currently possible
+        to directly examine the value applied to the standby, <span class="productname">ltclusterd</span>
+        may not be able to properly evaluate the node as a promotion candidate.
+      </p><p>
+        We recommend that delayed standbys are explicitly excluded from promotion
+        by setting <code class="varname">priority</code> to <code class="literal">0</code> in
+        <code class="filename">ltcluster.conf</code>.
+      </p><p>
+        Note that after registering a delayed standby, <span class="productname">ltclusterd</span> will only start
+        once the metadata added in the primary node has been replicated.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTERD-LOGFILE-ROTATE"><div class="titlepage"><div><div><h3 class="title">B.3.3. How can I get <span class="productname">ltclusterd</span> to rotate its logfile?</h3></div></div></div><p>
+        Configure your system's <code class="literal">logrotate</code> service to do this; see <a class="xref" href="ltclusterd-log-rotation.html" title="13.4. ltclusterd log rotation">Section 13.4</a>.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTERD-RECLONED-NO-START"><div class="titlepage"><div><div><h3 class="title">B.3.4. I've recloned a failed primary as a standby, but <span class="productname">ltclusterd</span> refuses to start?</h3></div></div></div><p>
+        Check you registered the standby after recloning. If unregistered, the standby
+        cannot be considered as a promotion candidate even if <code class="varname">failover</code> is set to
+        <code class="literal">automatic</code>, which is probably not what you want. <span class="productname">ltclusterd</span> will start if
+        <code class="varname">failover</code> is set to <code class="literal">manual</code> so the node's replication status can still
+        be monitored, if desired.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTERD-PG-BINDIR"><div class="titlepage"><div><div><h3 class="title">B.3.5. 
+        <span class="productname">ltclusterd</span> ignores pg_bindir when executing <code class="varname">promote_command</code> or <code class="varname">follow_command</code>
+      </h3></div></div></div><p>
+        <code class="varname">promote_command</code> or <code class="varname">follow_command</code> can be user-defined scripts,
+        so <span class="productname">ltcluster</span> will not apply <code class="option">pg_bindir</code> even if excuting <span class="productname">ltcluster</span>. Always provide the full
+        path; see <a class="xref" href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION" title="13.1.1. Required configuration for automatic failover">Section 13.1.1</a> for more details.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTERD-STARTUP-NO-UPSTREAM"><div class="titlepage"><div><div><h3 class="title">B.3.6. 
+        <span class="productname">ltclusterd</span> aborts startup with the error "<code class="literal">upstream node must be running before ltclusterd can start</code>"
+      </h3></div></div></div><p>
+        <span class="productname">ltclusterd</span> does this to avoid starting up on a replication cluster
+        which is not in a healthy state. If the upstream is unavailable, <span class="productname">ltclusterd</span>
+        may initiate a failover immediately after starting up, which could have unintended side-effects,
+        particularly if <span class="productname">ltclusterd</span> is not running on other nodes.
+      </p><p>
+        In particular, it's possible that the node's local copy of the <code class="literal">ltcluster.nodes</code> copy
+        is out-of-date, which may lead to incorrect failover behaviour.
+      </p><p>
+        The onus is therefore on the adminstrator to manually set the cluster to a stable, healthy state before
+        starting <span class="productname">ltclusterd</span>.
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="faq-ltcluster.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-faq.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="appendix-packages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">B.2. <code class="command">ltcluster</code> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Appendix C. <span class="productname">ltcluster</span> package details</td></tr></table></div></body></html>

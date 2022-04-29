@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>4.2. Configuration file</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="configuration-prerequisites.html" title="4.1. Prerequisites for configuration" /><link rel="next" href="configuration-file-settings.html" title="4.3. Required configuration file settings" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">4.2. Configuration file</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="configuration-prerequisites.html" title="4.1. Prerequisites for configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="configuration.html" title="Chapter 4. ltcluster configuration">Up</a></td><th width="60%" align="center">Chapter 4. ltcluster configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="configuration-file-settings.html" title="4.3. Required configuration file settings">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CONFIGURATION-FILE"><div class="titlepage"><div><div><h2 class="title" style="clear: both">4.2. Configuration file</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="configuration-file.html#CONFIGURATION-FILE-FORMAT">4.2.1. Configuration file format</a></span></dt><dt><span class="sect2"><a href="configuration-file.html#CONFIGURATION-FILE-ITEMS">4.2.2. Configuration file items</a></span></dt><dt><span class="sect2"><a href="configuration-file.html#CONFIGURATION-FILE-LOCATION">4.2.3. Configuration file location</a></span></dt><dt><span class="sect2"><a href="configuration-file.html#CONFIGURATION-FILE-POSTGRESQL-MAJOR-UPGRADES">4.2.4. Configuration file and LightDB major version upgrades</a></span></dt></dl></div><a id="id-1.4.2.3.2" class="indexterm"></a><a id="id-1.4.2.3.3" class="indexterm"></a><p>
+    <span class="application">ltcluster</span> and <span class="productname">ltclusterd</span>
+    use a common configuration file, by default called
+    <code class="filename">ltcluster.conf</code> (although any name can be used if explicitly specified).
+    <code class="filename">ltcluster.conf</code> must contain a number of required parameters, including
+    the database connection string for the local node and the location
+    of its data directory; other values will be inferred from defaults if
+    not explicitly supplied. See section <a class="xref" href="configuration-file-settings.html" title="4.3. Required configuration file settings">required configuration file settings</a>
+    for more details.
+  </p><div class="sect2" id="CONFIGURATION-FILE-FORMAT"><div class="titlepage"><div><div><h3 class="title">4.2.1. Configuration file format</h3></div></div></div><a id="id-1.4.2.3.5.2" class="indexterm"></a><p>
+      <code class="filename">ltcluster.conf</code> is a plain text file with one parameter/value
+      combination per line.
+    </p><p>
+      Whitespace is insignificant (except within a quoted parameter value) and blank lines are ignored.
+      Hash marks (<code class="literal">#</code>) designate the remainder of the line as a comment.
+      Parameter values that are not simple identifiers or numbers should be single-quoted.
+    </p><p>
+      To embed a single quote in a parameter value, write either two quotes (preferred) or backslash-quote.
+    </p><p>
+      Example of a valid <code class="filename">ltcluster.conf</code> file:
+      </p><pre class="programlisting">
+# ltcluster.conf
+
+node_id=1
+node_name= node1
+conninfo ='host=node1 dbname=ltcluster user=ltcluster connect_timeout=2'
+data_directory = '/var/lib/pgsql/12/data'</pre><p>
+
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        Beginning with <a class="link" href="release-5.0.html" title="A.4. Release 5.0">ltcluster 5.0</a>, configuration
+        file parsing has been tightened up and now matches the way LightDB
+        itself parses configuration files.
+      </p><p>
+        This means <code class="filename">ltcluster.conf</code> files used with earlier <span class="productname">ltcluster</span>
+        versions may need slight modification before they can be used with <span class="productname">ltcluster</span> 5
+        and later.
+      </p><p>
+        The main change is that <span class="productname">ltcluster</span> requires most string values to be
+        enclosed in single quotes. For example, this was previously valid:
+          </p><pre class="programlisting">
+conninfo=host=node1 user=ltcluster dbname=ltcluster connect_timeout=2</pre><p>
+          but must now be changed to:
+          </p><pre class="programlisting">
+conninfo='host=node1 user=ltcluster dbname=ltcluster connect_timeout=2'</pre><p>
+      </p></div><div class="sect3" id="CONFIGURATION-FILE-INCLUDE-DIRECTIVES"><div class="titlepage"><div><div><h4 class="title">4.2.1.1. Configuration file include directives</h4></div></div></div><a id="id-1.4.2.3.5.8.2" class="indexterm"></a><p>
+        From <span class="productname">ltcluster</span> 5.2, the configuration file can contain the following include directives:
+        </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+              <code class="option">include</code>: include the specified file,
+              either as an absolute path or path relative to the current file
+            </li><li class="listitem" style="list-style-type: disc">
+              <code class="option">include_if_exists</code>: include the specified file.
+              The file is specified as an absolute path or path relative to the current file.
+              However, if it does not exist, an error will not be raised.
+            </li><li class="listitem" style="list-style-type: disc">
+              <code class="option">include_dir</code>: include files in the specified directory
+              which have the <code class="filename">.conf</code> suffix.
+              The directory is specified either as an absolute path or path
+              relative to the current file
+            </li></ul></div><p>
+      </p><p>
+        These behave in exactly the same way as the LightDB configuration file processing;
+        see the <a class="ulink" href="https://www.hs.net/lightdb/docs/current/config-setting.html#CONFIG-INCLUDES" target="_top">LightDB documentation</a>
+        for additional details.
+      </p></div></div><div class="sect2" id="CONFIGURATION-FILE-ITEMS"><div class="titlepage"><div><div><h3 class="title">4.2.2. Configuration file items</h3></div></div></div><p>
+      The following sections document some sections of the configuration file:
+       </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+              <a class="xref" href="configuration-file-settings.html" title="4.3. Required configuration file settings">required configuration file settings</a>
+            </li><li class="listitem">
+              <a class="xref" href="configuration-file-optional-settings.html" title="4.4. Optional configuration file settings">optional configuration file settings</a>
+            </li><li class="listitem">
+              <a class="xref" href="configuration-file-log-settings.html" title="4.5. Log settings">log settings</a>
+            </li><li class="listitem">
+              <a class="xref" href="configuration-file-service-commands.html" title="4.6. Service command settings">service command settings</a>
+            </li></ul></div><p>
+
+    </p><p>
+      For a full list of annotated configuration items, see the file
+      <a class="ulink" href="www.hs.net/lightdb/ltcluster/master/ltcluster.conf.sample" target="_top">ltcluster.conf.sample</a>.
+    </p><p>
+      For <span class="productname">ltclusterd</span>-specific settings, see <a class="xref" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Chapter 13</a>.
+    </p><div class="note"><h3 class="title">Note</h3><p>
+        The following parameters in the configuration file can be overridden with
+        command line options:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+              <code class="literal">-L/--log-level</code> overrides <code class="literal">log_level</code> in
+              <code class="filename">ltcluster.conf</code>
+            </li><li class="listitem">
+              <code class="literal">-b/--pg_bindir</code> overrides <code class="literal">pg_bindir</code> in
+              <code class="filename">ltcluster.conf</code>
+            </li></ul></div><p>
+      </p></div></div><div class="sect2" id="CONFIGURATION-FILE-LOCATION"><div class="titlepage"><div><div><h3 class="title">4.2.3. Configuration file location</h3></div></div></div><a id="id-1.4.2.3.7.2" class="indexterm"></a><p>
+   The configuration file will be searched for in the following locations:
+   </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>a configuration file specified by the <code class="literal">-f/--config-file</code> command line option</p></li><li class="listitem" style="list-style-type: disc"><p>
+      a location specified by the package maintainer (if <span class="application">ltcluster</span>
+      as installed from a package and the package maintainer has specified the configuration
+      file location)
+     </p></li><li class="listitem" style="list-style-type: disc"><p><code class="filename">ltcluster.conf</code> in the local directory</p></li><li class="listitem" style="list-style-type: disc"><p><code class="filename">/etc/ltcluster.conf</code></p></li><li class="listitem" style="list-style-type: disc"><p>the directory reported by <span class="application">postgresql.confconfig --sysconfdir</span></p></li></ul></div><p>
+  </p><p>
+    In examples provided in this documentation, it is assumed the configuration file is located
+    at <code class="filename">/etc/ltcluster.conf</code>. If <span class="productname">ltcluster</span> is installed from a package, the
+    configuration file will probably be located at another location specified by the packager;
+    see appendix <a class="xref" href="appendix-packages.html" title="Appendix C. ltcluster package details">Package details</a> for configuration file locations in
+    different packaging systems.
+  </p><p>
+   Note that if a file is explicitly specified with <code class="literal">-f/--config-file</code>,
+   an error will be raised if it is not found or not readable, and no attempt will be made to
+   check default locations; this is to prevent <span class="application">ltcluster</span> unexpectedly
+   reading the wrong configuration file.
+  </p><div class="note"><h3 class="title">Note</h3><p>
+      If providing the configuration file location with <code class="literal">-f/--config-file</code>,
+      avoid using a relative path, particularly when executing <a class="xref" href="ltcluster-primary-register.html" title="ltcluster primary register"><span class="refentrytitle">ltcluster primary register</span></a>
+      and <a class="xref" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register</a>, as <span class="productname">ltcluster</span> stores the configuration file location
+      in the ltcluster metadata for use when <span class="productname">ltcluster</span> is executed remotely (e.g. during
+      <a class="xref" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><span class="refentrytitle">ltcluster standby switchover</span></a>). <span class="productname">ltcluster</span> will attempt to convert the
+      a relative path into an absolute one, but this may not be the same as the path you
+      would explicitly provide (e.g. <code class="filename">./ltcluster.conf</code> might be converted
+      to <code class="filename">/path/to/./ltcluster.conf</code>, whereas you'd normally write
+      <code class="filename">/path/to/ltcluster.conf</code>).
+    </p></div></div><div class="sect2" id="CONFIGURATION-FILE-POSTGRESQL-MAJOR-UPGRADES"><div class="titlepage"><div><div><h3 class="title">4.2.4. Configuration file and LightDB major version upgrades</h3></div></div></div><a id="id-1.4.2.3.8.2" class="indexterm"></a><p>
+      When upgrading the LightDB cluster to a new major version, <code class="filename">ltcluster.conf</code>
+      will probably needed to be updated.
+    </p><p>
+      Usually <code class="option">pg_bindir</code> and <code class="option">data_directory</code> will need to be modified,
+      particularly if the default package locations are used, as these usually change.
+    </p><p>
+       It's also possible the location of <code class="filename">ltcluster.conf</code> itself will change
+       (e.g. from <code class="filename">/etc/ltcluster/11/ltcluster.conf</code> to <code class="filename">/etc/ltcluster/12/ltcluster.conf</code>).
+       This is stored as part of the <span class="productname">ltcluster</span> metadata and is used by <span class="productname">ltcluster</span> to execute <span class="productname">ltcluster</span> remotely
+       (e.g. during a <a class="link" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">switchover operation</a>).
+     </p><p>
+       If the content and/or location of <code class="filename">ltcluster.conf</code> has changed, the <span class="productname">ltcluster</span> metadata
+       needs to be updated to reflect this. The <span class="productname">ltcluster</span> metadata can be updated on each node with:
+       </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+             <a class="link" href="ltcluster-primary-register.html" title="ltcluster primary register">
+               <code class="command">ltcluster primary register --force -f /path/to/ltcluster.conf</code>
+             </a>
+           </li><li class="listitem" style="list-style-type: disc">
+             <a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">
+               <code class="command">ltcluster standby register --force -f /path/to/ltcluster.conf</code>
+             </a>
+           </li><li class="listitem" style="list-style-type: disc">
+             <a class="link" href="ltcluster-witness-register.html" title="ltcluster witness register">
+               <code class="command">ltcluster witness register --force -f /path/to/ltcluster.conf -h primary_host</code>
+             </a>
+           </li></ul></div><p>
+     </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="configuration-prerequisites.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="configuration-file-settings.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.1. Prerequisites for configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.3. Required configuration file settings</td></tr></table></div></body></html>

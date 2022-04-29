@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>4.3. Required configuration file settings</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="configuration-file.html" title="4.2. Configuration file" /><link rel="next" href="configuration-file-optional-settings.html" title="4.4. Optional configuration file settings" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">4.3. Required configuration file settings</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="configuration-file.html" title="4.2. Configuration file">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="configuration.html" title="Chapter 4. ltcluster configuration">Up</a></td><th width="60%" align="center">Chapter 4. ltcluster configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="configuration-file-optional-settings.html" title="4.4. Optional configuration file settings">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="CONFIGURATION-FILE-SETTINGS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">4.3. Required configuration file settings</h2></div></div></div><a id="id-1.4.2.4.2" class="indexterm"></a><p>
+   Each <code class="filename">ltcluster.conf</code> file must contain the following parameters:
+ </p><p>
+  </p><div class="variablelist"><dl class="variablelist"><dt id="LTCLUSTER-CONF-NODE-ID"><span class="term"><code class="varname">node_id</code> (<code class="type">int</code>)
+     <a id="id-1.4.2.4.4.1.1.1.3" class="indexterm"></a>
+    </span></dt><dd><p>
+      A unique integer greater than zero which identifies the node.
+     </p></dd><dt id="LTCLUSTER-CONF-NODE-NAME"><span class="term"><code class="varname">node_name</code> (<code class="type">string</code>)
+     <a id="id-1.4.2.4.4.1.2.1.3" class="indexterm"></a>
+    </span></dt><dd><p>
+       An arbitrary (but unique) string; we recommend using the server's hostname
+       or another identifier unambiguously associated with the server to avoid
+       confusion. Avoid choosing names which reflect the node's current role,
+       e.g. <code class="varname">primary</code> or <code class="varname">standby1</code>
+       as roles can change and if you end up in a solution where the current primary is
+       called <code class="varname">standby1</code> (for example), things will be confusing
+       to say the least.
+     </p><p>
+       The string's maximum length is 63 characters and it should
+       contain only printable ASCII characters.
+     </p></dd><dt id="LTCLUSTER-CONF-CONNINFO"><span class="term"><code class="varname">conninfo</code> (<code class="type">string</code>)
+     <a id="id-1.4.2.4.4.1.3.1.3" class="indexterm"></a>
+    </span></dt><dd><p>
+      Database connection information as a conninfo string.
+      All servers in the cluster must be able to connect to
+      the local node using this string.
+     </p><p>
+       For details on conninfo strings, see section <a class="ulink" href="https://www.hs.net/lightdb/docs/current/libpq-connect.html#LIBPQ-CONNSTRING" target="_top">Connection Strings</a>
+        in the PosgreSQL documentation.
+     </p><p>
+        If ltclusterd is in use, consider explicitly setting
+        <code class="varname">connect_timeout</code> in the <code class="varname">conninfo</code>
+        string to determine the length of time which elapses before a network
+        connection attempt is abandoned; for details see <a class="ulink" href="https://www.hs.net/lightdb/docs/current/libpq-connect.html#LIBPQ-CONNECT-CONNECT-TIMEOUT" target="_top">
+        the LightDB documentation</a>.
+     </p></dd><dt id="LTCLUSTER-CONF-DATA-DIRECTORY"><span class="term"><code class="varname">data_directory</code> (<code class="type">string</code>)</span></dt><dd><a id="id-1.4.2.4.4.1.4.2.1" class="indexterm"></a><p>
+       The node's data directory. This is needed by ltcluster
+       when performing operations when the LightDB instance
+       is not running and there's no other way of determining
+       the data directory.
+     </p></dd></dl></div><p>
+ </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="configuration-file.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="configuration-file-optional-settings.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.2. Configuration file </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.4. Optional configuration file settings</td></tr></table></div></body></html>

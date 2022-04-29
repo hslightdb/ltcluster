@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>D.1. Reporting Issues</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="appendix-support.html" title="Appendix D. ltcluster support" /><link rel="next" href="bookindex.html" title="Index" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">D.1. Reporting Issues</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="appendix-support.html" title="Appendix D. ltcluster support">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-support.html" title="Appendix D. ltcluster support">Up</a></td><th width="60%" align="center">Appendix D. <span xmlns="http://www.w3.org/1999/xhtml" class="productname">ltcluster</span> support</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="bookindex.html" title="Index">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="APPENDIX-SUPPORT-REPORTING-ISSUES"><div class="titlepage"><div><div><h2 class="title" style="clear: both">D.1. Reporting Issues</h2></div></div></div><a id="id-1.10.8.2" class="indexterm"></a><p>
+      When asking questions or reporting issues, it is extremely helpful if the following information is included:
+
+    </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc">
+        LightDB version
+      </li><li class="listitem" style="list-style-type: disc">
+        <span class="productname">ltcluster</span> version
+      </li><li class="listitem" style="list-style-type: disc">
+        How was <span class="productname">ltcluster</span> installed? From source? From packages? If
+        so from which repository?
+      </li><li class="listitem" style="list-style-type: disc">
+        <code class="filename">repmpgr.conf</code> files (suitably anonymized if necessary)
+      </li><li class="listitem" style="list-style-type: disc">
+        Contents of the <code class="literal">ltcluster.nodes</code> table (suitably anonymized if necessary)
+      </li><li class="listitem" style="list-style-type: disc">
+        LightDB 11 and earlier: contents of the <code class="filename">recovery.conf</code> file
+        (suitably anonymized if necessary).
+      </li><li class="listitem" style="list-style-type: disc">
+        LightDB 12 and later: contents of the <code class="filename">postgresql.auto.conf</code> file
+        (suitably anonymized if necessary), and whether or not the LightDB data directory
+        contains the files <code class="filename">standby.signal</code> and/or <code class="filename">recovery.signal</code>.
+      </li></ul></div><p>
+    </p><p>
+      If issues are encountered with a <span class="productname">ltcluster</span> client command, please provide
+      the output of that command executed with the options
+      <code class="option">-LDEBUG --verbose</code>, which will ensure <span class="productname">ltcluster</span> emits
+      the maximum level of logging output.
+    </p><p>
+      If issues are encountered with <span class="productname">ltclusterd</span>,
+      please provide relevant extracts from the <span class="productname">ltcluster</span> log files
+      and if possible the LightDB log itself. Please ensure these
+      logs do not contain any confidential data.
+    </p><p>
+      In all cases it is <span class="emphasis"><em>extremely</em></span> useful to receive
+      as much detail as possible on how to reliably reproduce
+      an issue.
+    </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="appendix-support.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-support.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="bookindex.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Appendix D. <span class="productname">ltcluster</span> support </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Index</td></tr></table></div></body></html>

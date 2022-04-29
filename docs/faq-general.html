@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>B.1. General</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="appendix-faq.html" title="Appendix B. FAQ (Frequently Asked Questions)" /><link rel="next" href="faq-ltcluster.html" title="B.2. ltcluster" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">B.1. General</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="appendix-faq.html" title="Appendix B. FAQ (Frequently Asked Questions)">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="appendix-faq.html" title="Appendix B. FAQ (Frequently Asked Questions)">Up</a></td><th width="60%" align="center">Appendix B. FAQ (Frequently Asked Questions)</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="faq-ltcluster.html" title="B.2. ltcluster">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="FAQ-GENERAL"><div class="titlepage"><div><div><h2 class="title" style="clear: both">B.1. General</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="faq-general.html#FAQ-XLTCLUSTER-VERSION-DIFF">B.1.1. What's the difference between the ltcluster versions?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-REPLICATION-SLOTS-ADVANTAGE">B.1.2. What's the advantage of using replication slots?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-REPLICATION-SLOTS-NUMBER">B.1.3. How many replication slots should I define in <code class="varname">max_replication_slots</code>?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-HASH-INDEX">B.1.4. Does <span class="productname">ltcluster</span> support hash indexes?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-UPGRADES">B.1.5. Can <span class="productname">ltcluster</span> assist with upgrading a LightDB cluster?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-LIBDIR-LTCLUSTER-ERROR">B.1.6. What does this error mean: <code class="literal">ERROR: could not access file "$libdir/ltcluster"</code>?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-OLD-PACKAGES">B.1.7. How can I obtain old versions of <span class="productname">ltcluster</span> packages?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-LTCLUSTER-REQUIRED-FOR-REPLICATION">B.1.8. Is <span class="productname">ltcluster</span> required for streaming replication?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-WHAT-IF-LTCLUSTER-UNINSTALLED">B.1.9. Will replication stop working if <span class="productname">ltcluster</span> is uninstalled?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-VERSION-MIX">B.1.10. Does it matter if different <span class="productname">ltcluster</span> versions are present in the replication cluster?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-UPGRADE-LTCLUSTER">B.1.11. Should I upgrade <span class="productname">ltcluster</span>?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-LTCLUSTER-CONF-DATA-DIRECTORY">B.1.12. Why do I need to specify the data directory location in ltcluster.conf?</a></span></dt><dt><span class="sect2"><a href="faq-general.html#FAQ-THIRD-PARTY-PACKAGES">B.1.13. Are <span class="productname">ltcluster</span> packages compatible with <code class="literal">$third_party_vendor</code>'s packages?</a></span></dt></dl></div><div class="sect2" id="FAQ-XLTCLUSTER-VERSION-DIFF"><div class="titlepage"><div><div><h3 class="title">B.1.1. What's the difference between the ltcluster versions?</h3></div></div></div><p>
+        <span class="productname">ltcluster</span> 4 is a complete rewrite of the previous <span class="productname">ltcluster</span> code base
+        and implements <span class="productname">ltcluster</span> as a LightDB extension. It
+        supports all LightDB versions from 9.3 (although some <span class="productname">ltcluster</span>
+        features are not available for LightDB 9.3 and 9.4).
+      </p><div class="note"><h3 class="title">Note</h3><p>
+          <span class="productname">ltcluster</span> 5 is fundamentally the same code base as <span class="productname">ltcluster</span> 4, but provides
+          support for the revised replication configuration mechanism in LightDB 12.
+        </p><p>
+          Support for LightDB 9.3 is no longer available from <span class="productname">ltcluster</span> 5.2.
+        </p></div><p>
+        <span class="productname">ltcluster</span> 3.x builds on the improved replication facilities added
+        in LightDB 9.3, as well as improved automated failover support
+        via <span class="productname">ltclusterd</span>, and is not compatible with LightDB 9.2
+        and earlier. We recommend upgrading to <span class="productname">ltcluster</span> 4, as the <span class="productname">ltcluster</span> 3.x
+        series is no longer maintained.
+      </p><p>
+        <span class="productname">ltcluster</span> 2.x supports LightDB 9.0 ~ 9.3. While it is compatible
+        with LightDB 9.3, we recommend using ltcluster 4.x. <span class="productname">ltcluster</span> 2.x is
+        no longer maintained.
+      </p><p>
+        See also <a class="link" href="install-requirements.html#INSTALL-COMPATIBILITY-MATRIX" title="2.1.1. ltcluster compatibility matrix"><span class="productname">ltcluster</span> compatibility matrix</a>
+        and <a class="link" href="faq-general.html#FAQ-UPGRADE-LTCLUSTER" title="B.1.11. Should I upgrade ltcluster?">Should I upgrade <span class="productname">ltcluster</span>?</a>.
+      </p></div><div class="sect2" id="FAQ-REPLICATION-SLOTS-ADVANTAGE"><div class="titlepage"><div><div><h3 class="title">B.1.2. What's the advantage of using replication slots?</h3></div></div></div><p>
+        Replication slots, introduced in LightDB 9.4, ensure that the
+        primary server will retain WAL files until they have been consumed
+        by all standby servers. This means standby servers should never
+        fail due to not being able to retrieve required WAL files from the
+        primary.
+      </p><p>
+        However this does mean that if a standby is no longer connected to the
+        primary, the presence of the replication slot will cause WAL files
+        to be retained indefinitely, and eventually lead to disk space
+        exhaustion.
+      </p><div class="tip"><h3 class="title">Tip</h3><p>
+          Hundsun LightDB's recommended configuration is to configure
+          <a class="ulink" href="https://www.pgbarman.org/" target="_top">Barman</a> as a fallback
+          source of WAL files, rather than maintain replication slots for
+          each standby. See also: <a class="link" href="cloning-from-barman.html#CLONING-FROM-BARMAN-RESTORE-COMMAND" title="5.1.2. Using Barman as a WAL file source">Using Barman as a WAL file source</a>.
+        </p></div></div><div class="sect2" id="FAQ-REPLICATION-SLOTS-NUMBER"><div class="titlepage"><div><div><h3 class="title">B.1.3. How many replication slots should I define in <code class="varname">max_replication_slots</code>?</h3></div></div></div><p>
+        Normally at least same number as the number of standbys which will connect
+        to the node. Note that changes to <code class="varname">max_replication_slots</code> require a server
+        restart to take effect, and as there is no particular penalty for unused
+        replication slots, setting a higher figure will make adding new nodes
+        easier.
+      </p></div><div class="sect2" id="FAQ-HASH-INDEX"><div class="titlepage"><div><div><h3 class="title">B.1.4. Does <span class="productname">ltcluster</span> support hash indexes?</h3></div></div></div><p>
+        Before LightDB 10, hash indexes were not WAL logged and are therefore not suitable
+        for use in streaming replication in LightDB 9.6 and earlier. See the
+        <a class="ulink" href="https://www.hs.net/lightdb/docs/9.6/sql-createindex.html#AEN80279" target="_top">LightDB documentation</a>
+        for details.
+      </p><p>
+        From LightDB 10, this restriction has been lifted and hash indexes can be used
+        in a streaming replication cluster.
+      </p></div><div class="sect2" id="FAQ-UPGRADES"><div class="titlepage"><div><div><h3 class="title">B.1.5. Can <span class="productname">ltcluster</span> assist with upgrading a LightDB cluster?</h3></div></div></div><p>
+        For <span class="emphasis"><em>minor</em></span> version upgrades, e.g. from 9.6.7 to 9.6.8, a common
+        approach is to upgrade a standby to the latest version, perform a
+        <a class="link" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">switchover</a> promoting it to a primary,
+        then upgrade the former primary.
+      </p><p>
+        For <span class="emphasis"><em>major</em></span> version upgrades (e.g. from LightDB 9.6 to LightDB 10),
+        the traditional approach is to "reseed" a cluster by upgrading a single
+        node with <a class="ulink" href="https://www.hs.net/lightdb/docs/current/pgupgrade.html" target="_top">lt_upgrade</a>
+        and recloning standbys from this.
+      </p><p>
+        To minimize downtime during major upgrades from LightDB 9.4 and later,
+        <a class="ulink" href="https://www.hs.net/lightdb/en/resources/pglogical/" target="_top">pglogical</a>
+        can be used to set up a parallel cluster using the newer LightDB version,
+        which can be kept in sync with the existing production cluster until the
+        new cluster is ready to be put into production.
+      </p></div><div class="sect2" id="FAQ-LIBDIR-LTCLUSTER-ERROR"><div class="titlepage"><div><div><h3 class="title">B.1.6. What does this error mean: <code class="literal">ERROR: could not access file "$libdir/ltcluster"</code>?</h3></div></div></div><p>
+        It means the <span class="productname">ltcluster</span> extension code is not installed in the
+        LightDB application directory. This typically happens when using LightDB
+        packages provided by a third-party vendor, which often have different
+        filesystem layouts.
+      </p><p>
+        Either use LightDB packages provided by the community or Hundsun LightDB; if this
+        is not possible, contact your vendor for assistance.
+      </p></div><div class="sect2" id="FAQ-OLD-PACKAGES"><div class="titlepage"><div><div><h3 class="title">B.1.7. How can I obtain old versions of <span class="productname">ltcluster</span> packages?</h3></div></div></div><p>
+        See appendix <a class="xref" href="packages-old-versions.html" title="C.4. Installing old package versions">Installing old package versions</a> for details.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-REQUIRED-FOR-REPLICATION"><div class="titlepage"><div><div><h3 class="title">B.1.8. Is <span class="productname">ltcluster</span> required for streaming replication?</h3></div></div></div><p>
+        No.
+      </p><p>
+        <span class="productname">ltcluster</span> (together with <span class="productname">ltclusterd</span>) assists with
+        <span class="emphasis"><em>managing</em></span> replication. It does not actually perform replication, which
+        is part of the core LightDB functionality.
+      </p></div><div class="sect2" id="FAQ-WHAT-IF-LTCLUSTER-UNINSTALLED"><div class="titlepage"><div><div><h3 class="title">B.1.9. Will replication stop working if <span class="productname">ltcluster</span> is uninstalled?</h3></div></div></div><p>
+        No. See preceding question.
+      </p></div><div class="sect2" id="FAQ-VERSION-MIX"><div class="titlepage"><div><div><h3 class="title">B.1.10. Does it matter if different <span class="productname">ltcluster</span> versions are present in the replication cluster?</h3></div></div></div><p>
+        Yes. If different "major" <span class="productname">ltcluster</span> versions (e.g. 3.3.x and 4.1.x) are present,
+        <span class="productname">ltcluster</span> (in particular <span class="productname">ltclusterd</span>)
+        may not run, or run properly, or in the worst case (if different <span class="productname">ltclusterd</span>
+        versions are running and there are differences in the failover implementation) break
+        your replication cluster.
+      </p><p>
+        If different "minor" <span class="productname">ltcluster</span> versions (e.g. 4.1.1 and 4.1.6) are installed,
+        <span class="productname">ltcluster</span> will function, but we strongly recommend always running the same version
+        to ensure there are no unexpected suprises, e.g. a newer version behaving slightly
+        differently to the older version.
+      </p><p>
+        See also <a class="link" href="faq-general.html#FAQ-UPGRADE-LTCLUSTER" title="B.1.11. Should I upgrade ltcluster?">Should I upgrade <span class="productname">ltcluster</span>?</a>.
+      </p></div><div class="sect2" id="FAQ-UPGRADE-LTCLUSTER"><div class="titlepage"><div><div><h3 class="title">B.1.11. Should I upgrade <span class="productname">ltcluster</span>?</h3></div></div></div><p>
+        Yes.
+      </p><p>
+        We don't release new versions for fun, you know. Upgrading may require a little effort,
+        but running an older <span class="productname">ltcluster</span> version with bugs which have since been fixed may end up
+        costing you more effort. The same applies to LightDB itself.
+      </p></div><div class="sect2" id="FAQ-LTCLUSTER-CONF-DATA-DIRECTORY"><div class="titlepage"><div><div><h3 class="title">B.1.12. Why do I need to specify the data directory location in ltcluster.conf?</h3></div></div></div><p>
+        In some circumstances <span class="productname">ltcluster</span> may need to access a LightDB data
+        directory while the LightDB server is not running, e.g. to confirm
+        it shut down cleanly during a <a class="link" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">switchover</a>.
+      </p><p>
+        Additionally, this provides support when using <span class="productname">ltcluster</span> on LightDB 9.6 and
+        earlier, where the <code class="literal">ltcluster</code> user is not a superuser; in that
+        case the <code class="literal">ltcluster</code> user will not be able to access the
+        <code class="literal">data_directory</code> configuration setting, access to which is restricted
+        to superusers.
+      </p><p>
+        In LightDB 10 and later, non-superusers can be added to the
+        <a class="ulink" href="https://www.hs.net/lightdb/docs/current/default-roles.html" target="_top">default role</a>
+        <code class="option">pg_read_all_settings</code> (or the meta-role <code class="option">pg_monitor</code>)
+        which will enable them to read this setting.
+      </p></div><div class="sect2" id="FAQ-THIRD-PARTY-PACKAGES"><div class="titlepage"><div><div><h3 class="title">B.1.13. Are <span class="productname">ltcluster</span> packages compatible with <code class="literal">$third_party_vendor</code>'s packages?</h3></div></div></div><p>
+        <span class="productname">ltcluster</span> packages provided by Hundsun LightDB are compatible with the community-provided LightDB
+        packages and any software provided by Hundsun LightDB.
+      </p><p>
+        A number of other vendors provide their own versions of LightDB packages, often with different
+        package naming schemes and/or file locations.
+      </p><p>
+        We cannot guarantee that <span class="productname">ltcluster</span> packages will be compatible with these packages.
+        It may be possible to override package dependencies (e.g. <code class="literal">rpm --nodeps</code>
+        for CentOS-based systems or <code class="literal">dpkg --force-depends</code> for Debian-based systems).
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="appendix-faq.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="appendix-faq.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="faq-ltcluster.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Appendix B. FAQ (Frequently Asked Questions) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> B.2. <code class="command">ltcluster</code></td></tr></table></div></body></html>
