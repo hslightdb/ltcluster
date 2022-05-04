@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>8.1. Preparing for switchover</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster" /><link rel="next" href="switchover-execution.html" title="8.2. Executing the switchover command" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">8.1. Preparing for switchover</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="performing-switchover.html" title="Chapter 8. Performing a switchover with ltcluster">Up</a></td><th width="60%" align="center">Chapter 8. Performing a switchover with ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="switchover-execution.html" title="8.2. Executing the switchover command">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="PREPARING-FOR-SWITCHOVER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">8.1. Preparing for switchover</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="preparing-for-switchover.html#SWITCHOVER-PG-REWIND">8.1.1. Switchover and postgresql.confrewind</a></span></dt></dl></div><a id="id-1.4.6.7.2" class="indexterm"></a><p>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>7.1. Preparing for switchover</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="performing-switchover.html" title="Chapter 7. Performing a switchover with ltcluster" /><link rel="next" href="switchover-execution.html" title="7.2. Executing the switchover command" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">7.1. Preparing for switchover</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="performing-switchover.html" title="Chapter 7. Performing a switchover with ltcluster">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="performing-switchover.html" title="Chapter 7. Performing a switchover with ltcluster">Up</a></td><th width="60%" align="center">Chapter 7. Performing a switchover with ltcluster</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="switchover-execution.html" title="7.2. Executing the switchover command">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="PREPARING-FOR-SWITCHOVER"><div class="titlepage"><div><div><h2 class="title" style="clear: both">7.1. Preparing for switchover</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="preparing-for-switchover.html#SWITCHOVER-PG-REWIND">7.1.1. Switchover and postgresql.confrewind</a></span></dt></dl></div><a id="id-1.4.6.7.2" class="indexterm"></a><p>
     As mentioned in the previous section, success of the switchover operation depends on
     <span class="productname">ltcluster</span> being able to shut down the current primary server quickly and cleanly.
    </p><p>
@@ -40,7 +40,7 @@
        LightDB, which may not work properly, particularly when executed on a remote
        server.
      </p><p>
-       For more details, see <a class="xref" href="configuration-file-service-commands.html" title="4.6. Service command settings">service command settings</a>.
+       For more details, see <a class="xref" href="configuration-file-service-commands.html" title="3.6. Service command settings">service command settings</a>.
      </p></div><div class="note"><h3 class="title">Note</h3><p>
      On <code class="literal">systemd</code> systems we strongly recommend using the appropriate
      <code class="command">systemctl</code> commands (typically run via <code class="command">sudo</code>) to ensure
@@ -64,15 +64,7 @@
     archived. If there is a backlog exceeding <code class="varname">archive_ready_warning</code> WAL files,
     <span class="productname">ltcluster</span> will emit a warning before attempting to perform a switchover; you can also check
     manually with <code class="command">ltcluster node check --archive-ready</code>.
-   </p><div class="note"><h3 class="title">Note</h3><p>
-        From <a class="link" href="release-4.2.html" title="A.7. Release 4.2">ltcluster 4.2</a>, <span class="productname">ltcluster</span> will instruct any running
-        <span class="productname">ltclusterd</span> instances to pause operations while the switchover
-        is being carried out, to prevent <span class="productname">ltclusterd</span> from
-        unintentionally promoting a node. For more details, see <a class="xref" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">pausing the ltclusterd service</a>.
-      </p><p>
-        Users of <span class="productname">ltcluster</span> versions prior to 4.2 should ensure that <span class="productname">ltclusterd</span>
-        is not running on any nodes while a switchover is being executed.
-      </p></div><p>
+   </p><p>
     Finally, consider executing <code class="command">ltcluster standby switchover</code> with the
     <code class="literal">--dry-run</code> option; this will perform any necessary checks and inform you about
     success/failure, and stop before the first actual command is run (which would be the shutdown of the
@@ -102,7 +94,7 @@
        See <a class="xref" href="ltcluster-standby-switchover.html" title="ltcluster standby switchover"><span class="refentrytitle">ltcluster standby switchover</span></a> for a full list of available
        command line options and <code class="filename">ltcluster.conf</code> settings relevant
        to performing a switchover.
-     </p></div><div class="sect2" id="SWITCHOVER-PG-REWIND"><div class="titlepage"><div><div><h3 class="title">8.1.1. Switchover and postgresql.confrewind</h3></div></div></div><a id="id-1.4.6.7.19.2" class="indexterm"></a><p>
+     </p></div><div class="sect2" id="SWITCHOVER-PG-REWIND"><div class="titlepage"><div><div><h3 class="title">7.1.1. Switchover and postgresql.confrewind</h3></div></div></div><a id="id-1.4.6.7.18.2" class="indexterm"></a><p>
       If the demotion candidate does not shut down smoothly or cleanly, there's a risk it
       will have a slightly divergent timeline and will not be able to attach to the new
       primary. To fix this situation without needing to reclone the old primary, it's
@@ -118,15 +110,5 @@
         <span class="application">postgresql.confrewind</span>.
       </p></div><p>
       For more details on <span class="application">postgresql.confrewind</span>, see:
-      <a class="ulink" href="https://www.hs.net/lightdb/docs/current/app-pgrewind.html" target="_top">https://www.hs.net/lightdb/docs/current/app-pgrewind.html</a>.
-    </p><p>
-      <span class="application">postgresql.confrewind</span> has been part of the core LightDB distribution since
-      version 9.5. Users of LightDB 9.4 will need to manually install it; the source code is available here:
-      <a class="ulink" href="https://github.com/vmware/postgresql.confrewind" target="_top">https://github.com/vmware/pg_rewind</a>.
-      If the <span class="application">lt_rewind</span>
-      binary is not installed in the LightDB <code class="filename">bin</code> directory, provide
-      its full path  on the demotion candidate  with <code class="option">--force-rewind</code>.
-    </p><p>
-      Note that building the 9.4 version of <span class="application">lt_rewind</span> requires the LightDB
-      source code.
-    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="performing-switchover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="performing-switchover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="switchover-execution.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 8. Performing a switchover with ltcluster </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 8.2. Executing the switchover command</td></tr></table></div></body></html>
+      <a class="ulink" href="https://www.hs.net/lightdb/docs/html/app-pgrewind.html" target="_top">https://www.hs.net/lightdb/docs/html/app-pgrewind.html</a>.
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="performing-switchover.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="performing-switchover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="switchover-execution.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 7. Performing a switchover with ltcluster </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 7.2. Executing the switchover command</td></tr></table></div></body></html>
