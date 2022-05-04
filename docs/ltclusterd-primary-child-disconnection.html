@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>12.7. Monitoring standby disconnections on the primary node</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication" /><link rel="next" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">12.7. Monitoring standby disconnections on the primary node</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cascading-replication.html" title="12.6. ltclusterd and cascading replication">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 12. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 12. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">12.7. Monitoring standby disconnections on the primary node</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS">12.7.1. Standby disconnections monitoring process and criteria</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE">12.7.2. Standby disconnections monitoring process example</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS">12.7.3. Standby disconnections monitoring caveats</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION">12.7.4. Standby disconnections monitoring process configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS">12.7.5. Standby disconnections monitoring process event notifications</a></span></dt></dl></div><a id="id-1.5.3.10.2" class="indexterm"></a><a id="id-1.5.3.10.3" class="indexterm"></a><div class="note"><h3 class="title">Note</h3><p>
-      This functionality is available in <a class="link" href="release-4.4.html" title="A.5. Release 4.4"><span class="productname">ltcluster</span> 4.4</a> and later.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>10.7. Monitoring standby disconnections on the primary node</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="cascading-replication.html" title="10.6. ltclusterd and cascading replication" /><link rel="next" href="ltclusterd-configuration.html" title="Chapter 11. ltclusterd setup and configuration" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">10.7. Monitoring standby disconnections on the primary node</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="cascading-replication.html" title="10.6. ltclusterd and cascading replication">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-automatic-failover.html" title="Chapter 10. Automatic failover with ltclusterd">Up</a></td><th width="60%" align="center">Chapter 10. Automatic failover with ltclusterd</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html" title="Chapter 11. ltclusterd setup and configuration">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">10.7. Monitoring standby disconnections on the primary node</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS">10.7.1. Standby disconnections monitoring process and criteria</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE">10.7.2. Standby disconnections monitoring process example</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS">10.7.3. Standby disconnections monitoring caveats</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION">10.7.4. Standby disconnections monitoring process configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS">10.7.5. Standby disconnections monitoring process event notifications</a></span></dt></dl></div><a id="id-1.5.3.10.2" class="indexterm"></a><a id="id-1.5.3.10.3" class="indexterm"></a><div class="note"><h3 class="title">Note</h3><p>
+      This functionality is available in ltcluster 5 and later.
     </p></div><p>
     When running on the primary node, <span class="productname">ltclusterd</span> can
     monitor connections and in particular disconnections by its attached
@@ -14,8 +14,8 @@
 	  of streaming replication standbys and cannot determine whether a standby
 	  has disconnected and fallen back to archive recovery.
 	</p><p>
-	  See section <a class="link" href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS" title="12.7.3. Standby disconnections monitoring caveats">caveats</a> below.
-	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS"><div class="titlepage"><div><div><h3 class="title">12.7.1. Standby disconnections monitoring process and criteria</h3></div></div></div><p>
+	  See section <a class="link" href="ltclusterd-primary-child-disconnection.html#LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS" title="10.7.3. Standby disconnections monitoring caveats">caveats</a> below.
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-MONITORING-PROCESS"><div class="titlepage"><div><div><h3 class="title">10.7.1. Standby disconnections monitoring process and criteria</h3></div></div></div><p>
 	  <span class="productname">ltclusterd</span> monitors attached child nodes and decides
 	  whether to invoke the user-defined command based on the following process
 	  and criteria:
@@ -71,14 +71,14 @@
             To enable the witness node to be counted as a child node, set
             <code class="varname">child_nodes_connected_include_witness</code> in <code class="filename">ltcluster.conf</code>
             to <code class="literal">true</code>
-            (and <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-RELOADING-CONFIGURATION" title="13.1.7. Applying configuration changes to ltclusterd">reload the configuration</a> if <span class="productname">ltclusterd</span>
+            (and <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-RELOADING-CONFIGURATION" title="11.1.7. Applying configuration changes to ltclusterd">reload the configuration</a> if <span class="productname">ltclusterd</span>
             is running).
           </p></div></li><li class="listitem"><p>
           Note that child nodes which are not attached when <span class="productname">ltclusterd</span>
           starts will <span class="emphasis"><em>not</em></span> be considered as missing, as <span class="productname">ltclusterd</span>
           cannot know why they are not attached.
         </p></li></ul></div><p>
-	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE"><div class="titlepage"><div><div><h3 class="title">12.7.2. Standby disconnections monitoring process example</h3></div></div></div><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EXAMPLE"><div class="titlepage"><div><div><h3 class="title">10.7.2. Standby disconnections monitoring process example</h3></div></div></div><p>
 	  This example shows typical <span class="productname">ltclusterd</span> log output from a three-node cluster
 	  (primary and two child nodes), with <code class="varname">child_nodes_connected_min_count</code>
 	  set to <code class="literal">2</code>.
@@ -114,7 +114,7 @@
 	"/usr/bin/fence-all-the-things.sh"
 [2019-04-24 15:28:51] [NOTICE] 1 (of 2) child nodes are connected, but at least 2 child nodes required
 [2019-04-24 15:28:51] [INFO] "child_nodes_disconnect_command" was previously executed, taking no action</pre><p>
-	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS"><div class="titlepage"><div><div><h3 class="title">12.7.3. Standby disconnections monitoring caveats</h3></div></div></div><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CAVEATS"><div class="titlepage"><div><div><h3 class="title">10.7.3. Standby disconnections monitoring caveats</h3></div></div></div><p>
 	  The follwing caveats should be considered if you are intending to use this functionality.
 	</p><p>
 	  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>
@@ -133,7 +133,7 @@
 			<code class="varname">application_name</code> is not unique across the replication
 			cluster, <span class="productname">ltcluster</span> will not be able to reliably monitor child node connections.
 		  </p></li></ul></div><p>
-	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">12.7.4. Standby disconnections monitoring process configuration</h3></div></div></div><p>
+	</p></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">10.7.4. Standby disconnections monitoring process configuration</h3></div></div></div><p>
 	  The following parameters, set in <code class="filename">ltcluster.conf</code>,
 	  control how child node disconnection monitoring operates.
 	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">child_nodes_check_interval</code></span></dt><dd><a id="id-1.5.3.10.10.3.1.2.1" class="indexterm"></a><p>
@@ -169,7 +169,7 @@
 			the criteria for its execution are met again.
           </p><p>
 			The <code class="varname">child_nodes_disconnect_command</code> script will not be executed if
-			<span class="productname">ltclusterd</span> is <a class="link" href="ltclusterd-pausing.html" title="14.1. Pausing the ltclusterd service">paused</a>.
+			<span class="productname">ltclusterd</span> is <a class="link" href="ltclusterd-pausing.html" title="12.1. Pausing the ltclusterd service">paused</a>.
           </p></dd><dt><span class="term"><code class="varname">child_nodes_disconnect_timeout</code></span></dt><dd><a id="id-1.5.3.10.10.3.3.2.1" class="indexterm"></a><p>
 			If <span class="productname">ltclusterd</span> determines that an insufficient number of
 			child nodes are connected, it will wait for the specified number of seconds
@@ -219,8 +219,8 @@
             determining whether to execute <code class="varname">child_nodes_disconnect_command</code>.
           </p><p>
             Default to <code class="literal">false</code>.
-          </p></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS"><div class="titlepage"><div><div><h3 class="title">12.7.5. Standby disconnections monitoring process event notifications</h3></div></div></div><p>
-	  The following <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notifications</a> may be generated:
+          </p></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-PRIMARY-CHILD-DISCONNECTION-EVENTS"><div class="titlepage"><div><div><h3 class="title">10.7.5. Standby disconnections monitoring process event notifications</h3></div></div></div><p>
+	  The following <a class="link" href="event-notifications.html" title="Chapter 8. Event Notifications">event notifications</a> may be generated:
 	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">child_node_disconnect</code></span></dt><dd><a id="id-1.5.3.10.11.3.1.2.1" class="indexterm"></a><p>
 			This event is generated after <span class="productname">ltclusterd</span>
 			detects that a child node is no longer streaming from the primary node.
@@ -263,4 +263,4 @@ $ ltcluster cluster event --event=child_nodes_disconnect_command
  Node ID | Name  | Event                          | OK | Timestamp           | Details
 ---------+-------+--------------------------------+----+---------------------+--------------------------------------------------------
  1       | node1 | child_nodes_disconnect_command | t  | 2019-04-24 13:08:17 | "child_nodes_disconnect_command" successfully executed</pre><p>
-		  </p></dd></dl></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cascading-replication.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">12.6. ltclusterd and cascading replication </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 13. ltclusterd setup and configuration</td></tr></table></div></body></html>
+		  </p></dd></dl></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cascading-replication.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-automatic-failover.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-configuration.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">10.6. ltclusterd and cascading replication </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 11. ltclusterd setup and configuration</td></tr></table></div></body></html>

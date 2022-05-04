@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>13.1. ltclusterd configuration</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration" /><link rel="next" href="ltclusterd-daemon.html" title="13.2. ltclusterd daemon" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">13.1. ltclusterd configuration</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-configuration.html" title="Chapter 13. ltclusterd setup and configuration">Up</a></td><th width="60%" align="center">Chapter 13. ltclusterd setup and configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-daemon.html" title="13.2. ltclusterd daemon">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-BASIC-CONFIGURATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">13.1. ltclusterd configuration</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION">13.1.1. Required configuration for automatic failover</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-OPTIONAL">13.1.2. Optional configuration for automatic failover</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-PGBOUNCER-FENCING">13.1.3. Configuring <span class="productname">ltclusterd</span> and pgbouncer to fence a failed primary node</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LIGHTDB-SERVICE-CONFIGURATION">13.1.4. LightDB service configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-SERVICE-CONFIGURATION">13.1.5. ltclusterd service configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-MONITORING-CONFIGURATION">13.1.6. Monitoring configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-RELOADING-CONFIGURATION">13.1.7. Applying configuration changes to ltclusterd</a></span></dt></dl></div><p>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>11.1. ltclusterd configuration</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><meta name="keywords" content="ltcluster, LightDB, replication, asynchronous, HA, high-availability" /><link rel="prev" href="ltclusterd-configuration.html" title="Chapter 11. ltclusterd setup and configuration" /><link rel="next" href="ltclusterd-daemon.html" title="11.2. ltclusterd daemon" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">11.1. ltclusterd configuration</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ltclusterd-configuration.html" title="Chapter 11. ltclusterd setup and configuration">Prev</a> </td><td width="10%" align="left"><a accesskey="u" href="ltclusterd-configuration.html" title="Chapter 11. ltclusterd setup and configuration">Up</a></td><th width="60%" align="center">Chapter 11. ltclusterd setup and configuration</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="ltcluster 5.2.1 Documentation">Home</a></td><td width="10%" align="right"> <a accesskey="n" href="ltclusterd-daemon.html" title="11.2. ltclusterd daemon">Next</a></td></tr></table><hr></hr></div><div class="sect1" id="LTCLUSTERD-BASIC-CONFIGURATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">11.1. ltclusterd configuration</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION">11.1.1. Required configuration for automatic failover</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-OPTIONAL">11.1.2. Optional configuration for automatic failover</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-PGBOUNCER-FENCING">11.1.3. Configuring <span class="productname">ltclusterd</span> and pgbouncer to fence a failed primary node</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LIGHTDB-SERVICE-CONFIGURATION">11.1.4. LightDB service configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-SERVICE-CONFIGURATION">11.1.5. ltclusterd service configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-MONITORING-CONFIGURATION">11.1.6. Monitoring configuration</a></span></dt><dt><span class="sect2"><a href="ltclusterd-basic-configuration.html#LTCLUSTERD-RELOADING-CONFIGURATION">11.1.7. Applying configuration changes to ltclusterd</a></span></dt></dl></div><p>
       To use <span class="productname">ltclusterd</span>, its associated function library <span class="emphasis"><em>must</em></span> be
       included via <code class="filename">postgresql.conf</code> with:
 
@@ -7,7 +7,7 @@
         shared_preload_libraries = 'ltcluster'</pre><p>
     </p><p>
       Changing this setting requires a restart of LightDB; for more details see
-      the <a class="ulink" href="https://www.hs.net/lightdb/docs/current/runtime-config-client.html#GUC-SHARED-PRELOAD-LIBRARIES" target="_top">LightDB documentation</a>.
+      the <a class="ulink" href="https://www.hs.net/lightdb/docs/html/runtime-config-client.html#GUC-SHARED-PRELOAD-LIBRARIES" target="_top">LightDB documentation</a>.
     </p><p>
       The following configuraton options apply to <span class="productname">ltclusterd</span> in all circumstances:
     </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">monitor_interval_secs</code></span></dt><dd><a id="id-1.5.4.6.5.1.2.1" class="indexterm"></a><p>
@@ -41,12 +41,12 @@
           </p></dd><dt><span class="term"><code class="option">degraded_monitoring_timeout</code></span></dt><dd><a id="id-1.5.4.6.5.5.2.1" class="indexterm"></a><p>
             Interval (in seconds) after which <span class="productname">ltclusterd</span> will terminate if
             either of the servers (local node and or upstream node) being monitored is no longer available
-            (<a class="link" href="ltclusterd-degraded-monitoring.html" title="14.3. &quot;degraded monitoring&quot; mode">degraded monitoring mode</a>).
+            (<a class="link" href="ltclusterd-degraded-monitoring.html" title="12.3. &quot;degraded monitoring&quot; mode">degraded monitoring mode</a>).
           </p><p>
             <code class="literal">-1</code> (default) disables this timeout completely.
           </p></dd></dl></div><p>
-        See also <code class="filename"><a class="ulink" href="www.hs.net/lightdb/ltcluster/master/ltcluster.conf.sample" target="_top">ltcluster.conf.sample</a></code> for an annotated sample configuration file.
-      </p><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">13.1.1. Required configuration for automatic failover</h3></div></div></div><p>
+        See also <code class="filename"><a class="ulink" href="https://www.hs.net/lightdb/ltcluster/master/ltcluster.conf.sample" target="_top">ltcluster.conf.sample</a></code> for an annotated sample configuration file.
+      </p><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">11.1.1. Required configuration for automatic failover</h3></div></div></div><p>
         The following <span class="productname">ltclusterd</span> options <span class="emphasis"><em>must</em></span> be set in
         <code class="filename">ltcluster.conf</code>:
 
@@ -130,7 +130,7 @@
                 <span class="productname">ltcluster</span> will not apply <code class="option">pg_bindir</code> when executing <code class="option">promote_command</code>
                 or <code class="option">follow_command</code>; these can be user-defined scripts so must always be
                 specified with the full path.
-              </p></div></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-OPTIONAL"><div class="titlepage"><div><div><h3 class="title">13.1.2. Optional configuration for automatic failover</h3></div></div></div><p>
+              </p></div></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-OPTIONAL"><div class="titlepage"><div><div><h3 class="title">11.1.2. Optional configuration for automatic failover</h3></div></div></div><p>
         The following configuraton options can be use to fine-tune automatic failover:
       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">priority</code></span></dt><dd><a id="id-1.5.4.6.8.3.1.2.1" class="indexterm"></a><p>
               Indicates a preferred priority (default: <code class="literal">100</code>) for promoting nodes;
@@ -151,7 +151,7 @@
 	          value:
               </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="literal">%n</code>: node ID</li><li class="listitem" style="list-style-type: disc"><code class="literal">%a</code>: node name</li><li class="listitem" style="list-style-type: disc"><code class="literal">%v</code>: number of visible nodes</li><li class="listitem" style="list-style-type: disc"><code class="literal">%u</code>: number of shared upstream nodes</li><li class="listitem" style="list-style-type: disc"><code class="literal">%t</code>: total number of nodes</li></ul></div><p>
             </p><p>
-              See also: <a class="link" href="ltclusterd-failover-validation.html" title="12.5. Failover validation">Failover validation</a>.
+              See also: <a class="link" href="ltclusterd-failover-validation.html" title="10.5. Failover validation">Failover validation</a>.
             </p></dd><dt><span class="term"><code class="option">primary_visibility_consensus</code></span></dt><dd><a id="id-1.5.4.6.8.3.3.2.1" class="indexterm"></a><p>
               If <code class="literal">true</code>, only continue with failover if no standbys
               (or the witness server, if present) have seen the primary node recently.
@@ -173,7 +173,7 @@
             </p></dd><dt><span class="term"><code class="option">standby_disconnect_on_failover</code></span></dt><dd><a id="id-1.5.4.6.8.3.5.2.1" class="indexterm"></a><p>
               In a failover situation, disconnect the local node's WAL receiver.
             </p><p>
-              This option is available from LightDB 9.5 and later.
+              This option is available from LightDB 21 and later.
             </p><div class="note"><h3 class="title">Note</h3><p>
                 This option <span class="emphasis"><em>must</em></span> be identically configured
                 on all nodes.
@@ -184,7 +184,7 @@
                 <span class="productname">ltclusterd</span> will refuse to start if this option is set
                 but either of these prerequisites is not met.
               </p></div><p>
-              See also: <a class="link" href="ltclusterd-standby-disconnection-on-failover.html" title="12.4. Standby disconnection on failover">Standby disconnection on failover</a>.
+              See also: <a class="link" href="ltclusterd-standby-disconnection-on-failover.html" title="10.4. Standby disconnection on failover">Standby disconnection on failover</a>.
             </p></dd></dl></div><p>
         The following options can be used to further fine-tune failover behaviour.
         In practice it's unlikely these will need to be changed from their default
@@ -197,10 +197,10 @@
               maximum length of time (in seconds, default: <code class="literal">30</code>)
 			  to wait for other standbys to confirm they have disconnected their
 		      WAL receivers.
-			</p></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-PGBOUNCER-FENCING"><div class="titlepage"><div><div><h3 class="title">13.1.3. Configuring <span class="productname">ltclusterd</span> and pgbouncer to fence a failed primary node</h3></div></div></div><a id="id-1.5.4.6.9.2" class="indexterm"></a><a id="id-1.5.4.6.9.3" class="indexterm"></a><p>
+			</p></dd></dl></div></div><div class="sect2" id="LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION-PGBOUNCER-FENCING"><div class="titlepage"><div><div><h3 class="title">11.1.3. Configuring <span class="productname">ltclusterd</span> and pgbouncer to fence a failed primary node</h3></div></div></div><a id="id-1.5.4.6.9.2" class="indexterm"></a><a id="id-1.5.4.6.9.3" class="indexterm"></a><p>
         For further details and a reference implementation, see the separate document
         <a class="ulink" href="https://github.com/hslightdb/ltcluster/blob/master/doc/ltclusterd-node-fencing.md" target="_top">Fencing a failed master node with ltclusterd and PgBouncer</a>.
-      </p></div><div class="sect2" id="LIGHTDB-SERVICE-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">13.1.4. LightDB service configuration</h3></div></div></div><a id="id-1.5.4.6.10.2" class="indexterm"></a><p>
+      </p></div><div class="sect2" id="LIGHTDB-SERVICE-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">11.1.4. LightDB service configuration</h3></div></div></div><a id="id-1.5.4.6.10.2" class="indexterm"></a><p>
         If using automatic failover, currently <span class="productname">ltclusterd</span> will need to execute
         <a class="link" href="ltcluster-standby-follow.html" title="ltcluster standby follow"><code class="command">ltcluster standby follow</code></a>
         to restart LightDB on standbys to have them follow a new primary.
@@ -211,8 +211,8 @@
         will default to using <code class="command">lt_ctl</code>, which can result in unexpected problems,
         particularly on <span class="application">systemd</span>-based systems.
       </p><p>
-        For more details, see <a class="xref" href="configuration-file-service-commands.html" title="4.6. Service command settings">service command settings</a>.
-      </p></div><div class="sect2" id="LTCLUSTERD-SERVICE-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">13.1.5. ltclusterd service configuration</h3></div></div></div><a id="id-1.5.4.6.11.2" class="indexterm"></a><p>
+        For more details, see <a class="xref" href="configuration-file-service-commands.html" title="3.6. Service command settings">service command settings</a>.
+      </p></div><div class="sect2" id="LTCLUSTERD-SERVICE-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">11.1.5. ltclusterd service configuration</h3></div></div></div><a id="id-1.5.4.6.11.2" class="indexterm"></a><p>
         If you are intending to use the <a class="link" href="ltcluster-daemon-start.html" title="ltcluster daemon start"><code class="command">ltcluster daemon start</code></a>
         and <a class="link" href="ltcluster-daemon-stop.html" title="ltcluster daemon stop"><code class="command">ltcluster daemon stop</code></a>
         commands, the following
@@ -220,14 +220,14 @@
         </p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><code class="varname">ltclusterd_service_start_command</code></li><li class="listitem" style="list-style-type: disc"><code class="varname">ltclusterd_service_stop_command</code></li></ul></div><p>
 
       </p><p>
-        Example (for <span class="productname">ltcluster</span> with LightDB 12 on CentOS 7):
+        Example (for <span class="productname">ltcluster</span> with LightDB 21 on CentOS 7):
         </p><pre class="programlisting">
 ltclusterd_service_start_command='sudo systemctl ltcluster12 start'
 ltclusterd_service_stop_command='sudo systemctl ltcluster12 stop'
 </pre><p>
       </p><p>
         For more details see the reference page for each command.
-      </p></div><div class="sect2" id="LTCLUSTERD-MONITORING-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">13.1.6. Monitoring configuration</h3></div></div></div><a id="id-1.5.4.6.12.2" class="indexterm"></a><p>
+      </p></div><div class="sect2" id="LTCLUSTERD-MONITORING-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">11.1.6. Monitoring configuration</h3></div></div></div><a id="id-1.5.4.6.12.2" class="indexterm"></a><p>
         To enable monitoring, set:
         </p><pre class="programlisting">
           monitoring_history=yes</pre><p>
@@ -236,12 +236,12 @@ ltclusterd_service_stop_command='sudo systemctl ltcluster12 stop'
         Monitoring data is written at the interval defined by
         the option <code class="option">monitor_interval_secs</code> (see above).
       </p><p>
-        For more details on monitoring, see <a class="xref" href="ltclusterd-monitoring.html" title="14.4. Storing monitoring data">Storing monitoring data</a>. For information on
-        monitoring standby disconnections, see <a class="xref" href="ltclusterd-primary-child-disconnection.html" title="12.7. Monitoring standby disconnections on the primary node">Monitoring standby disconnections on the primary</a>.
-      </p></div><div class="sect2" id="LTCLUSTERD-RELOADING-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">13.1.7. Applying configuration changes to ltclusterd</h3></div></div></div><a id="id-1.5.4.6.13.2" class="indexterm"></a><p>
+        For more details on monitoring, see <a class="xref" href="ltclusterd-monitoring.html" title="12.4. Storing monitoring data">Storing monitoring data</a>. For information on
+        monitoring standby disconnections, see <a class="xref" href="ltclusterd-primary-child-disconnection.html" title="10.7. Monitoring standby disconnections on the primary node">Monitoring standby disconnections on the primary</a>.
+      </p></div><div class="sect2" id="LTCLUSTERD-RELOADING-CONFIGURATION"><div class="titlepage"><div><div><h3 class="title">11.1.7. Applying configuration changes to ltclusterd</h3></div></div></div><a id="id-1.5.4.6.13.2" class="indexterm"></a><p>
         To apply configuration file changes to a running <span class="productname">ltclusterd</span>
         daemon, execute the operating system's <span class="productname">ltclusterd</span> service reload command
-        (see <a class="xref" href="appendix-packages.html" title="Appendix C. ltcluster package details">Package details</a> for examples),
+        ,
           or for instances  which were manually started, execute <code class="command">kill -HUP</code>, e.g.
           <code class="command">kill -HUP `cat /tmp/ltclusterd.pid`</code>.
       </p><div class="tip"><h3 class="title">Tip</h3><p>
@@ -330,4 +330,4 @@ ltclusterd_service_stop_command='sudo systemctl ltcluster12 stop'
           </li></ul></div><div class="note"><h3 class="title">Note</h3><p>
           After executing <code class="command"><a class="link" href="ltcluster-standby-register.html" title="ltcluster standby register">ltcluster standby register --force</a></code>,
           <span class="productname">ltclusterd</span> <span class="emphasis"><em>must</em></span> be restarted for the changes to take effect.
-        </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-configuration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-daemon.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 13. ltclusterd setup and configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 13.2. ltclusterd daemon</td></tr></table></div></body></html>
+        </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ltclusterd-configuration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ltclusterd-configuration.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ltclusterd-daemon.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 11. ltclusterd setup and configuration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 11.2. ltclusterd daemon</td></tr></table></div></body></html>

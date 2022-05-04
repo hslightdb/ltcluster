@@ -19,9 +19,7 @@
       If <code class="option">--upstream-node-id</code> is provided, <span class="productname">ltcluster</span> will attempt
       to attach the standby to the specified node, which can be another standby.
     </p><p>
-      In LightDB 12 and earlier, this command will force a restart of LightDB on the standby node.
-    </p><p>
-      In LightDB 13 and later, by default this command will signal LightDB to reload its
+      In LightDB 21 and later, by default this command will signal LightDB to reload its
       configuration, which will cause LightDB to follow the new upstream without
       a restart. If this behaviour is not desired for whatever reason, the configuration
       file parameter <code class="varname">standby_follow_restart</code> can be set <code class="literal">true</code>
@@ -55,7 +53,7 @@
             This will also verify whether the standby is capable of following the new upstream node.
           </p><div class="important"><h3 class="title">Important</h3><p>
               If a standby was turned into a primary by removing <code class="filename">recovery.conf</code>
-              (<span class="application">LightDB 12</span> and later: <code class="filename">standby.signal</code>),
+              (<span class="application">LightDB 21</span> and later: <code class="filename">standby.signal</code>),
               <span class="productname">ltcluster</span> will <span class="emphasis"><em>not</em></span> be able to determine whether that primary's timeline
               has diverged from the timeline of the standby ("follow candidate").
             </p><p>
@@ -70,7 +68,7 @@
           </p><p>
             Note that when using <span class="productname">ltclusterd</span>, <code class="option">--upstream-node-id</code>
             should always be configured;
-            see <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION" title="13.1.1. Required configuration for automatic failover">Automatic failover configuration</a>
+            see <a class="link" href="ltclusterd-basic-configuration.html#LTCLUSTERD-AUTOMATIC-FAILOVER-CONFIGURATION" title="11.1.1. Required configuration for automatic failover">Automatic failover configuration</a>
             for details.
           </p></dd><dt><span class="term"><code class="option">-w</code><br /></span><span class="term"><code class="option">--wait</code></span></dt><dd><p>
             Wait for a primary to appear. <span class="productname">ltcluster</span> will wait for up to
@@ -114,7 +112,7 @@ DETAIL: follow target server's timeline 2 forked off current database system tim
           </p></dd><dt><span class="term"><code class="option">ERR_FOLLOW_FAIL (23)</code></span></dt><dd><p>
             <span class="productname">ltcluster</span> was unable to complete the follow command.
           </p></dd></dl></div></div><div class="refsect1" id="LTCLUSTER-STANDBY-FOLLOW-EVENTS"><h2>Event notifications</h2><p>
-      A <code class="literal">standby_follow</code> <a class="link" href="event-notifications.html" title="Chapter 9. Event Notifications">event notification</a> will be generated.
+      A <code class="literal">standby_follow</code> <a class="link" href="event-notifications.html" title="Chapter 8. Event Notifications">event notification</a> will be generated.
     </p><p>
       If provided, <span class="productname">ltcluster</span> will substitute the placeholders <code class="literal">%p</code> with the node ID of the node
       being followed, <code class="literal">%c</code> with its <code class="literal">conninfo</code> string, and
